@@ -1,0 +1,31 @@
+# Python 기본 - 컴파일된 파일, 캐시
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 가상환경 - 로컬 환경설정 폴더
+.venv/
+venv/
+env/
+ENV/
+
+# 환경 변수 및 보안 파일 - API Key, DB 비밀번호
+.env
+property.env
+*.env
+
+# AI 모델 가중치 파일 (대용량)
+*.pt
+*.pth
+*.onnx
+weights/
+!weights/.gitkeep
+
+# IDE 설정 파일 - PyCharm 개인 설정 파일
+.idea/
+.vscode/
+*.swp
+
+# 기타 로그 및 데이터 파일
+*.log
+.DS_Store

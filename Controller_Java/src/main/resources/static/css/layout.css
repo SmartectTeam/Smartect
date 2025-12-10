@@ -1,0 +1,122 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #0f172a; /* 전체 배경 (Dark Blue) */
+    color: #f1f5f9;
+    font-family: 'Noto Sans KR', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* 브라우저 전체 스크롤 없애기 */
+}
+
+/* 2. 전체를 감싸는 Flex 컨테이너 */
+.app-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* 3. [LEFT] 네비게이션 사이드바 */
+.nav-sidebar {
+    width: 250px;
+    background-color: #1e293b; /* 사이드바 배경 */
+    border-right: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    z-index: 1000;
+}
+
+.nav-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #06b6d4; /* 포인트 컬러 (Cyan) */
+    border-bottom: 1px solid #334155;
+    gap: 10px;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 20px 10px;
+    margin: 0;
+}
+
+.nav-menu li {
+    margin-bottom: 5px;
+}
+
+.nav-menu a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #94a3b8; /* 비활성 텍스트 색 */
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-size: 15px;
+    gap: 12px;
+}
+
+.nav-menu a:hover, .nav-menu a.active {
+    background-color: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+}
+
+/* 4. [RIGHT] 메인 영역 (탑바 + 콘텐츠) */
+.app-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 5. [TOP] 시스템 헤더 (유저 정보 등) */
+.system-header {
+    height: 60px;
+    background-color: #1e293b;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 정렬 */
+    align-items: center;
+    padding: 0 30px;
+    flex-shrink: 0;
+}
+
+.system-header .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #06b6d4;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* 6. 실제 콘텐츠가 들어가는 스크롤 영역 */
+.content-wrapper {
+    flex-grow: 1;
+    overflow-y: auto; /* 내용이 넘치면 여기서 스크롤 */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 스크롤바 예쁘게 꾸미기 (Chrome/Safari/Edge) */
+.content-wrapper::-webkit-scrollbar { width: 8px; }
+.content-wrapper::-webkit-scrollbar-track { background: #0f172a; }
+.content-wrapper::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+.content-wrapper::-webkit-scrollbar-thumb:hover { background: #475569; }

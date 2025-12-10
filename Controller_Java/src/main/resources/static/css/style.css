@@ -1,0 +1,215 @@
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0 10px;
+}
+
+.dashboard-header {
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.header-left h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #06b6d4; /* Cyan */
+    margin: 0;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.header-left .sub-text {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 상태 배지 (Active) */
+.status-badge {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.status-badge.pulse { animation: pulse-green 2s infinite; }
+
+.control-button {
+    background-color: #06b6d4;
+    color: white;
+    border: none;
+    padding: 7px 15px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.control-button:hover { background-color: #0891b2; }
+
+
+/* 2. 메인 레이아웃 (좌우 높이 정렬 핵심) */
+.dashboard-main {
+    display: flex;
+    gap: 25px; /* 좌우 간격 */
+    height: calc(100vh - 120px); /* 헤더 제외 높이 */
+    overflow: hidden;
+}
+
+/* 왼쪽 (영상) & 오른쪽 (알림) 공통 타이틀 스타일 */
+/* ★이게 같아야 Y축 시작점이 똑같아집니다★ */
+.section-title {
+    height: 30px; /* 높이 고정 */
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #06b6d4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.section-title.error-text { color: #ef4444; } /* 알림 쪽은 빨간색 */
+
+.sub-label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 400;
+    margin-left: 5px;
+}
+
+/* [LEFT] Feed Section (75% 차지) */
+.feed-section {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 15px;
+    flex-grow: 1; /* 남은 높이 꽉 채우기 */
+}
+
+/* 비디오 패널 스타일 */
+.video-panel {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.panel-header {
+    padding: 8px 12px;
+    background-color: rgba(30, 41, 59, 0.5);
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #06b6d4;
+    font-weight: 600;
+}
+
+.rec-indicator { color: #ef4444; font-size: 11px; animation: blink 1.5s infinite; }
+
+.video-display {
+    flex-grow: 1;
+    background: #000;
+    position: relative;
+    display: flex; justify-content: center; align-items: center;
+}
+.video-display img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+
+.panel-footer {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #64748b;
+    background-color: rgba(30, 41, 59, 0.5);
+    border-top: 1px solid #1e293b;
+}
+.text-cyan { color: #06b6d4; font-weight: bold; }
+
+
+/* [RIGHT] Alert Section (25% 차지) */
+.alert-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 300px; /* 너무 좁아지지 않게 */
+}
+
+.alert-list-container {
+    flex-grow: 1;
+    overflow-y: auto; /* 내용 많으면 스크롤 */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 5px; /* 스크롤바 여백 */
+}
+
+/* 개별 알림 카드 (2번째 사진 스타일) */
+.alert-card {
+    background-color: rgba(239, 68, 68, 0.05); /* 아주 연한 빨간 배경 */
+    border: 1px solid #7f1d1d; /* 어두운 빨간 테두리 */
+    border-radius: 6px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s;
+}
+.alert-card:hover { transform: translateX(5px); border-color: #ef4444; }
+
+.alert-card .alert-header {
+    color: #fca5a5; /* 연한 빨강 텍스트 */
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-card .alert-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.alert-card .badge {
+    background-color: #1e293b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #334155;
+}
+
+/* 박스 (감지) */
+.bounding-box {
+    position: absolute; border: 2px solid #06b6d4; background: rgba(6,182,212,0.1);
+}
+.box-label {
+    position: absolute; bottom: 100%; left: -2px; background: #06b6d4; color: #000;
+    font-size: 11px; padding: 1px 4px; font-weight: bold;
+}
+
+/* 애니메이션 */
+@keyframes blink { 50% { opacity: 0.3; } }
+@keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }

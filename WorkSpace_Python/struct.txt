@@ -1,0 +1,27 @@
+python_workspace/
+├── apps/
+│   ├── action_service/         # 컴1. 행동 침입 감지 API
+│   │   ├── __init__.py
+│   │   ├── camera.py           # 카메라 연동
+│   │   ├── main.py             # 서버 시작
+│   │   ├── detector.py         # 화재 전용 감지 로직
+│   │   └── endpoints.py        # 화재 관련 웹소켓 API
+│   │
+│   └── fire_service/           # 컴2. 화재 감지 API
+│       ├── __init__.py
+│       ├── main.py             # 중앙 서버 시작
+│       ├── detector.py         # 행동 전용 감지 로직
+│       └── endpoints.py        # 행동 관련 웹소켓 API
+│
+├── common/                     # 공통 모듈 (두 서버가 같이 쓰는 것)
+│   ├── __init__.py
+│   ├── schemas.py              # JSON (Java와 통신할 규격)
+│   └── config.py               # 설정 (환경변수 로드, 카메라 주소 등)
+│
+├── weights/                    # 모델 파일 저장소
+│   ├── fire_model.pt
+│   └── action_model.pt
+│
+├── .gitignore
+├── requirements.txt
+└── property.env                # 포트 번호 등을 여기서 관리
