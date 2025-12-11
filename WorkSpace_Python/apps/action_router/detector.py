@@ -2,8 +2,12 @@
 import cv2
 
 
-def action_model_video(cap):
-    pass
+def action_model_video(frame):
+    action_json = {
+        "is_touch": False,
+        "confidence": 0.0
+    }
+    return action_json
 
 
 def action_objects():
