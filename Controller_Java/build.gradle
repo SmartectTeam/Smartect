@@ -52,6 +52,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     // 검증 어노테이션 @Valid , @NotNull, @Min, @Pattern...등
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Thymeleaf base.html(공통 레이아웃)
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
     // ----------------------------- 문서 -----------------------------
     // PDF openPDF

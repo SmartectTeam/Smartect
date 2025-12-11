@@ -1,205 +1,197 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smartect AI Monitoring</title>
-
-    <!-- CSS 및 폰트 설정 -->
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- 페이지에 해당하는 css로 수정 -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
-<body>
+<div layout:fragment="content">
+    <!-- 페이지 콘텐츠 시작 -->
 
-<div class="app-layout">
-    <!-- 사이드바 조각 불러오기 -->
-    <nav th:replace="~{fragments/sidebar :: sidebar}"></nav>
+    <div class="dashboard-container">
 
-    <div class="app-main">
-        <!-- 상단 헤더 조각 불러오기 -->
-        <header th:replace="~{fragments/header :: header}"></header>
+        <!-- 상단 제목 영역 -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>AI CCTV MONITORING</h1>
+                <span class="sub-text">실시간 위험 감지 시스템</span>
+            </div>
+            <div class="header-right">
+                <div class="status-badge pulse">
+                    <i class="fa-solid fa-bolt"></i> ACTIVE
+                </div>
+                <button class="control-button">일시정지</button>
+            </div>
+        </header>
 
-        <div class="content-wrapper">
+        <!-- 메인 레이아웃 -->
+        <main class="dashboard-main">
 
-            <!-- ▼▼▼ [수정됨] 오타 수정: dashboard=container -> dashboard-container ▼▼▼ -->
-            <div class="dashboard-container">
+            <!-- LEFT : LIVE FEED -->
+            <section class="feed-section">
 
-                <!-- [1. 헤더: 제목과 상태 버튼을 한 줄로 통합] -->
-                <header class="dashboard-header">
-                    <div class="header-left">
-                        <h1>AI CCTV MONITORING</h1>
-                        <span class="sub-text">실시간 위험 감지 시스템</span>
+                <div class="section-title">
+                    <i class="fa-solid fa-video"></i> LIVE FEED
+                    <span class="sub-label">실시간 모니터링</span>
+                </div>
+
+                <div class="video-grid">
+
+                    <!-- CCTV-01 -->
+                    <div class="video-panel">
+                        <div class="panel-header">
+                            <span class="cctv-name">
+                                <i class="fa-solid fa-camera"></i> CCTV-01 정문
+                            </span>
+                            <span class="rec-indicator">● REC</span>
+                        </div>
+                        <div class="video-display">
+                            <img id="live-image" src="" alt="CCTV 1">
+                        </div>
+                        <div class="panel-footer">
+                            <span class="ai-status">AI 분석 중...</span>
+                        </div>
                     </div>
-                    <div class="header-right">
-                        <!-- 상태 표시 (심플하게) -->
-                        <div class="status-badge pulse">
-                            <i class="fa-solid fa-bolt"></i> ACTIVE
+
+                    <!-- CCTV-02 -->
+                    <div class="video-panel">
+                        <div class="panel-header">
+                            <span class="cctv-name">
+                                <i class="fa-solid fa-camera"></i> CCTV-02 주차장
+                            </span>
+                            <span class="rec-indicator">● REC</span>
                         </div>
-                        <button class="control-button">일시정지</button>
+                        <div class="video-display">
+                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 2">
+                        </div>
+                        <div class="panel-footer">
+                            <span class="ai-status">AI 분석 중...</span>
+                        </div>
                     </div>
-                </header>
 
-                <!-- [2. 메인 콘텐츠: 좌우 높이 정렬 핵심] -->
-                <main class="dashboard-main">
-
-                    <!-- [LEFT] 영상 구역 -->
-                    <section class="feed-section">
-                        <!-- 제목 (오른쪽 ALERTS와 높이 맞춤용) -->
-                        <div class="section-title">
-                            <i class="fa-solid fa-video"></i> LIVE FEED
-                            <span class="sub-label">실시간 모니터링</span>
+                    <!-- CCTV-03 -->
+                    <div class="video-panel">
+                        <div class="panel-header">
+                            <span class="cctv-name">
+                                <i class="fa-solid fa-camera"></i> CCTV-03 복도
+                            </span>
+                            <span class="rec-indicator">● REC</span>
                         </div>
+                        <div class="video-display">
+                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 3">
+                        </div>
+                        <div class="panel-footer">
+                            <span class="ai-status">AI 분석 중...</span>
+                        </div>
+                    </div>
 
-                        <div class="video-grid">
-                            <!-- CCTV 1 -->
-                            <div class="video-panel">
-                                <div class="panel-header">
-                                    <span class="cctv-name"><i class="fa-solid fa-camera"></i> CCTV-01 정문</span>
-                                    <span class="rec-indicator">● REC</span>
-                                </div>
-                                <div class="video-display">
-                                    <img id="live-image" src="" alt="CCTV 1"/>
-                                </div>
-                                <div class="panel-footer">
-                                    <span class="ai-status">AI 분석 중...</span>
-                                </div>
-                            </div>
-                            <!-- CCTV 2 -->
-                            <div class="video-panel">
-                                <div class="panel-header">
-                                    <span class="cctv-name"><i class="fa-solid fa-camera"></i> CCTV-02 주차장</span>
-                                    <span class="rec-indicator">● REC</span>
-                                </div>
-                                <div class="video-display">
-                                    <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 2">
-                                </div>
-                                <div class="panel-footer">
-                                    <span class="ai-status">AI 분석 중...</span>
-                                </div>
-                            </div>
-                            <!-- CCTV 3 -->
-                            <div class="video-panel">
-                                <div class="panel-header">
-                                    <span class="cctv-name"><i class="fa-solid fa-camera"></i> CCTV-03 복도</span>
-                                    <span class="rec-indicator">● REC</span>
-                                </div>
-                                <div class="video-display">
-                                    <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 3">
-                                </div>
-                                <div class="panel-footer">
-                                    <span class="ai-status">AI 분석 중...</span>
-                                </div>
-                            </div>
-                            <!-- CCTV 4 -->
-                            <div class="video-panel">
-                                <div class="panel-header">
-                                    <span class="cctv-name"><i class="fa-solid fa-camera"></i> CCTV-04 비상구</span>
-                                    <span class="rec-indicator">● REC</span>
-                                </div>
-                                <div class="video-display">
-                                    <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 4">
-                                    <div class="bounding-box" style="top: 60%; left: 45%; width: 25%; height: 30%;">
-                                        <span class="box-label">물체 이동</span>
-                                    </div>
-                                </div>
-                                <div class="panel-footer">
-                                    <span class="ai-status text-cyan">물체 이동 감지</span>
-                                </div>
+                    <!-- CCTV-04 -->
+                    <div class="video-panel">
+                        <div class="panel-header">
+                            <span class="cctv-name">
+                                <i class="fa-solid fa-camera"></i> CCTV-04 비상구
+                            </span>
+                            <span class="rec-indicator">● REC</span>
+                        </div>
+                        <div class="video-display">
+                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 4">
+                            <div class="bounding-box"
+                                 style="top: 60%; left: 45%; width: 25%; height: 30%;">
+                                <span class="box-label">물체 이동</span>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- [RIGHT] 알림 구역 -->
-                    <aside class="alert-section">
-                        <!-- 제목 (왼쪽 LIVE FEED와 높이 정확히 일치시킴) -->
-                        <div class="section-title error-text">
-                            <i class="fa-regular fa-bell"></i> ALERTS
-                            <span class="sub-label">고위험 알람 (5)</span>
+                        <div class="panel-footer">
+                            <span class="ai-status text-cyan">물체 이동 감지</span>
                         </div>
+                    </div>
 
-                        <!-- 알림 리스트 (스크롤 가능) -->
-                        <div class="alert-list-container">
-                            <!-- 알림 카드 1 -->
-                            <div class="alert-card critical">
-                                <div class="alert-header">
-                                    <i class="fa-solid fa-triangle-exclamation"></i> 침입자 감지
-                                </div>
-                                <div class="alert-info">
-                                    <span class="badge">CCTV-01</span>
-                                    <span class="time">오후 4:57:50</span>
-                                </div>
-                            </div>
+                </div>
+            </section>
 
-                            <!-- 알림 카드 2 -->
-                            <div class="alert-card warning">
-                                <div class="alert-header">
-                                    <i class="fa-solid fa-fire"></i> 화재 감지
-                                </div>
-                                <div class="alert-info">
-                                    <span class="badge">CCTV-01</span>
-                                    <span class="time">오후 4:57:47</span>
-                                </div>
-                            </div>
+            <!-- RIGHT : ALERTS -->
+            <aside class="alert-section">
 
-                            <!-- 알림 카드 3 -->
-                            <div class="alert-card warning">
-                                <div class="alert-header">
-                                    <i class="fa-solid fa-person-falling"></i> 낙상 감지
-                                </div>
-                                <div class="alert-info">
-                                    <span class="badge">CCTV-03</span>
-                                    <span class="time">오후 4:57:23</span>
-                                </div>
-                            </div>
+                <div class="section-title error-text">
+                    <i class="fa-regular fa-bell"></i> ALERTS
+                    <span class="sub-label">고위험 알람 (5)</span>
+                </div>
 
-                            <!-- 알림 카드 4 -->
-                            <div class="alert-card warning">
-                                <div class="alert-header">
-                                    <i class="fa-solid fa-fire"></i> 화재 감지
-                                </div>
-                                <div class="alert-info">
-                                    <span class="badge">CCTV-02</span>
-                                    <span class="time">오후 4:56:56</span>
-                                </div>
-                            </div>
+                <div class="alert-list-container">
+
+                    <div class="alert-card critical">
+                        <div class="alert-header">
+                            <i class="fa-solid fa-triangle-exclamation"></i> 침입자 감지
                         </div>
-                    </aside>
-                </main>
-            </div> <!-- dashboard-container 끝 -->
-        </div> <!-- content-wrapper 끝 -->
+                        <div class="alert-info">
+                            <span class="badge">CCTV-01</span>
+                            <span class="time">오후 4:57:50</span>
+                        </div>
+                    </div>
 
-    </div> <!-- app-main 끝 -->
-</div> <!-- app-layout 끝 -->
+                    <div class="alert-card warning">
+                        <div class="alert-header">
+                            <i class="fa-solid fa-fire"></i> 화재 감지
+                        </div>
+                        <div class="alert-info">
+                            <span class="badge">CCTV-01</span>
+                            <span class="time">오후 4:57:47</span>
+                        </div>
+                    </div>
 
+                    <div class="alert-card warning">
+                        <div class="alert-header">
+                            <i class="fa-solid fa-person-falling"></i> 낙상 감지
+                        </div>
+                        <div class="alert-info">
+                            <span class="badge">CCTV-03</span>
+                            <span class="time">오후 4:57:23</span>
+                        </div>
+                    </div>
+
+                    <div class="alert-card warning">
+                        <div class="alert-header">
+                            <i class="fa-solid fa-fire"></i> 화재 감지
+                        </div>
+                        <div class="alert-info">
+                            <span class="badge">CCTV-02</span>
+                            <span class="time">오후 4:56:56</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </main>
+    </div>
+
+    <!-- WebSocket 스크립트 -->
     <script>
         const socket = new WebSocket("ws://localhost:8080/ws/video");
-
+        const imgElement = document.getElementById("live-image");
         socket.binaryType = "blob";
 
-        const imgElement = document.getElementById("live-image");
-
-        socket.onopen = function() {
+        socket.onopen = function () {
             console.log("Java 서버 접속");
         };
 
-        socket.onmessage = function(event) {
+        socket.onmessage = function (event) {
             if (event.data instanceof Blob) {
                 if (imgElement.src.startsWith("blob:")) {
                     URL.revokeObjectURL(imgElement.src);
                 }
-
                 const imageUrl = URL.createObjectURL(event.data);
                 imgElement.src = imageUrl;
             }
         };
 
-        socket.onclose = function() {
+        socket.onclose = function () {
             console.log("서버 연결 끊김");
         };
-
     </script>
+    <!--    페이지 콘텐츠 끝    -->
+</div>
 
-</body>
 </html>
