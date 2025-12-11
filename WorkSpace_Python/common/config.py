@@ -23,7 +23,7 @@ class PhoneCamPath:
         self.WEBCAM_PW = os.getenv(f"{cam_id}_PW")
 
 
-# PC2 ip 정보
+# PC ip 정보
 class PCPath:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
