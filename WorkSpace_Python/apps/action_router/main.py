@@ -6,7 +6,7 @@ from endpoints import camera_post_video
 import asyncio
 import os
 
-pc_id = "HSYPC"
+pc_id = "HSMPC"
 cam_id = 0
 
 if __name__ == "__main__":
