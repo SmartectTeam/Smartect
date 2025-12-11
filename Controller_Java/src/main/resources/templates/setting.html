@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="fragments/base">
-
-<head layout:title=""> <!-- title -->
-    <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <link rel="stylesheet" th:href="@{/css/.css}"> <!-- css -->
-</head>
-<div layout:fragment="content">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{fragments/base}">
+    <head>
+        <!-- 페이지에 해당하는 css로 수정 -->
+        <link rel="stylesheet" th:href="@{/css/.css}">
+    </head>
+    <div layout:fragment="content">
+        <!-- 페이지 콘텐츠 시작 -->
 
 
-    <!-- conetent -->
 
 
-</div>
+        <!-- 페이지 콘텐츠 끝 -->
+    </div>
+
 </html>

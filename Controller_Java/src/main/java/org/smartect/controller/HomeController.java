@@ -15,4 +15,14 @@ public class HomeController {
     public String dashboard(){
         return "dashboard"; // HTML 화면 출력
     }
+
+
+    @GetMapping("/eventboard")
+    public String eventboard(){
+        return "eventboard"; // test@@
+    }
+    @GetMapping("/about")
+    public String about(){
+        return "about"; // test@@
+    }
 }

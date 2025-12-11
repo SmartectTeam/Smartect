@@ -1,10 +1,45 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head layout:fragment="head">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title layout:title-pattern="${title} :: Smartect">Smartect</title>
+
+    <!-- 공통 CSS -->
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <!-- 공통 아이콘 & 폰트 -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap"
+          rel="stylesheet">
 </head>
+
 <body>
+
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <nav th:replace="fragments/sidebar :: sidebar"></nav>
+
+    <div class="app-main">
+
+        <!-- HEADER -->
+        <header th:replace="fragments/header :: header"></header>
+
+        <!-- CONTENT -->
+        <div class="content-wrapper" layout:fragment="content">
+            <!-- 각 페이지 콘텐츠 영역 -->
+        </div>
+        <!-- FOOTER -->
+        <footer th:replace="fragments/footer :: footer"></footer>
+
+    </div>
+</div>
 
 </body>
 </html>
