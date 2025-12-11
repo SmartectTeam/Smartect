@@ -25,17 +25,48 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // ----------------------------- 필수 -----------------------------
+    // 코드 변경시 자동 리스타트, 개발환경 전용
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    // 기본 웹 MVC (@Controller, Rest API 등)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // JPA + Hibernate ... ORM
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    //Thymeleaf 템플릿 엔진
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Websocket 엔드포인트 구현 실시간 이벤트/알림
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // Test JUnit5, AssertJ, Spring test...
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    // MariaDB
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+    // ----------------------------- 편리 -----------------------------
+    // Thymeleaf security 태그
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    // Getter,Setter
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // 검증 어노테이션 @Valid , @NotNull, @Min, @Pattern...등
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Thymeleaf base.html(공통 레이아웃)
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+
+    // ----------------------------- 문서 -----------------------------
+    // PDF openPDF
+    implementation 'org.xhtmlrenderer:flying-saucer-pdf:9.1.20'
+    // Excel
+    implementation 'org.apache.poi:poi:5.2.5'
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
+    // ----------------------------- 기타 -----------------------------
+    // Java mail sender - 보류
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // MQTT Mosquitto 브로커 연동 - 보류(파이썬에서 연동)
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
 }
 
 tasks.named('test') {

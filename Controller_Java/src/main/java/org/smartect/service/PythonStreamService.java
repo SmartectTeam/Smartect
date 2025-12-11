@@ -1,7 +1,7 @@
 package org.smartect.service;
 
-import lombok.RequiredArgsConstructor;
 import org.smartect.handler.WebSocketHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.BinaryMessage;
@@ -19,12 +19,18 @@ import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.WebSocketContainer;
 
 @Service
-@RequiredArgsConstructor
 public class PythonStreamService implements CommandLineRunner {
 
     private final WebSocketHandler videoWebSocketHandler;
+    private final String PYTHON_SERVER_URL;
 
-    private final String PYTHON_SERVER_URL = "ws://192.168.0.166:8000/ws/output";
+    public PythonStreamService(
+            WebSocketHandler videoWebSocketHandler,
+            @Value("${python.hsyServer.ip}") String ip) {
+        this.PYTHON_SERVER_URL = String.format("ws://%s:8000/ws/output", ip);
+        this.videoWebSocketHandler = videoWebSocketHandler;
+        System.out.println("설정된 python 서버 url: " + this.PYTHON_SERVER_URL);
+    }
 
     @Override
     public void run(String... args) {

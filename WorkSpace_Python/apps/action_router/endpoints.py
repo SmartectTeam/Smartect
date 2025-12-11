@@ -1,17 +1,18 @@
 # 웹소캣을 통한 데이터 전송
-from camera import camera_connect, camera_disconnect
+from camera import phone_connect, snap_cam_connect, camera_disconnect
 import cv2
 import asyncio
 import websockets
 import json
-from common.config import PC2Path
+from common.config import PCPath
 
 
-async def camera_post_video():
-    pc2 = PC2Path
-    url = f"ws://{pc2.PC2_IP}:8000/ws/input"
+async def camera_post_video(pc_id, cam_id):
+    pc2 = PCPath(pc_id)
+    url = f"ws://{pc2.PC_IP}:8000/ws/input"
 
-    cap = camera_connect()
+    # cap = phone_connect(cam_id)
+    cap = snap_cam_connect(cam_id)
     async with websockets.connect(url) as websocket:
         print("PC2 연결 성공!")
 
