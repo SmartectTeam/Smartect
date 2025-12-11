@@ -43,16 +43,21 @@ def prepare_lstm_input(buffer):
 # [시각화] 화면에 박스와 텍스트 그리기
 # ============================
 def draw_info(img, box, kps, color, label):
-    bx1, bt1, bx2, bt2 = map(int, box[:4])
+    bx1, by1, bx2, bt2 = map(int, box[:4])
 
     # 박스 그리기
-    cv2.rectangle(img, (bx1, bt1), (bx2, bt2), color, 2)
+    cv2.rectangle(img, (bx1, by1), (bx2, bt2), color, 2)
 
     # 텍스트 배경
-    (w,h). _ = cv2.getTextSize(label, cv2) """ 작업중 """
+    (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+    cv2.rectangle(img, (bx1, by1 - 20), (bx1 + w, by1), color, -1)
 
+    # 라벨 쓰기
+    cv2.putText(img, label, (bx1, by1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-
+    # 관절 점 찍기
+    for x, y in kps:
+        cv2.circle(img, (int(x), int(y)), 3, color, -1)
 
 
 
