@@ -1,0 +1,196 @@
+/* ===========================================================
+   EventBoard 전체 컨테이너
+   (Dashboard 스타일과 톤을 정확히 맞춘 버전)
+=========================================================== */
+.eventboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0 10px;
+}
+
+/* ===========================================================
+   상단 헤더 (Dashboard와 통일)
+=========================================================== */
+.eventboard-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 20px;
+}
+
+.eventboard-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #06b6d4;
+    margin-right: 10px;
+}
+
+.eventboard-header .sub-text {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ===========================================================
+   메인 2분할 구조
+=========================================================== */
+.eventboard-main {
+    display: flex;
+    height: calc(100vh - 140px);
+    gap: 20px;
+    overflow: hidden;
+}
+
+/* ===========================================================
+   왼쪽 EVENT LIST
+=========================================================== */
+.event-list {
+    width: 35%;
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.event-list h2 {
+    font-size: 18px;
+    margin-top: 0;
+    color: #06b6d4;
+}
+
+/* ========================= 검색 ========================= */
+.filter-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-row input {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: white;
+}
+
+.primary-btn {
+    background: #06b6d4;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.primary-btn:hover {
+    background: #0891b2;
+}
+
+/* ========================= 필터 그룹 ========================= */
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-label {
+    display: block;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip-btn {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.chip-btn:hover {
+    background: #334155;
+}
+
+.chip-btn.active {
+    background: #06b6d4;
+    border-color: #06b6d4;
+    color: #0f172a;
+}
+
+/* ========================= 이벤트 목록 ========================= */
+#eventList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#eventList li {
+    background: #1e293b;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+#eventList li:hover {
+    background: #273447;
+}
+
+#eventList li strong {
+    color: #06b6d4;
+}
+
+/* ===========================================================
+   오른쪽 상세보기
+=========================================================== */
+.event-detail {
+    width: 65%;
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.event-detail h2 {
+    color: #06b6d4;
+    margin-top: 0;
+}
+
+.detail-box {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+    color: #d1d5db;
+}
+
+/* ===========================================================
+   스크롤바 (Dashboard 스타일 동일)
+=========================================================== */
+.event-list::-webkit-scrollbar,
+.event-detail::-webkit-scrollbar {
+    width: 8px;
+}
+
+.event-list::-webkit-scrollbar-thumb,
+.event-detail::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 6px;
+}
+
+.event-list::-webkit-scrollbar-track,
+.event-detail::-webkit-scrollbar-track {
+    background: #1e293b;
+}
