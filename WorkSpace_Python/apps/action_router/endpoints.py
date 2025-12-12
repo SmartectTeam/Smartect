@@ -35,6 +35,9 @@ async def camera_post_video(pc_id, cam_id):
     async with websockets.connect(url) as websocket:
         print("PC2 연결 성공!")
 
+        frame_count = 0
+        skip_frame = 1000
+
         while True:
             ret, frame = cap.read()
             if not ret: break
@@ -45,9 +48,12 @@ async def camera_post_video(pc_id, cam_id):
 
             frame = cv2.resize(frame, (640, 480))
 
+            if frame_count % skip_frame == 0:
+                action_json = action_model_video(frame)
+
             ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
 
-            await websocket.send(json.dumps(action_data))
+            await websocket.send(json.dumps(action_json))
             await websocket.send(buffer.tobytes())
 
             # await asyncio.sleep(0.01)

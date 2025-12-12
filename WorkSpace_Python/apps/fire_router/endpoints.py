@@ -1,7 +1,8 @@
 # 웹소캣을 통한 데이터 전송
+import cv2
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
-import cv2
+
 from apps.fire_router.detector import fire_model_video, frame_detector
 
 router = APIRouter()
@@ -40,6 +41,7 @@ async def input_api(websocket: WebSocket):
             image_bytes = await websocket.receive_bytes()
 
             fire_json = None
+
             frame_count += 1
             frame = frame_detector(image_bytes)
 

@@ -33,19 +33,10 @@ from common.schemas import EventJson
 from detect import algorithm, ai_models
 from detect.processor import (fill_missing_keypoints, get_stable_anchor, prepare_lstm_input)
 
-# ==================[원본 일단 냄기기] ===============================
-def action_model_video(cap):
-    pass
-
-
-def action_objects():
-    result_image = ""
-    return result_image
-# =================================================================
 
 class MotionDetector:
     def __init__(self, settings_path=None):
-        # 기본 설정
+        # 기본 설정 ==================================================================
         self.settings = {
             "fall_check": True,
             "zone_check": True,
@@ -70,7 +61,7 @@ class MotionDetector:
         self.DANGER_ACTIONS = ['punching', 'pushing']
 
         # 스크린 샷 저장 폴더
-        self.CAPTURE_DIR = "static/captures"
+        self.CAPTURE_DIR = "static/captures" # =======================================
         os.makedirs(self.CAPTURE_DIR, exist_ok=True)
 
     def reload_settings(self):
