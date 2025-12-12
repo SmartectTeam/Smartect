@@ -1,4 +1,4 @@
 package org.smartect.controller;
 
-public class StatisicsController {
+public class StatisticsController {
 }
