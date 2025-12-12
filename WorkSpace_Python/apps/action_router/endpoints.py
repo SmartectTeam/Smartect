@@ -1,5 +1,5 @@
 # 웹소캣을 통한 데이터 전송
-from camera import phone_connect, snap_cam_connect, camera_disconnect
+from apps.action_router.camera import phone_connect, snap_cam_connect, camera_disconnect, cam_connect
 import cv2
 import asyncio
 import websockets
@@ -12,7 +12,8 @@ async def camera_post_video(pc_id, cam_id):
     url = f"ws://{pc2.PC_IP}:8000/ws/input"
 
     # cap = phone_connect(cam_id)
-    cap = snap_cam_connect(cam_id)
+    # cap = snap_cam_connect(cam_id)
+    cap = cam_connect(cam_id)
     async with websockets.connect(url) as websocket:
         print("PC2 연결 성공!")
 

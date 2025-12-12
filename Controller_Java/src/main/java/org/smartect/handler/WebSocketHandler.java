@@ -34,7 +34,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
             try {
                 if (session.isOpen()) {
                     synchronized (session) {
-                        session.sendMessage(new TextMessage(jsonData));
+                        if (jsonData != null) {
+                            session.sendMessage(new TextMessage(jsonData));
+                        }
                         session.sendMessage(new BinaryMessage(imageBytes));
                     }
                 }

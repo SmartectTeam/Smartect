@@ -33,3 +33,12 @@ class PCPath:
 
     def __init__(self, pc_id):
         self.PC_IP = os.getenv(f"{pc_id}_IP")
+
+
+class ModelPath:
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+    # weight 경로 (모델 추가 시 이쪽에 경로 추가)
+    FIRE_MODEL = os.path.join(BASE_DIR, "weight", "fireModel.pt")
+
+    USE_GPU = True
