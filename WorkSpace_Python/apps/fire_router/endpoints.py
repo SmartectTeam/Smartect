@@ -54,13 +54,17 @@ async def input_api(websocket: WebSocket):
                 }
                 print(final_json)
 
+            final_json = {
+                "type": "VIDEO",
+                "payload": "..."
+            }
 
             ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
 
             for viewer in connected_viewers:
                 try:
                     await viewer.send_json(final_json)
-                    await viewer.send_bytes(buffer)
+                    await viewer.send_bytes(image_bytes)
                 except Exception as e:
                     print(f"전송 실패: {e}")
                     connected_viewers.remove(viewer)
