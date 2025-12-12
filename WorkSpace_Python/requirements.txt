@@ -6,8 +6,8 @@ colorama==0.4.6
 fastapi==0.124.0
 h11==0.16.0
 idna==3.11
-numpy==2.2.6
-opencv-python==4.12.0.88
+# numpy==2.2.6                   # TensorFlow 호환성을 위해 Numpy 2.x는 사용할 수 없음
+# opencv-python==4.12.0.88       # OpenCV 충돌 방지
 pydantic==2.12.5
 pydantic_core==2.41.5
 python-dotenv==1.2.1
@@ -16,3 +16,38 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.38.0
 websockets==15.0.1
+
+
+# ==========================================
+# AI 및 뷰어 필수 패키지
+# ==========================================
+numpy<2.0.0             # 버전 낮춤(호환성)
+opencv-python>=4.8.0    # 버전 낮춤(호환성)
+
+# YOLOv11 지원
+ultralytics>=8.3.0
+
+# LSTM 모델 지원 (Numpy < 2.0.0 필수)
+tensorflow>=2.15.0
+
+# Streamlit 뷰어 및 시각화 도구
+streamlit>=1.35.0
+streamlit-drawable-canvas>=0.9.0
+pandas>=2.0.0
+altair>=5.0.0
+Pillow>=10.0.0
+sympy>=1.12
+watchdog>=4.0.0
+
+#===============================================================
+# [설치방법]
+
+# 1. PyTorch (GPU 버전) 설치
+# [터미널실행] pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# 2. 꼬인 패키지 삭제
+# [터미널실행] pip uninstall opencv-python numpy -y
+
+# 3. 수정된 파일로 다시 설치
+# [터미널실행] pip install -r requirements.txt --upgrade
+#===============================================================

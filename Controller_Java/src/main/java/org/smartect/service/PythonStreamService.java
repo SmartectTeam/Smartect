@@ -26,7 +26,7 @@ public class PythonStreamService implements CommandLineRunner {
 
     public PythonStreamService(
             WebSocketHandler videoWebSocketHandler,
-            @Value("${python.hsyServer.ip}") String ip) {
+            @Value("localhost") String ip) {
         this.PYTHON_SERVER_URL = String.format("ws://%s:8000/ws/output", ip);
         this.videoWebSocketHandler = videoWebSocketHandler;
         System.out.println("설정된 python 서버 url: " + this.PYTHON_SERVER_URL);
