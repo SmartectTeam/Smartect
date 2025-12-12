@@ -43,12 +43,6 @@ public class HomeController {
         return "auth";
     }
 
-    @GetMapping("/statistics")
-    public String statistics(Model model) {
-        model.addAttribute("activePage", "statistics");
-        return "statistics";
-    }
-
     @GetMapping("/settings")
     public String setting(Model model) {
         model.addAttribute("activePage", "settings");

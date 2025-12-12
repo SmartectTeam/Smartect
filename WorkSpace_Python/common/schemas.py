@@ -1,5 +1,7 @@
 # json (pydantic을 사용하여 데이터 모델을 정의)
+# __init__ 필요 없음(BaseModel 이 자동으로 처리)
 from pydantic import BaseModel
+from typing import List
 
 class EventJson(BaseModel):
     cam_no: int            # 2
@@ -8,9 +10,19 @@ class EventJson(BaseModel):
     event_time: str        # "2025-01-01T12:00:00"
     screenshot_path: str   #"/images/capture_123.png"
 
-    def __init__(self, cam_no: int, event_type: str, danger_level:int ,event_time: str, screenshot_path: str):
-        self.cam_no = cam_no
-        self.event_type = event_type
-        self.danger_level = danger_level
-        self.event_time = event_time
-        self.screenshot_path = screenshot_path
+
+class EventMap(BaseModel):
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+    event_type: str
+    confidence: float
+
+
+class CombinedJson(BaseModel):
+    type: str = "COMBINED"
+    fire_json: List[EventJson] = []
+    fire_map: List[EventMap] = []
+    action_json: List[EventJson] = []
+    action_map: List[EventMap] = []
