@@ -36,3 +36,10 @@ class PCPath:
         if not self.PC_IP:
             print(f"[Config]Warning:{pc_id}_IP not found in {self.env_path}")
 
+class ModelPath:
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+    # weight 경로 (모델 추가 시 이쪽에 경로 추가)
+    FIRE_MODEL = os.path.join(BASE_DIR, "weight", "fireModel.pt")
+
+    USE_GPU = True

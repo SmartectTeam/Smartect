@@ -1,7 +1,7 @@
 # 매인 실행문
 from fastapi import FastAPI
 import uvicorn
-from endpoints import router
+from apps.fire_router.endpoints import router
 
 app = FastAPI()
 

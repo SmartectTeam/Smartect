@@ -45,7 +45,7 @@ public class PythonStreamService implements CommandLineRunner {
         StandardWebSocketClient client = new StandardWebSocketClient(container);
 
         TextWebSocketHandler pythonHandler = new TextWebSocketHandler() {
-            private String lastJsonData = "{}";
+            private String lastJsonData = null; // JSON이 없을 수 있음
 
             @Override
             public void afterConnectionEstablished(WebSocketSession session) {
@@ -65,6 +65,7 @@ public class PythonStreamService implements CommandLineRunner {
                     imageBuffer.get(imageBytes);
 
                     videoWebSocketHandler.livePostData(lastJsonData, imageBytes);
+                    
                 } catch (Exception e) {
                     System.out.println("이미지 처리 중 오류: " + e.getMessage());
                 }

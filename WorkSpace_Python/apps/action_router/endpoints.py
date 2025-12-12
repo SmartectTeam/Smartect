@@ -1,4 +1,5 @@
 # 웹소캣을 통한 데이터 전송
+
 import sys
 import os
 
@@ -10,13 +11,14 @@ root_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-# from camera import phone_connect, snap_cam_connect, camera_disconnect
+# from apps.action_router.camera import phone_connect, snap_cam_connect, camera_disconnect, cam_connect
 import cv2
 import asyncio
 import websockets
 import json
 from common.config import PCPath
 from apps.action_router.detector import MotionDetector
+
 
 '''
 # 원본 코드
@@ -28,6 +30,8 @@ async def camera_post_video(pc_id, cam_id):
 
     # cap = phone_connect(cam_id)
     # cap = snap_cam_connect(cam_id)
+    cap = cam_connect(cam_id)
+
     async with websockets.connect(url) as websocket:
         print("PC2 연결 성공!")
 
