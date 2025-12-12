@@ -15,9 +15,12 @@ class AIModels:
         self.class_names = []
 
         # 파일 경로
-        self.YOLO_PATH = 'yolo11n-pose.pt'
-        self.LSTM_PATH = 'lstm_model_v0.5.h5'
-        self.JSON_PATH = 'lstm_model_v0.5_classes.json'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(current_dir)
+
+        self.YOLO_PATH = os.path.join(base_dir, 'yolo11n-pose.pt')
+        self.LSTM_PATH = os.path.join(base_dir, 'lstm_model_v0.5.h5')
+        self.JSON_PATH = os.path.join(base_dir, 'lstm_model_v0.5_classes.json')
         self.load_models()
 
     def load_models(self):
@@ -39,7 +42,7 @@ class AIModels:
             except Exception as e:
                 print(f">>>[AI Models] LSTM Model ERROR: {e}")
         else:
-            print(f">>>[AI Models] Warming: LSTM file missing")
+            print(f">>>[AI Models] Warning: LSTM file missing")
 
     def predict_yolo(self, frame):
         if not self.yolo_model: return []

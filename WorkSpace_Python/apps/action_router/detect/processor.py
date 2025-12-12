@@ -14,7 +14,7 @@ def fill_missing_keypoints(current_kp, confs, last_valid_kp):
     for i in range(17):
         # 신뢰도가 0.5 미만이거나 좌표가 0.0 인 경우 보정
         if confs[i] < 0.5 or (filled[i][0] == 0 and filled[i][1] == 0):
-            filled[i] = last_valid_kp
+            filled[i] = last_valid_kp[i]
     return filled
 
 def get_stable_anchor(kp, confs):

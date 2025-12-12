@@ -86,7 +86,7 @@ class MotionDetector:
             except Exception as e:
                 print(f"[Detector] Config Error: {e}")
 
-    def process_frame(self, frame, channel_id):
+    def process_frame(self, frame, cam_id):
         # 프레임을 분석하고 전송할 데이터 객체를 생성 (Endpoints 에서 이 함수를 호출)
         self.reload_settings()
         if self.models is None: self.models = ai_models.AIModels()
@@ -208,7 +208,7 @@ class MotionDetector:
 
         # 스크린샷 저장
         if has_thread:
-            filename = f"cam_{channel_id}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+            filename = f"cam_{cam_id}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
             save_path = os.path.join(self.CAPTURE_DIR, filename)
             try:
                 cv2.imwrite(save_path, annotated_frame)
@@ -218,9 +218,9 @@ class MotionDetector:
 
         # Pydantic 모델 생성
         event_data = EventJson(
-            cam_no=channel_id,
+            cam_no=cam_id,
             event_type=primary_event_type,
-            danger_lvl=highest_danger_level,
+            danger_level=highest_danger_level,
             event_time=current_time,
             screenshot_path=screenshot_path,
         )

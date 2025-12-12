@@ -34,6 +34,7 @@ if __name__ == "__main__":
 SETTINGS_DIR = os.path.join(current_dir, "settings")
 os.makedirs(SETTINGS_DIR, exist_ok=True)
 
+#============================================================카메라로
 # [CCTV-03] 실시간 카메라
 CAM_ID_3 = 0
 CONFIG_FILE_3 = os.path.join(SETTINGS_DIR, "cam_3.json")
@@ -62,8 +63,8 @@ async def main():
 
     print(">>> [System] Streams Started.")
     await asyncio.gather(
-        camera_post_video(source3, detector3, PC_ID, channel_id=3),
-        camera_post_video(source4, detector4, PC_ID, channel_id=4)
+        camera_post_video(source3, detector3, PC_ID, 3)
+        # camera_post_video(source4, detector4, PC_ID, 4)
     )
 
 if __name__ == "__main__":
