@@ -33,3 +33,6 @@ class PCPath:
 
     def __init__(self, pc_id):
         self.PC_IP = os.getenv(f"{pc_id}_IP")
+        if not self.PC_IP:
+            print(f"[Config]Warning:{pc_id}_IP not found in {self.env_path}")
+

@@ -6,7 +6,7 @@ import cv2
 # ==========================================
 
 def fill_missing_keypoints(current_kp, confs, last_valid_kp):
-    # 신뢰도가 낮은 관절을 이전 프레임의 유효한 값으로 채움(떨림방지)
+    # 신뢰도가 낮은 관절 좌표를 이전 프레임의 값으로 채움
     filled = current_kp.copy()
     if last_valid_kp is None:
         return filled
@@ -18,8 +18,7 @@ def fill_missing_keypoints(current_kp, confs, last_valid_kp):
     return filled
 
 def get_stable_anchor(kp, confs):
-    # 상대 좌표 변환을 위한 기준점(Anchor)을 선정
-    # 우선순위: 어깨 중점 -> 골반 중점 -> 코
+    # 정규화를 위한 기준점 선정: 어깨 -> 골반 -> 코
     if confs[5] > 0.5 and confs[6] > 0.5: return (kp[5] + kp[6]) / 2
     if confs[11] > 0.5 and confs[12] > 0.5: return (kp[11] + kp[12]) / 2
     if confs[0] > 0.5: return kp[0]
@@ -43,9 +42,8 @@ def prepare_lstm_input(buffer):
 # [시각화] 화면에 박스와 텍스트 그리기
 # ============================
 def draw_info(img, box, kps, color, label):
-    bx1, by1, bx2, bt2 = map(int, box[:4])
-
     # 박스 그리기
+    bx1, by1, bx2, bt2 = map(int, box[:4])
     cv2.rectangle(img, (bx1, by1), (bx2, bt2), color, 2)
 
     # 텍스트 배경
