@@ -1,12 +1,13 @@
 # 웹소캣을 통한 데이터 전송
 import cv2
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from apps.fire_router.detector import frame_detector, fire_model_video
+import json
+
+from apps.fire_router.detector import fire_model_video, frame_detector
 
 router = APIRouter()
 
 connected_viewers = []
-
 
 @router.websocket("/ws/output")
 async def output_api(websocket: WebSocket):
@@ -40,33 +41,34 @@ async def input_api(websocket: WebSocket):
             image_bytes = await websocket.receive_bytes()
 
             fire_json = None
-            final_json = None
+
             frame_count += 1
             frame = frame_detector(image_bytes)
 
             if frame_count % skip_frame == 0:
                 fire_json = fire_model_video(frame, threshold_map)
 
-            if fire_json or action_json is not None:
-                final_json = {
-                    "fire_info": fire_json,
-                    "action_info": action_json
-                }
-                print(final_json)
-
-            final_json = {
-                "type": "VIDEO",
-                "payload": "..."
-            }
-
             ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+            encoded_image_bytes = buffer.tobytes()
 
             for viewer in connected_viewers:
                 try:
-                    await viewer.send_json(final_json)
-                    await viewer.send_bytes(image_bytes)
+                    # 감지가 발생했을 때만 JSON 전송
+                    if fire_json is not None or (action_json is not None and action_json.get("is_touch")):
+                        try:
+                            final_json = {
+                                "fire_info": fire_json,
+                                "action_info": action_json
+                            }
+                            await viewer.send_json(final_json)
+                        except Exception as json_error:
+                            print(f"[ENDPOINTS] JSON 전송 실패: {json_error}")
+                            print(f"[ENDPOINTS] fire_json 타입: {type(fire_json)}, 값: {fire_json}")
+                    
+                    # 영상은 항상 전송
+                    await viewer.send_bytes(encoded_image_bytes)
                 except Exception as e:
-                    print(f"전송 실패: {e}")
+                    print(f"[ENDPOINTS] 전송 실패: {e}")
                     connected_viewers.remove(viewer)
 
     except WebSocketDisconnect:

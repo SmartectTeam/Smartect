@@ -49,6 +49,7 @@
                         </div>
                         <div class="video-display">
                             <img id="live-image" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status">AI 분석 중...</span>
@@ -171,19 +172,107 @@
     <script>
         const socket = new WebSocket("ws://localhost:8000/ws/video");
         const imgElement = document.getElementById("live-image");
+        const canvas = document.getElementById("detection-canvas");
+        const ctx = canvas.getContext("2d");
+        let lastJsonData = null;
         socket.binaryType = "blob";
 
         socket.onopen = function () {
             console.log("Java 서버 접속");
         };
 
+        // 이미지 로드 후 Canvas 크기 조정 및 박스 그리기
+        function drawBoundingBoxes(jsonData) {
+            if (!jsonData || !jsonData.fire_info) return;
+            
+            const fireInfo = jsonData.fire_info;
+            if (!fireInfo || !Array.isArray(fireInfo) || fireInfo.length < 1) return;
+            
+            const fireMap = fireInfo[0]; // fire_map은 첫 번째 요소
+            if (!Array.isArray(fireMap)) return;
+            
+            // Canvas 크기를 이미지에 맞춤
+            canvas.width = imgElement.offsetWidth;
+            canvas.height = imgElement.offsetHeight;
+            
+            // 이전 그리기 지우기
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 이미지 실제 크기와 표시 크기 비율 계산
+            const scaleX = canvas.width / imgElement.naturalWidth;
+            const scaleY = canvas.height / imgElement.naturalHeight;
+            
+            // 각 바운딩 박스 그리기
+            fireMap.forEach(box => {
+                if (!box.x1 && box.x1 !== 0) return; // 유효한 박스인지 확인
+                
+                const x1 = box.x1 * scaleX;
+                const y1 = box.y1 * scaleY;
+                const x2 = box.x2 * scaleX;
+                const y2 = box.y2 * scaleY;
+                const width = x2 - x1;
+                const height = y2 - y1;
+                
+                // 클래스에 따라 색상 결정
+                const isFire = box.class === "fire";
+                const color = isFire ? "#FF0000" : "#FF8C00"; // fire: 빨강, smoke: 주황
+                
+                // 박스 그리기
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x1, y1, width, height);
+                
+                // 라벨 배경
+                const label = box.class;
+                ctx.font = "bold 14px Arial";
+                const textMetrics = ctx.measureText(label);
+                const labelWidth = textMetrics.width + 10;
+                const labelHeight = 20;
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(x1, y1 - labelHeight, labelWidth, labelHeight);
+                
+                // 라벨 텍스트
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillText(label, x1 + 5, y1 - 5);
+            });
+        }
+
         socket.onmessage = function (event) {
-            if (event.data instanceof Blob) {
+            if (typeof event.data === 'string') {
+                // JSON 메시지 수신 (감지 발생 시에만 전송됨)
+                try {
+                    lastJsonData = JSON.parse(event.data);
+                    console.log("JSON 수신 (감지 발생):", lastJsonData);
+                    // 이미지가 로드된 후 박스 그리기
+                    if (imgElement.complete && imgElement.naturalWidth > 0) {
+                        drawBoundingBoxes(lastJsonData);
+                    }
+                } catch (e) {
+                    console.error("JSON 파싱 오류:", e);
+                }
+            } else if (event.data instanceof Blob) {
+                // 이미지 메시지 수신 (항상 전송됨)
                 if (imgElement.src.startsWith("blob:")) {
                     URL.revokeObjectURL(imgElement.src);
                 }
                 const imageUrl = URL.createObjectURL(event.data);
                 imgElement.src = imageUrl;
+                
+                // 이미지 로드 후 처리
+                imgElement.onload = function() {
+                    // Canvas 크기 조정
+                    canvas.width = imgElement.offsetWidth;
+                    canvas.height = imgElement.offsetHeight;
+                    
+                    if (lastJsonData) {
+                        // JSON이 있으면 박스 그리기
+                        drawBoundingBoxes(lastJsonData);
+                    } else {
+                        // JSON이 없으면 박스 지우기 (감지 없음)
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                };
             }
         };
 

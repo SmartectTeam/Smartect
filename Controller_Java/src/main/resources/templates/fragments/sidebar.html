@@ -5,21 +5,42 @@
     </div>
 
     <ul class="nav-menu">
-        <li><a href="/dashboard" class="active">
-            <i class="fa-solid fa-chart-line"></i> Dashboard
-        </a></li>
-        <li><a href="/events">
-            <i class="fa-solid fa-video"></i> Events
-        </a></li>
-        <li><a href="/history">
-            <i class="fa-solid fa-clock-rotate-left"></i> History
-        </a></li>
-        <li><a href="/statistics">
-            <i class="fa-solid fa-chart-pie"></i> Statistics
-        </a></li>
-        <li><a href="/settings">
-            <i class="fa-solid fa-gear"></i> Settings
-        </a></li>
+
+        <li>
+            <a href="/dashboard"
+               th:classappend="${activePage == 'dashboard'} ? 'active'">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a>
+        </li>
+
+        <li>
+            <a href="/eventboard"
+               th:classappend="${activePage == 'eventboard'} ? 'active'">
+                <i class="fa-solid fa-video"></i> Events
+            </a>
+        </li>
+
+        <li>
+            <a href="/history"
+               th:classappend="${activePage == 'history'} ? 'active'">
+                <i class="fa-solid fa-clock-rotate-left"></i> History
+            </a>
+        </li>
+
+        <li>
+            <a href="/statistics"
+               th:classappend="${activePage == 'statistics'} ? 'active'">
+                <i class="fa-solid fa-chart-pie"></i> Statistics
+            </a>
+        </li>
+
+        <li>
+            <a href="/settings"
+               th:classappend="${activePage == 'settings'} ? 'active'">
+                <i class="fa-solid fa-gear"></i> Settings
+            </a>
+        </li>
+
     </ul>
 
 </nav>

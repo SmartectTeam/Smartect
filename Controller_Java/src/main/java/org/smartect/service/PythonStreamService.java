@@ -26,7 +26,7 @@ public class PythonStreamService implements CommandLineRunner {
 
     public PythonStreamService(
             WebSocketHandler videoWebSocketHandler,
-            @Value("${python.hsyServer.ip}") String ip) {
+            @Value("localhost") String ip) {
         this.PYTHON_SERVER_URL = String.format("ws://%s:8000/ws/output", ip);
         this.videoWebSocketHandler = videoWebSocketHandler;
         System.out.println("설정된 python 서버 url: " + this.PYTHON_SERVER_URL);
@@ -45,7 +45,7 @@ public class PythonStreamService implements CommandLineRunner {
         StandardWebSocketClient client = new StandardWebSocketClient(container);
 
         TextWebSocketHandler pythonHandler = new TextWebSocketHandler() {
-            private String lastJsonData = "{}";
+            private String lastJsonData = null; // JSON이 없을 수 있음
 
             @Override
             public void afterConnectionEstablished(WebSocketSession session) {
@@ -65,6 +65,7 @@ public class PythonStreamService implements CommandLineRunner {
                     imageBuffer.get(imageBytes);
 
                     videoWebSocketHandler.livePostData(lastJsonData, imageBytes);
+                    
                 } catch (Exception e) {
                     System.out.println("이미지 처리 중 오류: " + e.getMessage());
                 }
