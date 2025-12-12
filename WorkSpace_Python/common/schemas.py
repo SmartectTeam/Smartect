@@ -1,7 +1,7 @@
 # json (pydantic을 사용하여 데이터 모델을 정의)
+from pydantic import BaseModel
 
-
-class EventJson():
+class EventJson(BaseModel):
     cam_no: int            # 2
     event_type: str        # "touch"
     danger_level: int      # 1
