@@ -53,6 +53,7 @@ def cam_connect(cam_id):
 
     exit(1)
 
+
 def phone_connect(cam_id):
     cp = PhoneCamPath(cam_id)
 
@@ -70,7 +71,6 @@ def phone_connect(cam_id):
 
     return cap
 
-
 def snap_cam_connect(video_path):
     cap = cv2.VideoCapture(video_path)
 
@@ -80,11 +80,11 @@ def snap_cam_connect(video_path):
 
     return cap
 
-
 def camera_disconnect(cap):
     cap.release()
     cv2.destroyAllWindows()
     return "cap, cv2 종료 되었습니다."
+
 
 # =======================
 # HSM 임시 카메라 기존함수 활용
@@ -106,6 +106,7 @@ class WebcamStream:
 
     def release(self):
         camera_disconnect(self.cap)
+
 
 class FileLoofStream:
     """

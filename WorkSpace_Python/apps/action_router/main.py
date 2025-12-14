@@ -1,9 +1,5 @@
 # 매인 실행문
 from sympy import roots
-
-#test
-
-from apps.action_router.endpoints import camera_post_video
 import asyncio
 import sys
 import os
@@ -15,45 +11,52 @@ root_dir = os.path.abspath(os.path.join(current_dir, "../.."))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-from endpoints import camera_post_video
-from camera import WebcamStream, FileLoofStream
-from detector import  MotionDetector
-from detect.ai_models import AIModels
-
-"""
-# 원본 보존
-
-pc_id = "HSYPC"
-cam_id = "AHSCAM"
-
-if __name__ == "__main__":
-    asyncio.run(camera_post_video(pc_id, cam_id))
-"""
+from apps.action_router.endpoints import camera_post_video
+from apps.action_router.camera import WebcamStream, FileLoofStream
+from apps.action_router.detector import  MotionDetector
+from apps.action_router.detect.ai_models import AIModels
 
 # 설정 파일 경로(app/action_router/settings/)
 SETTINGS_DIR = os.path.join(current_dir, "settings")
 os.makedirs(SETTINGS_DIR, exist_ok=True)
 
-#============================================================카메라로
+# [CCTV-01] 파일 반복
+CAM_ID_1 = "HSYCAM"
+CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
+
+# [CCTV-02] 파일 반복
+VIDEO_PATH_2 = ""
+CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
+
 # [CCTV-03] 실시간 카메라
-CAM_ID_3 = 0
+VIDEO_PATH_3 = ""
 CONFIG_FILE_3 = os.path.join(SETTINGS_DIR, "cam_3.json")
 
 # [CCTV-04] 파일 반복
-VIDEO_PATH_4 = "C:/teamproject/Smartect/video/test.mp4"
+VIDEO_PATH_4 = ""
 CONFIG_FILE_4 = os.path.join(SETTINGS_DIR, "cam_4.json")
 
-PC_ID = "HSMPC"
-
-async def main():
+async def main(pc_id):
     print(">>>[System] Initializing Models...")
     shared_models = AIModels()
+
+    # CCTV 01
+    print(">>>[Setup] CCTV-1(live)")
+    detector1 = MotionDetector(settings_path=CONFIG_FILE_1)
+    detector1.models = shared_models
+    source1 = WebcamStream(CAM_ID_1)
+
+    # CCTV 02
+    print(">>>[Setup] CCTV-2(live)")
+    detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
+    detector2.models = shared_models
+    source2 = FileLoofStream(VIDEO_PATH_2)
 
     # CCTV 03
     print(">>>[Setup] CCTV-3(live)")
     detector3 = MotionDetector(settings_path=CONFIG_FILE_3)
     detector3.models = shared_models
-    source3 = WebcamStream(CAM_ID_3)
+    source3 = FileLoofStream(VIDEO_PATH_3)
 
     # CCTV 04
     print(f">>>[Setup] CCTV-4(file)")
@@ -63,16 +66,18 @@ async def main():
 
     print(">>> [System] Streams Started.")
     await asyncio.gather(
-        camera_post_video(source3, detector3, PC_ID, 3)
-        # camera_post_video(source4, detector4, PC_ID, 4)
+        camera_post_video(source1, detector1, pc_id, 1),
+        # camera_post_video(source2, detector2, pc_id, 2),
+        # camera_post_video(source3, detector3, pc_id, 3),
+        # camera_post_video(source4, detector4, pc_id, 4)
     )
+
+
+PC_ID = "HSYPC"
+
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        asyncio.run(main(PC_ID))
     except KeyboardInterrupt:
         print("\n>>> [System] Stopped.")
-
-
-
-

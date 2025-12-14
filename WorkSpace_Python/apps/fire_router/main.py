@@ -1,11 +1,13 @@
 # 매인 실행문
 from fastapi import FastAPI
 import uvicorn
+
 from apps.fire_router.endpoints import router
 
 app = FastAPI()
 
 app.include_router(router)
+
 
 if __name__ == "__main__":
     print("서버연결 (Port: 8000)")

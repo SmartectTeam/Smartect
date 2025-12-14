@@ -64,8 +64,8 @@ async def camera_post_video(pc_id, cam_id):
 '''
 # 인자 4개 받도록 변경
 async def camera_post_video(source, detector, pc_id, cam_id):
-    pc2 = PCPath(pc_id)
-    url = f"ws://{pc2.PC_IP}:8000/ws/input"
+    pc = PCPath(pc_id)
+    url = f"ws://{pc.PC_IP}:8000/ws/input"
 
     print(f"[Endpoint] Connecting CCTV={cam_id} to {url} ...")
 
@@ -98,5 +98,3 @@ async def camera_post_video(source, detector, pc_id, cam_id):
 
     finally:
         source.release()
-
-
