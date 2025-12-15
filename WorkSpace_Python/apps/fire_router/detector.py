@@ -8,10 +8,15 @@ from common.schemas import EventJson, EventMap, CombinedJson
 from datetime import datetime
 
 
+"""
 model = YOLO(ModelPath.FIRE_MODEL)
 if model:
     print("Model loaded")
-
+"""
+#===================================
+# action_router 작업을위한 임시코드
+model = None
+#====================================
 
 def frame_detector(image_bytes):
     nparr = np.frombuffer(image_bytes, np.uint8)
@@ -20,6 +25,12 @@ def frame_detector(image_bytes):
 
 
 def fire_model_video(frame, threshold_map):
+    #==================================
+    # action 작업을 위한 임시코드
+    if model is None:
+        return {"is_fire":False}
+    #==================================
+
     min_conf = min(threshold_map.values())
     results = model(frame, stream=True, conf=min_conf, verbose=False)
     fire_map = []

@@ -1,18 +1,425 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{fragments/base}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" xmlns="http://www.w3.org/1999/html">
     <head>
         <!-- 페이지에 해당하는 css로 수정 -->
-        <link rel="stylesheet" th:href="@{/css/.css}">
+<!--        <link rel="stylesheet" th:href="@{/css/dashboard.css}">-->
+        <title>AI CCTV 통합 관제 설정</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            /* --- 기본 레이아웃 --- */
+            body {
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+                font-family: 'Noto Sans KR', sans-serif;
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* 상단 헤더 */
+            .header {
+                background-color: #2d2d2d;
+                padding: 15px 20px;
+                border-bottom: 1px solid #444;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* 메인 컨테이너 (좌우 분할) */
+            .main-container {
+                display: flex;
+                flex: 1;
+                overflow: hidden; /* 스크롤 방지 */
+            }
+
+            /* --- [좌측] 영상 모니터링 존 (70%) --- */
+            .video-zone {
+                flex: 7;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                background-color: #000;
+                position: relative;
+                border-right: 1px solid #444;
+            }
+
+            .cam-selector {
+                margin-bottom: 15px;
+            }
+            .cam-selector select {
+                background: #333;
+                color: white;
+                padding: 10px;
+                font-size: 16px;
+                border: 1px solid #555;
+                border-radius: 5px;
+                width: 300px;
+            }
+
+            /* 영상 래퍼 (캔버스를 위에 겹치기 위함) */
+            .video-wrapper {
+                flex: 1;
+                position: relative;
+                border: 2px solid #444;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: #111;
+                overflow: hidden;
+            }
+
+            #live-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            /* 구역 그리기용 캔버스 (영상 위에 뜸) */
+            #zone-canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                cursor: crosshair; /* 그리기 모드일 때 십자 커서 */
+                /* pointer-events: none;  평소엔 클릭 통과 (JS로 제어) */
+            }
+
+            /* --- [우측] 설정 컨트롤 패널 (30%) --- */
+            .control-zone {
+                flex: 3;
+                background-color: #252525;
+                display: flex;
+                flex-direction: column;
+                min-width: 350px;
+            }
+
+            /* 탭 메뉴 */
+            .tabs {
+                display: flex;
+                background-color: #333;
+            }
+            .tab-btn {
+                flex: 1;
+                padding: 15px;
+                background: none;
+                border: none;
+                color: #aaa;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+                transition: 0.3s;
+                border-bottom: 3px solid transparent;
+            }
+            .tab-btn:hover { background-color: #3a3a3a; }
+            .tab-btn.active {
+                color: #fff;
+                border-bottom: 3px solid #007bff;
+                background-color: #2d2d2d;
+            }
+
+            /* 탭 내용 영역 */
+            .tab-content {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                display: none; /* 기본 숨김 */
+            }
+            .tab-content.active { display: block; }
+
+            /* 설정 그룹 스타일 */
+            .setting-group {
+                background: #333;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            .group-title {
+                font-size: 14px;
+                color: #888;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                font-weight: bold;
+            }
+
+            /* 슬라이더 스타일 */
+            .slider-box { margin-bottom: 15px; }
+            .slider-label {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+                font-size: 14px;
+            }
+            input[type="range"] { width: 100%; cursor: pointer; }
+
+            /* 스위치 (체크박스) */
+            .toggle-box {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                padding: 5px 0;
+            }
+            .toggle-box label { cursor: pointer; }
+
+            /* 비활성화 스타일 (화재 감지용) */
+            .disabled-opt { opacity: 0.5; pointer-events: none; }
+
+            /* AI 대시보드 그래프 (CSS Bar) */
+            .bar-chart {
+                margin-bottom: 10px;
+            }
+            .bar-label { font-size: 13px; margin-bottom: 3px; display: flex; justify-content: space-between;}
+            .bar-bg { background: #444; height: 20px; border-radius: 10px; overflow: hidden; }
+            .bar-fill { height: 100%; text-align: right; padding-right: 5px; font-size: 12px; line-height: 20px; color: white; transition: width 0.5s; }
+            .bg-green { background-color: #28a745; }
+            .bg-yellow { background-color: #ffc107; color: black; }
+            .bg-red { background-color: #dc3545; }
+
+            /* 하단 저장 버튼 */
+            .save-btn-area {
+                padding: 20px;
+                border-top: 1px solid #444;
+                background: #2d2d2d;
+            }
+            .btn-save {
+                width: 100%;
+                padding: 12px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .btn-save:hover { background-color: #0056b3; }
+
+        </style>
+
     </head>
-    <div layout:fragment="content">
-        <!-- 페이지 콘텐츠 시작 -->
+    <body>
 
+    <!-- 헤더 -->
+    <header class="header">
+        <div style="font-size: 1.2rem; font-weight: bold;">
+            <i class="fa-solid fa-gear"></i> AI CCTV 설정 관리자
+        </div>
+        <div>
+            <span style="color:#0f0; font-size: 0.9rem;">● 시스템 정상 가동 중</span>
+        </div>
+    </header>
 
+    <!-- 메인 레이아웃 -->
+    <div class="main-container">
 
+        <!-- [좌측] 영상 & 그리기 영역 -->
+        <section class="video-zone">
+            <div class="cam-selector">
+                <select id="camera-select">
+                    <option value="3" selected>CCTV-03 (복도) - WebCam</option>
+                    <option value="4">CCTV-04 (비상구) - File</option>
+                </select>
+            </div>
 
-        <!-- 페이지 콘텐츠 끝 -->
+            <div class="video-wrapper">
+                <!-- 영상 이미지 -->
+                <img id="live-image" src="" alt="CCTV 화면 대기중...">
+
+                <!-- 그 위에 겹쳐지는 투명 캔버스 (구역 설정용) -->
+                <canvas id="zone-canvas"></canvas>
+
+                <!-- (옵션) 안내 메시지 -->
+                <div id="draw-guide" style="position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); padding:5px 15px; border-radius:20px; font-size:14px; display:none;">
+                    마우스로 점을 찍어 구역을 그리세요 (우클릭 종료)
+                </div>
+            </div>
+        </section>
+
+        <!-- [우측] 설정 컨트롤 패널 -->
+        <aside class="control-zone">
+
+            <!-- 탭 버튼 -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab('tab-sense')">감도 설정</button>
+                <button class="tab-btn" onclick="openTab('tab-zone')">구역 관리</button>
+                <button class="tab-btn" onclick="openTab('tab-dash')">AI 대시보드</button>
+            </div>
+
+            <!-- [TAB 1] 감도 설정 -->
+            <div id="tab-sense" class="tab-content active">
+
+                <!-- 기능 ON/OFF -->
+                <div class="setting-group">
+                    <div class="group-title">기능 활성화</div>
+
+                    <div class="toggle-box">
+                        <label>🤸 낙상 감지 (Fall)</label>
+                        <input type="checkbox" id="chk-fall" checked>
+                    </div>
+                    <div class="toggle-box">
+                        <label>🚧 구역 침입 감지 (Zone)</label>
+                        <input type="checkbox" id="chk-zone" checked>
+                    </div>
+                    <div class="toggle-box">
+                        <label>🧠 AI 행동 인식</label>
+                        <input type="checkbox" id="chk-ai" checked>
+                    </div>
+                    <!-- 화재 감지는 비활성화 -->
+                    <div class="toggle-box disabled-opt">
+                        <label>🔥 화재 감지 (시스템 전용)</label>
+                        <input type="checkbox" disabled>
+                    </div>
+                </div>
+
+                <!-- 민감도 슬라이더 -->
+                <div class="setting-group">
+                    <div class="group-title">알고리즘 민감도</div>
+
+                    <!-- 낙상 비율 -->
+                    <div class="slider-box">
+                        <div class="slider-label">
+                            <span>낙상 비율 (가로/세로)</span>
+                            <span id="val-fall">1.2</span>
+                        </div>
+                        <input type="range" min="0.5" max="2.0" step="0.1" value="1.2" oninput="updateVal('val-fall', this.value)">
+                    </div>
+
+                    <!-- 팔 뻗음 감지 (Reach) -->
+                    <div class="slider-box">
+                        <div class="slider-label">
+                            <span>팔 뻗음 임계값 (Reach)</span>
+                            <span id="val-reach">0.85</span>
+                        </div>
+                        <input type="range" min="0.5" max="1.0" step="0.05" value="0.85" oninput="updateVal('val-reach', this.value)">
+                    </div>
+
+                    <!-- AI 임계값 -->
+                    <div class="slider-box">
+                        <div class="slider-label">
+                            <span>AI 신뢰도 (Threshold)</span>
+                            <span id="val-ai">0.7</span>
+                        </div>
+                        <input type="range" min="0.1" max="1.0" step="0.05" value="0.7" oninput="updateVal('val-ai', this.value)">
+                    </div>
+
+                    <!-- 락 시간 -->
+                    <div class="slider-box">
+                        <div class="slider-label">
+                            <span>경고 유지 시간 (초)</span>
+                            <span id="val-lock">30</span>
+                        </div>
+                        <input type="range" min="1" max="60" step="1" value="30" oninput="updateVal('val-lock', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- [TAB 2] 구역 관리 -->
+            <div id="tab-zone" class="tab-content">
+                <div class="setting-group">
+                    <div class="group-title">위험 구역 설정</div>
+                    <button class="btn-save" style="background:#444; margin-bottom:15px;" onclick="toggleDrawMode()">
+                        ➕ 새 구역 그리기 (좌측 화면)
+                    </button>
+
+                    <!-- 구역 목록 (예시) -->
+                    <div id="zone-list">
+                        <div style="background:#222; padding:10px; margin-bottom:5px; display:flex; justify-content:space-between;">
+                            <span>Zone #1 (위험)</span>
+                            <button style="background:red; border:none; color:white; cursor:pointer;">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size:12px; color:#888;">
+                    * [새 구역 그리기]를 누르고 왼쪽 화면에서 점을 찍어 다각형을 만드세요.
+                </div>
+            </div>
+
+            <!-- [TAB 3] AI 대시보드 -->
+            <div id="tab-dash" class="tab-content">
+                <div class="setting-group">
+                    <div class="group-title">실시간 분석 스코어</div>
+
+                    <!-- Safe -->
+                    <div class="bar-chart">
+                        <div class="bar-label"><span>Safe (안전)</span> <span>85%</span></div>
+                        <div class="bar-bg"><div class="bar-fill bg-green" style="width: 85%;"></div></div>
+                    </div>
+
+                    <!-- Move -->
+                    <div class="bar-chart">
+                        <div class="bar-label"><span>Move (이동)</span> <span>10%</span></div>
+                        <div class="bar-bg"><div class="bar-fill bg-yellow" style="width: 10%;"></div></div>
+                    </div>
+
+                    <!-- Threat -->
+                    <div class="bar-chart">
+                        <div class="bar-label"><span>Threat (위협)</span> <span>5%</span></div>
+                        <div class="bar-bg"><div class="bar-fill bg-red" style="width: 5%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="group-title">최근 이벤트</div>
+                    <div style="font-size:13px; color:#aaa;">
+                        [14:20:01] CCTV-03 낙상 감지<br>
+                        [14:18:55] CCTV-04 구역 침입
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 저장 버튼 -->
+            <div class="save-btn-area">
+                <button class="btn-save" onclick="saveSettings()">설정 저장 및 적용</button>
+            </div>
+        </aside>
+
     </div>
 
+    <!-- UI 동작 스크립트 -->
+    <script>
+        // 탭 전환 함수
+        function openTab(tabId) {
+            // 모든 탭 내용 숨김
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // 모든 탭 버튼 비활성
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // 선택된 탭 활성화
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 슬라이더 값 표시 업데이트
+        function updateVal(spanId, value) {
+            document.getElementById(spanId).innerText = value;
+        }
+
+        // 구역 그리기 모드 토글 (기능 예시)
+        function toggleDrawMode() {
+            const guide = document.getElementById('draw-guide');
+            const canvas = document.getElementById('zone-canvas');
+
+            if (guide.style.display === 'none') {
+                guide.style.display = 'block';
+                canvas.style.pointerEvents = 'auto'; // 클릭 가능하게
+                alert("왼쪽 화면에서 구역을 그려주세요.");
+            } else {
+                guide.style.display = 'none';
+                canvas.style.pointerEvents = 'none'; // 클릭 불가
+            }
+        }
+
+        // 저장 버튼 (나중에 Java 서버와 연동)
+        function saveSettings() {
+            // 여기에 JSON 데이터 생성 로직이 들어감
+            alert("설정이 저장되었습니다. (서버 전송 준비)");
+        }
+    </script>
+
+    </body>
 </html>

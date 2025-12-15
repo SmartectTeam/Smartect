@@ -21,6 +21,8 @@ import numpy as np
 import json
 import os
 import time
+import base64
+
 from collections import deque
 from datetime import datetime
 
@@ -207,14 +209,32 @@ class MotionDetector:
             except Exception as e:
                 print(f"[Detector] Save Error: {e}")
 
-        # Pydantic 모델 생성
+
+        #========================================================
+        # 이미지를 JPG로 압축해서 문자열(base64로)변환한 뒤 json에 담기
+        #========================================================
+        img_str = ""
+        # 이미지를 메모리에서 jpg로 인코딩
+        retval, buffer = cv2.imencode('.jpg', annotated_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+        if retval:
+            # 바이트를 Base64 문자열로 변환
+            img_str = base64.b64encode(buffer).decode('utf-8')
+
+        # event json 생성
+        current_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+
+        # Pydantic 모델 생성(스크린샷 저장 로직)
         event_data = EventJson(
             cam_no=cam_id,
             event_type=primary_event_type,
             danger_level=highest_danger_level,
             event_time=current_time,
             screenshot_path=screenshot_path,
+            img_base64=img_str
         )
+
+
         return annotated_frame, event_data
 
 
