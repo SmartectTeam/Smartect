@@ -11,6 +11,13 @@ public class HomeController {
     public String home() {
         return "index"; // main
     }
+
+    // Spring Security 적용 전 login 화면 테스트용
+    @GetMapping("login")
+    public String loginTest(){
+        return "login";
+    }
+
     // activePage : 사이드바 active class 부여하는 용도
     // ---------------------- 페이지 출력 테스트 -----------------------
 

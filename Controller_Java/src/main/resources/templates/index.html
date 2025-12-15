@@ -1,17 +1,88 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{fragments/base}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <!-- 페이지에 해당하는 css로 수정 -->
-    <link rel="stylesheet" th:href="@{/css/.css}">
+    <meta charset="UTF-8">
+    <title>Smartect</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
 </head>
-<div layout:fragment="content">
-    <!-- 페이지 콘텐츠 시작 -->
-    <!--   메인화면( 로고만 뜨게 ) + 게시판  ( 사이트 리뷰용 )     -->
+<body>
 
+<!-- MAIN 영역 -->
+<section id="main">
+    <div class="main-content">
+        <h1 class="logo">Smartect</h1>
+        <p class="main-desc">
+            AI 기반 실시간 CCTV 위험 감지 및 이벤트 관리 시스템
+        </p>
+        <a class="main-btn" th:href="@{/dashboard}">
+            대시보드 바로 가기
+        </a>
+        <span class="scroll-hint">▼ 밑으로 내려 리뷰를 작성해 보세요!</span>
+    </div>
+</section>
 
-    <!-- 페이지 콘텐츠 끝 -->
-</div>
+<!-- BOARD 영역 -->
+<section id="board">
+    <div class="board-container">
 
+        <h2 class="board-title">리뷰 게시판</h2>
+
+        <!-- 글 작성 -->
+        <div class="board-write">
+            <form action="/board" method="post">
+            <!--    csrf 토큰, 작성자 ip 정보 전달 추가해야함 @@        -->
+            <input name="title" type="text" placeholder="제목">
+            <textarea name="content" placeholder="내용을 입력해 주세요."></textarea>
+            <button type="submit">등록</button>
+            </form>
+        </div>
+
+        <!-- 게시글 -->
+        <!--    @@Controller 수정 후 사용    -->
+        <!--    게시물 없을 때    -->
+<!--        <div class="board-post" th:if="${#lists.isEmpty(postList)}">-->
+<!--            아직 작성된 게시물이 없습니다. 리뷰를 남겨보세요!-->
+<!--        </div>-->
+<!--        &lt;!&ndash;    게시물 있을 때     &ndash;&gt;-->
+<!--        <div class="board-post" th:each="post : ${postList}">-->
+<!--            <div class="post-header">-->
+<!--                <span class="post-title" th:text="${post.title}">제목</span>-->
+<!--                <span class="post-writer" th:text="${post.writerInfo}">글쓴이</span>-->
+<!--            </div>-->
+<!--            <p class="post-content" th:text="${post.content}">-->
+<!--                내용-->
+<!--            </p>-->
+<!--            <span class="post-time"-->
+<!--                  th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">-->
+<!--                작성일-->
+<!--            </span>-->
+<!--        </div>-->
+
+        <!--    더미데이터    -->
+        <div class="board-post">
+            <div class="post-header">
+                <span class="post-title">카메라 점검 공지</span>
+                <span class="post-writer">익명 (192.168.0.23)</span>
+            </div>
+            <p class="post-content">
+                3번 카메라 주변 조도 문제로 오탐 발생 중입니다.
+            </p>
+            <span class="post-time">2025-01-15 10:32</span>
+        </div>
+
+        <div class="board-post">
+            <div class="post-header">
+                <span class="post-title">이상 없음</span>
+                <span class="post-writer">익명 (192.168.0.41)</span>
+            </div>
+            <p class="post-content">
+                현재 관제 정상 동작 중입니다.
+            </p>
+            <span class="post-time">2025-01-15 09:58</span>
+        </div>
+
+    </div>
+</section>
+
+</body>
 </html>
