@@ -28,7 +28,6 @@ public class HomeController {
 
     @GetMapping("/history")
     public String history(Model model) {
-        // 사이드바 active class 부여하는 용도
         model.addAttribute("activePage", "history");
         return "history";
     }

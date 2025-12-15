@@ -17,7 +17,7 @@ public class EventLogDTO {
 //         "screenshot_path": "/images/capture_123.png"
 //    }
     private Long eventNo; // 위험도 높은 이벤트만 걸러서 들어옴, 전부 DB
-    private int camNo;
+    private Long camNo;
     private String eventType;
     private String screenshotPath; // Python에서 저장, 경로만 넘어옴
     private String memo;
