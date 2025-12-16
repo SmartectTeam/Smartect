@@ -2,6 +2,7 @@ package org.smartect.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,9 +34,22 @@ public class BoardEntity {
     @Column(name="created_at", updatable=false,nullable = false) // 수정 X
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name="updated_at")
-    private LocalDateTime updatedAt;
+//    @UpdateTimestamp
+//    @Column(name="updated_at")
+//    private LocalDateTime updatedAt;
 
-
+    // 게시물 등록 (비동기) 을 위한 생성메서드
+    public static BoardEntity create(String title, String content, String writerInfo) {
+        BoardEntity e = new BoardEntity();
+        e.title = title;
+        e.content = content;
+        e.writerInfo = writerInfo;
+        return e;
+    }
+    // Setter  게시물 등록 (비동기) 을 위해 최소한으로 허용함
+    public void write(String title, String content, String writerInfo) {
+        this.title = title;
+        this.content = content;
+        this.writerInfo = writerInfo;
+    }
 }

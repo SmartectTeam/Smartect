@@ -10,7 +10,7 @@
 <!-- MAIN 영역 -->
 <section id="main">
     <div class="main-content">
-        <h1 class="logo">Smartect</h1>
+        <h1 class="logo">SmarTect</h1>
         <p class="main-desc">
             AI 기반 실시간 CCTV 위험 감지 및 이벤트 관리 시스템
         </p>
@@ -29,58 +29,124 @@
 
         <!-- 글 작성 -->
         <div class="board-write">
-            <form action="/board" method="post">
-            <!--    csrf 토큰, 작성자 ip 정보 전달 추가해야함 @@        -->
-            <input name="title" type="text" placeholder="제목">
-            <textarea name="content" placeholder="내용을 입력해 주세요."></textarea>
-            <button type="submit">등록</button>
+            <form th:action="@{/post}" method="post" id="postForm">
+                <!--    csrf 토큰, 작성자 ip 정보 전달 추가해야함 @@        -->
+                <input name="title" type="text" placeholder="제목" required>
+                <textarea name="content" placeholder="내용을 입력해 주세요." required></textarea>
+                <button type="submit">등록</button>
             </form>
+            <div id="postError" class="error" style="display:none;"></div>
         </div>
 
         <!-- 게시글 -->
-        <!--    @@Controller 수정 후 사용    -->
-        <!--    게시물 없을 때    -->
-<!--        <div class="board-post" th:if="${#lists.isEmpty(postList)}">-->
-<!--            아직 작성된 게시물이 없습니다. 리뷰를 남겨보세요!-->
-<!--        </div>-->
-<!--        &lt;!&ndash;    게시물 있을 때     &ndash;&gt;-->
-<!--        <div class="board-post" th:each="post : ${postList}">-->
-<!--            <div class="post-header">-->
-<!--                <span class="post-title" th:text="${post.title}">제목</span>-->
-<!--                <span class="post-writer" th:text="${post.writerInfo}">글쓴이</span>-->
-<!--            </div>-->
-<!--            <p class="post-content" th:text="${post.content}">-->
-<!--                내용-->
-<!--            </p>-->
-<!--            <span class="post-time"-->
-<!--                  th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">-->
-<!--                작성일-->
-<!--            </span>-->
-<!--        </div>-->
+        <!--    @@ 게시물 작성 기능 구현 후 수정    -->
 
-        <!--    더미데이터    -->
-        <div class="board-post">
-            <div class="post-header">
-                <span class="post-title">카메라 점검 공지</span>
-                <span class="post-writer">익명 (192.168.0.23)</span>
+        <!--board-list 시작 -->
+        <div id="postList">
+            <!--    게시물 없을 때    -->
+            <div class="board-post" th:if="${#lists.isEmpty(boardList)}">
+                아직 작성된 게시물이 없습니다. 리뷰를 남겨보세요!
             </div>
-            <p class="post-content">
-                3번 카메라 주변 조도 문제로 오탐 발생 중입니다.
-            </p>
-            <span class="post-time">2025-01-15 10:32</span>
-        </div>
-
-        <div class="board-post">
-            <div class="post-header">
-                <span class="post-title">이상 없음</span>
-                <span class="post-writer">익명 (192.168.0.41)</span>
+            <!--        게시물 있을 때  -->
+            <div class="board-post" th:each="post : ${boardList}">
+                <div class="post-header">
+                    <span class="post-title" th:text="${post.title}">제목</span>
+                    <span class="post-writer" th:text="${post.writerInfo}">글쓴이</span>
+                </div>
+                <p class="post-content" th:text="${post.content}">
+                    내용
+                </p>
+                <span class="post-time"
+                      th:text="${post.createdAt}">
+                            작성일
+                        </span>
             </div>
-            <p class="post-content">
-                현재 관제 정상 동작 중입니다.
-            </p>
-            <span class="post-time">2025-01-15 09:58</span>
-        </div>
 
+        </div>
+        <!-- board-list 끝 -->
+        <script>
+            const form = document.getElementById("postForm");
+            const postList = document.getElementById("postList");
+            const postError = document.getElementById("postError");
+
+            function showError(msg){
+                postError.textContent = msg;
+                postError.style.display='block'
+            }
+            function clearError(){
+                postError.textContent= '';
+                postError.style.display='none';
+            }
+            <!--      기호 변환      -->
+            function escapeHtml(str) {
+                return str
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+             }
+
+            <!--      게시글 양식      -->
+            function renderPostCard(post){
+                const div = document.createElement('div');
+                div.className='board-post';
+                div.innerHTML = `
+                  <div class="post-header">
+                    <span class="post-title">${escapeHtml(post.title)}</span>
+                    <span class="post-writer">${escapeHtml(post.writerInfo)}</span>
+                  </div>
+                  <p class="post-content">${escapeHtml(post.content)}</p>
+                  <span class="post-time">${escapeHtml(post.createdAt)}</span>
+                `;
+                return div;
+            }
+
+            form.addEventListener('submit', async(e)=>{
+                e.preventDefault();
+                clearError();
+
+                const formData = new FormData(form);
+                const title = (formData.get('title') || '').toString().trim();
+                const content = (formData.get('content') || '').toString().trim();
+                    if (!title || !content) {
+                        showError('제목과 내용을 입력해 주세요.');
+                    return;
+                    }
+
+                // json으로 전송
+                const payload = {title,content};
+
+                try{
+                    const res = await fetch(form.action,{
+                    method: 'POST',
+                    headers:{
+                        'Content-Type' : 'application/json'
+                        // CSRF 사용시 수정 필요 @@
+                    },
+                    body:JSON.stringify(payload)
+                    }); //fetch
+
+                    if(!res.ok){
+                        // 400/500 에러 발생시
+                        const text = await res.text();
+                        showError(text || '등록에 실패했습니다.');
+                        return;
+                    }
+                    const saved = await res.json();
+                    const card = renderPostCard(saved);
+
+                    postList.prepend(card);
+                    // 입력창 초기화
+                    form.reset();
+                }catch(err){
+                    showError('작성 실패. 오류가 발생했습니다.');
+                    console.error(err);
+                }
+
+            });
+
+        </script>
     </div>
 </section>
 

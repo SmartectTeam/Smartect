@@ -5,7 +5,7 @@ body {
     color: white;
 }
 
-/* MAIN 영역 */
+/* 메인화면 */
 #main {
     height: 100vh;
     display: flex;
@@ -42,8 +42,9 @@ body {
     100% { opacity: 0.3; }
 }
 
-/* BOARD 영역 */
+/* 게시판  */
 #board {
+    border-top: 1px solid #5f7a99;
     padding: 80px 0;
     background: #0d141c;
 }
