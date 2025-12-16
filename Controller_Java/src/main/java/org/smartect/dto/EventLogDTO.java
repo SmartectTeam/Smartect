@@ -21,10 +21,11 @@ public class EventLogDTO {
     private String eventType;
     private String screenshotPath; // Python에서 저장, 경로만 넘어옴
     private String memo;
-    private LocalDateTime createdAt;
 
+    // LocalDateTime -> String Service에서 날짜 포멧 타입 변경 후 전달
+    private String createdAt;
     // Null == UnChecked Not Null == Checked
-    private LocalDateTime checkedAt;
+    private String checkedAt;
 
 //    fire Class
 //

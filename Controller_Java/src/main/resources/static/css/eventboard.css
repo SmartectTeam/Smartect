@@ -18,6 +18,7 @@
     align-items: center;
     border-bottom: 1px solid #334155;
     margin-bottom: 20px;
+    padding-bottom: 20px;
 }
 
 .eventboard-header h1 {
@@ -50,7 +51,7 @@
     background-color: #0f172a;
     border: 1px solid #334155;
     border-radius: 6px;
-    padding: 20px;
+    padding: 14px;          /* 기존 20px → ↓ */
     overflow-y: auto;
 }
 
@@ -92,41 +93,48 @@
 
 /* ========================= 필터 그룹 ========================= */
 .filter-group {
-    margin-bottom: 15px;
+    display: flex;              /* 가로 정렬 */
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;        /* 높이 줄이기 */
 }
 
 .filter-label {
-    display: block;
-    font-size: 13px;
+    display: inline-block;
+    font-size: 12px;            /* ↓ */
     color: #94a3b8;
-    margin-bottom: 6px;
+    min-width: 70px;            /* 라벨 폭 고정 */
+    margin-bottom: 0;           /* 세로 여백 제거 */
 }
 
 .chip-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
 }
 
 .chip-btn {
-    padding: 6px 12px;
+    padding: 3px 9px;           /* ↓ */
     border-radius: 999px;
     border: 1px solid #334155;
     background: #1e293b;
     color: #e2e8f0;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
+    height: 24px;               /* ↓ */
+    line-height: 1;
 }
 
-.chip-btn:hover {
-    background: #334155;
-}
 
-.chip-btn.active {
-    background: #06b6d4;
-    border-color: #06b6d4;
-    color: #0f172a;
-}
+ .chip-btn:hover {
+     background: #334155;
+ }
+
+ .chip-btn.active {
+     background: #06b6d4;
+     border-color: #06b6d4;
+     color: #0f172a;
+ }
 
 /* ========================= 이벤트 목록 ========================= */
 #eventList {
@@ -137,11 +145,12 @@
 
 #eventList li {
     background: #1e293b;
-    padding: 14px;
-    margin-bottom: 10px;
-    border-radius: 6px;
+    padding: 8px 10px;          /* ↓ */
+    margin-bottom: 6px;         /* ↓ */
+    border-radius: 5px;
     cursor: pointer;
     transition: 0.15s;
+    font-size: 12px;            /* ↓ */
 }
 
 #eventList li:hover {
@@ -150,6 +159,14 @@
 
 #eventList li strong {
     color: #06b6d4;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+#eventList li .event-time {
+    font-size: 11px;
+    color: #94a3b8;
 }
 
 /* ===========================================================
@@ -193,4 +210,14 @@
 .event-list::-webkit-scrollbar-track,
 .event-detail::-webkit-scrollbar-track {
     background: #1e293b;
+}
+
+/* FIRE 이벤트 강조 */
+#eventList li.fire {
+    border-left: 4px solid #ef4444;
+    background: linear-gradient(90deg, rgba(239,68,68,0.15), #1e293b);
+}
+
+#eventList li.fire strong {
+    color: #f87171;
 }

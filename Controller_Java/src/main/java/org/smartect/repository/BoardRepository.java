@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BoardRepository extends JpaRepository<BoardEntity,Long> {
     // JPA에서 제공하는 메소드 사용
-    public List<BoardEntity> findAllByOrderByCreatedAtDesc();
-    public long count();
+    List<BoardEntity> findAllByOrderByCreatedAtDesc();
+    long count();
 
 }
