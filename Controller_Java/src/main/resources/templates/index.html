@@ -44,7 +44,8 @@
         <!--board-list 시작 -->
         <div id="postList">
             <!--    게시물 없을 때    -->
-            <div class="board-post" th:if="${#lists.isEmpty(boardList)}">
+            <div class="board-post" th:if="${#lists.isEmpty(boardList)}"
+                 id="emptyMessage">
                 아직 작성된 게시물이 없습니다. 리뷰를 남겨보세요!
             </div>
             <!--        게시물 있을 때  -->
@@ -133,9 +134,18 @@
                         showError(text || '등록에 실패했습니다.');
                         return;
                     }
+                    <!--  비동기방식으로 게시글 작성 후에 "게시물이 없습니다" 안내문 삭제 (1)  -->
+                    const emptyMessage = document.getElementById("emptyMessage");
+
                     const saved = await res.json();
                     const card = renderPostCard(saved);
 
+                    <!--  비동기방식으로 게시글 작성 후에 "게시물이 없습니다" 안내문 삭제 (2)  -->
+                    if(emptyMessage){
+                        emptyMessage.remove();
+                    }
+
+                    <!--   새로 작성된 게시글 맨 위쪽으로 추가  -->
                     postList.prepend(card);
                     // 입력창 초기화
                     form.reset();

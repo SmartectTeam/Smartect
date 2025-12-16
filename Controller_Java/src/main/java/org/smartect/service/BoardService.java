@@ -42,7 +42,7 @@ public class BoardService {
     }
 
     public List<BoardDTO> findAll() {
-        // JPARepository 상속 -> JPQL 사용 (Entity)
+        // JPARepository 상속 -> JPQL 사용 (Entity) 최근순(생성일자 내림차순 정렬)
         List<BoardEntity> entityList = boardRepository.findAllByOrderByCreatedAtDesc();
         // Entity -> DTO 변환
         List<BoardDTO> dtoList = new ArrayList<>();
