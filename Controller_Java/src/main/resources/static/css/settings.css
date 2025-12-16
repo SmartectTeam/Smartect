@@ -1,0 +1,161 @@
+.safe-container {
+    width: 100%;
+    height: 85vh;
+    min-height: 600px;
+    background-color: #222;
+    color: #eee;
+    display: flex;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* 좌측 패널 */
+.left-panel {
+    width: 70%;
+    padding: 15px;
+    border-right: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    background-color: #151515;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+select {
+    padding: 8px;
+    font-size: 15px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+    width: 300px;
+}
+
+/* 영상 박스 */
+.video-box {
+    flex: 1;
+    width: 100%;
+    background-color: black;
+    border: 1px solid #444;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#live-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* 캔버스 (영상 위에 겹침) */
+#zone-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 평소엔 클릭 통과 */
+}
+
+/* 우측 패널 */
+.right-panel {
+    width: 30%;
+    background-color: #2a2a2a;
+    display: flex;
+    flex-direction: column;
+    min-width: 320px;
+}
+
+.tab-header {
+    display: flex;
+    background-color: #222;
+    border-bottom: 1px solid #444;
+}
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    color: #888;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: 0.2s;
+}
+.tab-btn:hover { background-color: #333; color: #ccc; }
+.tab-btn.active {
+    background-color: #2a2a2a;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+}
+
+.tab-body {
+    padding: 15px;
+    display: none;
+    overflow-y: auto;
+    flex: 1;
+}
+.tab-body.active { display: block; }
+
+.control-row {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #3c3c3c;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ddd;
+}
+
+input[type="range"] { width: 100%; cursor: pointer; accent-color: #007bff; }
+input[type="checkbox"] { transform: scale(1.2); cursor: pointer; accent-color: #007bff; }
+
+.disabled-opt { opacity: 0.5; }
+
+.btn-save {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: auto;
+}
+.btn-save:hover { background-color: #0056b3; }
+
+/* 그리기 모드 버튼 스타일 */
+.btn-draw {
+    background-color: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.btn-draw.active { background-color: #dc3545; border-color: #dc3545; }
+
+.status-txt { color: orange; font-weight: bold; font-size: 13px; }
+
+/* 그래프 바 */
+.bar-wrap { margin-bottom: 10px; }
+.bar-bg { background: #444; height: 10px; border-radius: 5px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s; }

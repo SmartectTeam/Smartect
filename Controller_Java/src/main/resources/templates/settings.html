@@ -1,425 +1,541 @@
+<!-- settings.html -->
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{fragments/base}" xmlns="http://www.w3.org/1999/html">
-    <head>
-        <!-- 페이지에 해당하는 css로 수정 -->
-<!--        <link rel="stylesheet" th:href="@{/css/dashboard.css}">-->
-        <title>AI CCTV 통합 관제 설정</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
-            /* --- 기본 레이아웃 --- */
-            body {
-                background-color: #1e1e1e;
-                color: #e0e0e0;
-                font-family: 'Noto Sans KR', sans-serif;
-                margin: 0;
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-            }
+      layout:decorate="~{fragments/base}">
+<head>
+    <title>CCTV 통합 관제</title>
+    <link rel="stylesheet" th:href="@{/css/settings.css}">
 
-            /* 상단 헤더 */
-            .header {
-                background-color: #2d2d2d;
-                padding: 15px 20px;
-                border-bottom: 1px solid #444;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
+</head>
 
-            /* 메인 컨테이너 (좌우 분할) */
-            .main-container {
-                display: flex;
-                flex: 1;
-                overflow: hidden; /* 스크롤 방지 */
-            }
+<div layout:fragment="content">
 
-            /* --- [좌측] 영상 모니터링 존 (70%) --- */
-            .video-zone {
-                flex: 7;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-                background-color: #000;
-                position: relative;
-                border-right: 1px solid #444;
-            }
+    <div class="safe-container">
 
-            .cam-selector {
-                margin-bottom: 15px;
-            }
-            .cam-selector select {
-                background: #333;
-                color: white;
-                padding: 10px;
-                font-size: 16px;
-                border: 1px solid #555;
-                border-radius: 5px;
-                width: 300px;
-            }
-
-            /* 영상 래퍼 (캔버스를 위에 겹치기 위함) */
-            .video-wrapper {
-                flex: 1;
-                position: relative;
-                border: 2px solid #444;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: #111;
-                overflow: hidden;
-            }
-
-            #live-image {
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-            }
-
-            /* 구역 그리기용 캔버스 (영상 위에 뜸) */
-            #zone-canvas {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                cursor: crosshair; /* 그리기 모드일 때 십자 커서 */
-                /* pointer-events: none;  평소엔 클릭 통과 (JS로 제어) */
-            }
-
-            /* --- [우측] 설정 컨트롤 패널 (30%) --- */
-            .control-zone {
-                flex: 3;
-                background-color: #252525;
-                display: flex;
-                flex-direction: column;
-                min-width: 350px;
-            }
-
-            /* 탭 메뉴 */
-            .tabs {
-                display: flex;
-                background-color: #333;
-            }
-            .tab-btn {
-                flex: 1;
-                padding: 15px;
-                background: none;
-                border: none;
-                color: #aaa;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: bold;
-                transition: 0.3s;
-                border-bottom: 3px solid transparent;
-            }
-            .tab-btn:hover { background-color: #3a3a3a; }
-            .tab-btn.active {
-                color: #fff;
-                border-bottom: 3px solid #007bff;
-                background-color: #2d2d2d;
-            }
-
-            /* 탭 내용 영역 */
-            .tab-content {
-                flex: 1;
-                padding: 20px;
-                overflow-y: auto;
-                display: none; /* 기본 숨김 */
-            }
-            .tab-content.active { display: block; }
-
-            /* 설정 그룹 스타일 */
-            .setting-group {
-                background: #333;
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-            }
-            .group-title {
-                font-size: 14px;
-                color: #888;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-                font-weight: bold;
-            }
-
-            /* 슬라이더 스타일 */
-            .slider-box { margin-bottom: 15px; }
-            .slider-label {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 5px;
-                font-size: 14px;
-            }
-            input[type="range"] { width: 100%; cursor: pointer; }
-
-            /* 스위치 (체크박스) */
-            .toggle-box {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 10px;
-                padding: 5px 0;
-            }
-            .toggle-box label { cursor: pointer; }
-
-            /* 비활성화 스타일 (화재 감지용) */
-            .disabled-opt { opacity: 0.5; pointer-events: none; }
-
-            /* AI 대시보드 그래프 (CSS Bar) */
-            .bar-chart {
-                margin-bottom: 10px;
-            }
-            .bar-label { font-size: 13px; margin-bottom: 3px; display: flex; justify-content: space-between;}
-            .bar-bg { background: #444; height: 20px; border-radius: 10px; overflow: hidden; }
-            .bar-fill { height: 100%; text-align: right; padding-right: 5px; font-size: 12px; line-height: 20px; color: white; transition: width 0.5s; }
-            .bg-green { background-color: #28a745; }
-            .bg-yellow { background-color: #ffc107; color: black; }
-            .bg-red { background-color: #dc3545; }
-
-            /* 하단 저장 버튼 */
-            .save-btn-area {
-                padding: 20px;
-                border-top: 1px solid #444;
-                background: #2d2d2d;
-            }
-            .btn-save {
-                width: 100%;
-                padding: 12px;
-                background-color: #007bff;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                font-size: 16px;
-                font-weight: bold;
-                cursor: pointer;
-            }
-            .btn-save:hover { background-color: #0056b3; }
-
-        </style>
-
-    </head>
-    <body>
-
-    <!-- 헤더 -->
-    <header class="header">
-        <div style="font-size: 1.2rem; font-weight: bold;">
-            <i class="fa-solid fa-gear"></i> AI CCTV 설정 관리자
-        </div>
-        <div>
-            <span style="color:#0f0; font-size: 0.9rem;">● 시스템 정상 가동 중</span>
-        </div>
-    </header>
-
-    <!-- 메인 레이아웃 -->
-    <div class="main-container">
-
-        <!-- [좌측] 영상 & 그리기 영역 -->
-        <section class="video-zone">
-            <div class="cam-selector">
-                <select id="camera-select">
-                    <option value="3" selected>CCTV-03 (복도) - WebCam</option>
-                    <option value="4">CCTV-04 (비상구) - File</option>
+        <!-- [LEFT] 영상 & 캔버스 -->
+        <div class="left-panel">
+            <div class="header-row">
+                <select id="cam-select">
+                    <option value="3" selected>CCTV-03 (실시간 웹캠)</option>
+                    <option value="4">CCTV-04 (파일 영상)</option>
                 </select>
+                <div id="status-msg" class="status-txt">연결 대기중...</div>
             </div>
 
-            <div class="video-wrapper">
-                <!-- 영상 이미지 -->
-                <img id="live-image" src="" alt="CCTV 화면 대기중...">
-
-                <!-- 그 위에 겹쳐지는 투명 캔버스 (구역 설정용) -->
+            <div class="video-box" id="video-container">
+                <img id="live-img" src="" alt="NO SIGNAL">
                 <canvas id="zone-canvas"></canvas>
-
-                <!-- (옵션) 안내 메시지 -->
-                <div id="draw-guide" style="position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); padding:5px 15px; border-radius:20px; font-size:14px; display:none;">
-                    마우스로 점을 찍어 구역을 그리세요 (우클릭 종료)
-                </div>
             </div>
-        </section>
 
-        <!-- [우측] 설정 컨트롤 패널 -->
-        <aside class="control-zone">
+            <!-- 그리기 안내 문구 (숨김 상태) -->
+            <div id="draw-guide" style="display:none; margin-top:10px; color:#aaa; font-size:13px; text-align:center;">
+                <i class="fa-solid fa-pen-nib"></i>
+                좌클릭: 점 추가 | 우클릭: 도형 완성 | <span style="color:#dc3545; cursor:pointer;" onclick="cancelDrawing()">[취소]</span>
+            </div>
+        </div>
 
-            <!-- 탭 버튼 -->
-            <div class="tabs">
-                <button class="tab-btn active" onclick="openTab('tab-sense')">감도 설정</button>
-                <button class="tab-btn" onclick="openTab('tab-zone')">구역 관리</button>
-                <button class="tab-btn" onclick="openTab('tab-dash')">AI 대시보드</button>
+        <!-- [RIGHT] 설정 패널 -->
+        <div class="right-panel">
+            <div class="tab-header">
+                <button class="tab-btn active" onclick="changeTab('tab1')">감도 설정</button>
+                <button class="tab-btn" onclick="changeTab('tab2')">구역 관리</button>
+                <!-- [수정] 3번: 보기 설정, 4번: AI 대시보드 -->
+                <button class="tab-btn" onclick="changeTab('tab3')">보기 설정</button>
+                <button class="tab-btn" onclick="changeTab('tab4')">AI 대시보드</button>
             </div>
 
             <!-- [TAB 1] 감도 설정 -->
-            <div id="tab-sense" class="tab-content active">
-
-                <!-- 기능 ON/OFF -->
-                <div class="setting-group">
-                    <div class="group-title">기능 활성화</div>
-
-                    <div class="toggle-box">
-                        <label>🤸 낙상 감지 (Fall)</label>
-                        <input type="checkbox" id="chk-fall" checked>
-                    </div>
-                    <div class="toggle-box">
-                        <label>🚧 구역 침입 감지 (Zone)</label>
-                        <input type="checkbox" id="chk-zone" checked>
-                    </div>
-                    <div class="toggle-box">
-                        <label>🧠 AI 행동 인식</label>
-                        <input type="checkbox" id="chk-ai" checked>
-                    </div>
-                    <!-- 화재 감지는 비활성화 -->
-                    <div class="toggle-box disabled-opt">
-                        <label>🔥 화재 감지 (시스템 전용)</label>
-                        <input type="checkbox" disabled>
-                    </div>
+            <div id="tab1" class="tab-body active">
+                <div class="control-row">
+                    <label><span>🤸 낙상 감지</span> <input type="checkbox" id="chk-fall" checked></label>
+                </div>
+                <div class="control-row">
+                    <label><span>🚧 구역 감지</span> <input type="checkbox" id="chk-zone" checked></label>
+                </div>
+                <div class="control-row">
+                    <label><span>🧠 AI 행동 인식</span> <input type="checkbox" id="chk-ai" checked></label>
+                </div>
+                <div class="control-row disabled-opt">
+                    <label><span>🔥 화재 감지 (미지원)</span> <input type="checkbox" disabled></label>
                 </div>
 
-                <!-- 민감도 슬라이더 -->
-                <div class="setting-group">
-                    <div class="group-title">알고리즘 민감도</div>
+                <!-- 슬라이더 목록 -->
+                <div class="control-row">
+                    <label>낙상 민감도: <span id="val-fall" style="color:#007bff">1.2</span></label>
+                    <input type="range" id="sl-fall" min="0.5" max="2.0" step="0.1" value="1.2"
+                           oninput="document.getElementById('val-fall').innerText=this.value">
+                </div>
 
-                    <!-- 낙상 비율 -->
-                    <div class="slider-box">
-                        <div class="slider-label">
-                            <span>낙상 비율 (가로/세로)</span>
-                            <span id="val-fall">1.2</span>
-                        </div>
-                        <input type="range" min="0.5" max="2.0" step="0.1" value="1.2" oninput="updateVal('val-fall', this.value)">
-                    </div>
+                <div class="control-row">
+                    <label>팔 뻗음 (Reach): <span id="val-reach" style="color:#007bff">0.85</span></label>
+                    <input type="range" id="sl-reach" min="0.5" max="1.0" step="0.05" value="0.85"
+                           oninput="document.getElementById('val-reach').innerText=this.value">
+                </div>
 
-                    <!-- 팔 뻗음 감지 (Reach) -->
-                    <div class="slider-box">
-                        <div class="slider-label">
-                            <span>팔 뻗음 임계값 (Reach)</span>
-                            <span id="val-reach">0.85</span>
-                        </div>
-                        <input type="range" min="0.5" max="1.0" step="0.05" value="0.85" oninput="updateVal('val-reach', this.value)">
-                    </div>
+                <div class="control-row">
+                    <label>손 높이 제한 (Hip Ratio): <span id="val-hip" style="color:#007bff">0.2</span></label>
+                    <input type="range" id="sl-hip" min="0.0" max="1.0" step="0.05" value="0.2"
+                           oninput="document.getElementById('val-hip').innerText=this.value">
+                </div>
 
-                    <!-- AI 임계값 -->
-                    <div class="slider-box">
-                        <div class="slider-label">
-                            <span>AI 신뢰도 (Threshold)</span>
-                            <span id="val-ai">0.7</span>
-                        </div>
-                        <input type="range" min="0.1" max="1.0" step="0.05" value="0.7" oninput="updateVal('val-ai', this.value)">
-                    </div>
+                <div class="control-row">
+                    <label>AI 신뢰도: <span id="val-ai" style="color:#007bff">0.7</span></label>
+                    <input type="range" id="sl-ai" min="0.1" max="1.0" step="0.05" value="0.7"
+                           oninput="document.getElementById('val-ai').innerText=this.value">
+                </div>
 
-                    <!-- 락 시간 -->
-                    <div class="slider-box">
-                        <div class="slider-label">
-                            <span>경고 유지 시간 (초)</span>
-                            <span id="val-lock">30</span>
-                        </div>
-                        <input type="range" min="1" max="60" step="1" value="30" oninput="updateVal('val-lock', this.value)">
-                    </div>
+                <div class="control-row">
+                    <label>경고 유지 (초): <span id="val-lock" style="color:#007bff">30</span></label>
+                    <input type="range" id="sl-lock" min="1" max="60" step="1" value="30"
+                           oninput="document.getElementById('val-lock').innerText=this.value">
                 </div>
             </div>
 
             <!-- [TAB 2] 구역 관리 -->
-            <div id="tab-zone" class="tab-content">
-                <div class="setting-group">
-                    <div class="group-title">위험 구역 설정</div>
-                    <button class="btn-save" style="background:#444; margin-bottom:15px;" onclick="toggleDrawMode()">
-                        ➕ 새 구역 그리기 (좌측 화면)
+            <div id="tab2" class="tab-body">
+                <div class="control-row">
+                    <label>구역 그리기</label>
+                    <button id="btn-draw-toggle" class="btn-draw" style="width:100%" onclick="toggleDrawingMode()">
+                        ✏️ 새 구역 그리기 시작
                     </button>
-
-                    <!-- 구역 목록 (예시) -->
-                    <div id="zone-list">
-                        <div style="background:#222; padding:10px; margin-bottom:5px; display:flex; justify-content:space-between;">
-                            <span>Zone #1 (위험)</span>
-                            <button style="background:red; border:none; color:white; cursor:pointer;">🗑️</button>
-                        </div>
-                    </div>
-                </div>
-                <div style="font-size:12px; color:#888;">
-                    * [새 구역 그리기]를 누르고 왼쪽 화면에서 점을 찍어 다각형을 만드세요.
-                </div>
-            </div>
-
-            <!-- [TAB 3] AI 대시보드 -->
-            <div id="tab-dash" class="tab-content">
-                <div class="setting-group">
-                    <div class="group-title">실시간 분석 스코어</div>
-
-                    <!-- Safe -->
-                    <div class="bar-chart">
-                        <div class="bar-label"><span>Safe (안전)</span> <span>85%</span></div>
-                        <div class="bar-bg"><div class="bar-fill bg-green" style="width: 85%;"></div></div>
-                    </div>
-
-                    <!-- Move -->
-                    <div class="bar-chart">
-                        <div class="bar-label"><span>Move (이동)</span> <span>10%</span></div>
-                        <div class="bar-bg"><div class="bar-fill bg-yellow" style="width: 10%;"></div></div>
-                    </div>
-
-                    <!-- Threat -->
-                    <div class="bar-chart">
-                        <div class="bar-label"><span>Threat (위협)</span> <span>5%</span></div>
-                        <div class="bar-bg"><div class="bar-fill bg-red" style="width: 5%;"></div></div>
-                    </div>
                 </div>
 
-                <div class="setting-group">
-                    <div class="group-title">최근 이벤트</div>
-                    <div style="font-size:13px; color:#aaa;">
-                        [14:20:01] CCTV-03 낙상 감지<br>
-                        [14:18:55] CCTV-04 구역 침입
-                    </div>
+                <div class="control-row">
+                    <label>등록된 구역 목록</label>
+                    <ul id="zone-list-ui" style="list-style:none; padding:0; margin:0; font-size:13px; color:#aaa;">
+                        <li style="padding:10px; background:#333; border-radius:4px;">(저장된 구역 없음)</li>
+                    </ul>
+                    <button class="btn-draw" style="width:100%; margin-top:5px; background:#dc3545;" onclick="clearZones()">
+                        🗑️ 전체 삭제
+                    </button>
                 </div>
             </div>
 
-            <!-- 하단 저장 버튼 -->
-            <div class="save-btn-area">
-                <button class="btn-save" onclick="saveSettings()">설정 저장 및 적용</button>
+            <!-- [TAB 3] 보기 설정 -->
+            <div id="tab3" class="tab-body">
+                <div class="group-box">
+                    <div class="group-title" style="color:#888; font-size:12px; margin-bottom:10px;">화면 표시 옵션</div>
+                    <div class="control-row"><label><span>🚨 위험 시에만 표시</span> <input type="checkbox" id="vis-alert"></label></div>
+                    <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;">
+                    <div class="control-row"><label><span>🔲 객체 박스</span> <input type="checkbox" id="vis-bbox" checked></label></div>
+                    <div class="control-row"><label><span>💀 관절 뼈대</span> <input type="checkbox" id="vis-skeleton" checked></label></div>
+                    <div class="control-row"><label><span>🏷️ 상태 텍스트</span> <input type="checkbox" id="vis-text" checked></label></div>
+                </div>
             </div>
-        </aside>
 
+            <!-- [TAB 4] AI 대시보드 -->
+            <div id="tab4" class="tab-body">
+                <h4 style="margin-top:0;">실시간 분석 상태</h4>
+
+                <div class="bar-wrap">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;">
+                        <span>Safe (안전)</span> <span>80%</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width:80%; background:#28a745;"></div>
+                    </div>
+                </div>
+
+                <div class="bar-wrap">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;">
+                        <span>Threat (위협)</span> <span>10%</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width:10%; background:#dc3545;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-save" onclick="saveSettings()">설정 저장 및 적용</button>
+        </div>
     </div>
 
-    <!-- UI 동작 스크립트 -->
+    <!-- 자바스크립트 로직 -->
     <script>
-        // 탭 전환 함수
-        function openTab(tabId) {
-            // 모든 탭 내용 숨김
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            // 모든 탭 버튼 비활성
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        // ==========================================
+        // [1] 전역 변수
+        // ==========================================
+        const WS_URL = `ws://${window.location.hostname}:8000/ws/output`;
+        const API_URL = "http://localhost:8000";
 
-            // 선택된 탭 활성화
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-        }
+        let socket;
 
-        // 슬라이더 값 표시 업데이트
-        function updateVal(spanId, value) {
-            document.getElementById(spanId).innerText = value;
-        }
+        const imgElement = document.getElementById("live-img");
+        const canvas = document.getElementById("zone-canvas");
+        const ctx = canvas.getContext("2d");
+        const statusMsg = document.getElementById("status-msg");
+        const selectBox = document.getElementById("cam-select");
+        const zoneListUI = document.getElementById("zone-list-ui");
 
-        // 구역 그리기 모드 토글 (기능 예시)
-        function toggleDrawMode() {
-            const guide = document.getElementById('draw-guide');
-            const canvas = document.getElementById('zone-canvas');
+        let selectedCam = 3;
 
-            if (guide.style.display === 'none') {
-                guide.style.display = 'block';
-                canvas.style.pointerEvents = 'auto'; // 클릭 가능하게
-                alert("왼쪽 화면에서 구역을 그려주세요.");
+        // 그리기 관련 변수
+        let isDrawingMode = false;
+        let currentPoints = []; // 현재 찍고 있는 점들
+        let savedZones = [];    // 저장된 구역들 (0.0~1.0 비율 좌표)
+
+        // 뼈대 정보
+        const SKELETON_PAIRS = [
+            [5, 7], [7, 9], [6, 8], [8, 10],
+            [11, 13], [13, 15], [12, 14], [14, 16],
+            [5, 6], [11, 12], [5, 11], [6, 12]
+        ];
+
+        // ==========================================
+        // [2] 구역 그리기 로직 (핵심)
+        // ==========================================
+        function toggleDrawingMode() {
+            isDrawingMode = !isDrawingMode;
+            const btn = document.getElementById("btn-draw-toggle");
+            const guide = document.getElementById("draw-guide");
+
+            if (isDrawingMode) {
+                btn.innerText = "🛑 그리기 종료 (우클릭 완성)";
+                btn.classList.add("active");
+                guide.style.display = "block";
+                canvas.style.pointerEvents = "auto";
+                currentPoints = [];
             } else {
-                guide.style.display = 'none';
-                canvas.style.pointerEvents = 'none'; // 클릭 불가
+                cancelDrawing();
             }
         }
 
-        // 저장 버튼 (나중에 Java 서버와 연동)
-        function saveSettings() {
-            // 여기에 JSON 데이터 생성 로직이 들어감
-            alert("설정이 저장되었습니다. (서버 전송 준비)");
-        }
-    </script>
+        function cancelDrawing() {
+            isDrawingMode = false;
+            currentPoints = [];
+            const btn = document.getElementById("btn-draw-toggle");
+            const guide = document.getElementById("draw-guide");
 
-    </body>
+            btn.innerText = "✏️ 새 구역 그리기 시작";
+            btn.classList.remove("active");
+            guide.style.display = "none";
+            canvas.style.pointerEvents = "none";
+        }
+
+        function clearZones() {
+            if(confirm("모든 구역을 삭제할까요?")) {
+                savedZones = [];
+                updateZoneList();
+            }
+        }
+
+        function updateZoneList() {
+            if (savedZones.length === 0) {
+                zoneListUI.innerHTML = '<li style="padding:10px; background:#333; border-radius:4px;">(저장된 구역 없음)</li>';
+                return;
+            }
+            let html = "";
+            savedZones.forEach((zone, idx) => {
+                html += `<li style="padding:10px; background:#333; margin-bottom:5px; border-radius:4px; display:flex; justify-content:space-between;">
+                            <span>Zone #${idx + 1}</span>
+                            <span style="color:red; cursor:pointer;" onclick="removeZone(${idx})">🗑️</span>
+                         </li>`;
+            });
+            zoneListUI.innerHTML = html;
+        }
+
+        window.removeZone = function(idx) {
+            savedZones.splice(idx, 1);
+            updateZoneList();
+        }
+
+        // 캔버스 이벤트 리스너 (그리기)
+        canvas.addEventListener("mousedown", (e) => {
+            if (!isDrawingMode) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // 좌클릭: 점 추가
+            if (e.button === 0) {
+                currentPoints.push({x, y});
+            }
+            // 우클릭: 도형 완성
+            else if (e.button === 2) {
+                e.preventDefault();
+                if (currentPoints.length < 3) {
+                    alert("최소 3개 이상의 점이 필요합니다.");
+                    return;
+                }
+                const width = canvas.width;
+                const height = canvas.height;
+                const normalizedPoints = currentPoints.map(p => [p.x / width, p.y / height]);
+
+                savedZones.push({
+                    active: true,
+                    points: normalizedPoints
+                });
+
+                updateZoneList();
+                cancelDrawing();
+            }
+        });
+
+        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+        // ==========================================
+        // [3] 그리기 및 렌더링 함수 (통합)
+        // ==========================================
+        function drawOverlays(objects) {
+            if (imgElement.naturalWidth === 0) return;
+
+            const rect = imgElement.getBoundingClientRect();
+
+            if (canvas.width !== rect.width || canvas.height !== rect.height){
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+
+            const scaleX = canvas.width / imgElement.naturalWidth;
+            const scaleY = canvas.height / imgElement.naturalHeight;
+
+            // 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. [사용자 구역 그리기] (노란색)
+            ctx.lineWidth = 3;
+            savedZones.forEach(zone => {
+                if (!zone.points || zone.points.length === 0) return;
+                ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+                ctx.fillStyle = "rgba(255, 255, 0, 0.2)";
+                ctx.beginPath();
+                const pts = zone.points;
+                ctx.moveTo(pts[0][0] * canvas.width, pts[0][1] * canvas.height);
+                for(let i=1; i<pts.length; i++) {
+                    ctx.lineTo(pts[i][0] * canvas.width, pts[i][1] * canvas.height);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            });
+
+            // 2. [현재 그리는 선] (빨간색)
+            if (isDrawingMode && currentPoints.length > 0) {
+                ctx.strokeStyle = "red";
+                ctx.beginPath();
+                ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
+                for(let i=1; i<currentPoints.length; i++) {
+                    ctx.lineTo(currentPoints[i].x, currentPoints[i].y);
+                }
+                ctx.stroke();
+
+                ctx.fillStyle = "red";
+                currentPoints.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                    ctx.fill();
+                });
+            }
+
+            // 그리기 모드일 때는 AI 박스 숨김 (방해 방지)
+            if (isDrawingMode) return;
+
+            // 3. [AI 결과 그리기]
+            if (!objects) return;
+
+            const showAlertOnly = document.getElementById('vis-alert').checked;
+            const showBBox = document.getElementById('vis-bbox').checked;
+            const showSkel = document.getElementById('vis-skeleton').checked;
+            const showText = document.getElementById('vis-text').checked;
+
+            objects.forEach(obj => {
+                if (showAlertOnly && obj.status === 'Safe') return;
+
+                let color = '#00ff00';
+                if (obj.status.includes('THREAT') || obj.status.includes('FALL')) color = '#ff00ff';
+                else if (obj.status.includes('WARNING')) color = '#00ffff';
+
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 2;
+
+                if (showBBox) {
+                    const [x1, y1, x2, y2] = obj.box;
+                    ctx.strokeRect(x1 * scaleX, y1 * scaleY, (x2 - x1) * scaleX, (y2 - y1) * scaleY);
+                }
+
+                if (showSkel && obj.keypoints) {
+                    SKELETON_PAIRS.forEach(([i, j]) => {
+                        const kp1 = obj.keypoints[i];
+                        const kp2 = obj.keypoints[j];
+                        if (kp1[0] > 0 && kp2[0] > 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(kp1[0] * scaleX, kp1[1] * scaleY);
+                            ctx.lineTo(kp2[0] * scaleX, kp2[1] * scaleY);
+                            ctx.stroke();
+                        }
+                    });
+                }
+
+                if (showText) {
+                    const [x1, y1] = obj.box;
+                    ctx.font = "bold 14px Arial";
+                    ctx.fillText(`${obj.label} (${obj.status})`, x1 * scaleX, (y1 * scaleY) - 5);
+                }
+            });
+        }
+
+        // ==========================================
+        // [4] 기본 UI 동작
+        // ==========================================
+        function changeTab(tabId) {
+            document.querySelectorAll('.tab-body').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        function saveSettings() {
+            // 1. 현재 화면의 설정값 읽어오기
+            const settingsData = {
+                "cam_id": selectedCam,
+                "fall_check": document.getElementById('chk-fall').checked,
+                "zone_check": document.getElementById('chk-zone').checked,
+                "ai_check": document.getElementById('chk-ai').checked, // 여기가 핵심
+                "fall_ratio": parseFloat(document.getElementById('sl-fall').value),
+                "ai_threshold": parseFloat(document.getElementById('sl-ai').value),
+                "lock_duration": parseInt(document.getElementById('sl-lock').value),
+                // 구역 데이터 포함
+                "zones": savedZones.map(z => z.points)
+            };
+
+            fetch(`${API_URL}/settings/update`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json',},
+                body: JSON.stringify(settingsData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert("설정이 저장되었습니다.");
+                    loadSettings(); // 저장 후 다시 불러옴
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert("저장 실패");
+                });
+        }
+        // ==========================================
+        // [수정됨] 설정 불러오기 및 이벤트 통합
+        // ==========================================
+
+        // 1. 서버에서 설정값 가져오기 함수
+        function loadSettings() {
+            fetch(`${API_URL}/settings/get?cam_id=${selectedCam}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log(`[CAM ${selectedCam}] 설정 로드 성공:`, data);
+
+                    // (1) 구역 데이터 복원
+                    if (data.zones) {
+                        savedZones = data.zones.map(points => ({
+                            active: true,
+                            points: points
+                        }));
+                        updateZoneList(); // 리스트 UI 갱신
+                    }
+
+                    // (2) 체크박스 상태 동기화
+                    if (data.fall_check !== undefined) document.getElementById('chk-fall').checked = data.fall_check;
+                    if (data.zone_check !== undefined) document.getElementById('chk-zone').checked = data.zone_check;
+                    if (data.ai_check !== undefined) document.getElementById('chk-ai').checked = data.ai_check;
+
+                    // (3) 슬라이더 값 및 텍스트 동기화
+                    if (data.fall_ratio !== undefined) {
+                        document.getElementById('sl-fall').value = data.fall_ratio;
+                        document.getElementById('val-fall').innerText = data.fall_ratio;
+                    }
+                    if (data.ai_threshold !== undefined) {
+                        document.getElementById('sl-ai').value = data.ai_threshold;
+                        document.getElementById('val-ai').innerText = data.ai_threshold;
+                    }
+                    if (data.lock_duration !== undefined) {
+                        document.getElementById('sl-lock').value = data.lock_duration;
+                        document.getElementById('val-lock').innerText = data.lock_duration;
+                    }
+                    // 필요 시 나머지 슬라이더도 동일하게 추가...
+                })
+                .catch(err => {
+                    console.error("설정 로드 실패 (API 확인 필요):", err);
+                });
+        }
+
+        // 2. 카메라 변경 이벤트 (초기화 + 로드 통합)
+        selectBox.addEventListener("change", function() {
+            selectedCam = parseInt(this.value);
+            imgElement.src = "";
+
+            // 캔버스 & 데이터 비우기 (UI 초기화)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            savedZones = [];
+            updateZoneList();
+
+            statusMsg.innerText = `CCTV-${selectedCam}번 연결 중...`;
+            statusMsg.style.color = "orange";
+
+            // 새로운 카메라의 설정 불러오기
+            loadSettings();
+        });
+
+        // ==========================================
+        // [5] 통신 로직
+        // ==========================================
+        function connect() {
+            socket = new WebSocket(WS_URL);
+            socket.binaryType = "arraybuffer"; // [중요] 바이너리 받을 준비
+
+            socket.onopen = function() {
+                console.log("✅ 웹소켓(바이너리) 연결됨");
+                statusMsg.innerText = `● LIVE (CAM ${selectedCam})`;
+                statusMsg.style.color = "#0f0";
+            };
+
+            // 데이터를 저장해둘 변수
+            let lastActionInfo = null;
+
+            socket.onmessage = function(event) {
+                // 1. 텍스트 데이터 (JSON) 도착 -> 정보만 갱신
+                if (typeof event.data === "string") {
+                    try {
+                        const data = JSON.parse(event.data);
+                        // 파이어 라우터에서 보낸 구조에 맞춤
+                        if (data.action_info) {
+                            lastActionInfo = data.action_info;
+                        }
+                    } catch (e) { console.error(e); }
+                }
+                // 2. 바이너리 데이터 (이미지) 도착 -> 그리기 수행
+                else if (event.data instanceof ArrayBuffer) {
+                    // (1) 이미지 그리기
+                    const blob = new Blob([event.data], { type: "image/jpeg" });
+                    const url = URL.createObjectURL(blob);
+
+                    // 이전 이미지 URL 메모리 해제 (메모리 누수 방지)
+                    if (imgElement.src) URL.revokeObjectURL(imgElement.src);
+                    imgElement.src = url;
+
+                    // (2) 아까 받은 정보(JSON)가 내 카메라 번호랑 맞으면 박스 그리기
+                    if (lastActionInfo && lastActionInfo.cam_no == selectedCam) {
+                        drawOverlays(lastActionInfo.objects);
+                        statusMsg.innerText = `● LIVE (CAM ${selectedCam})`;
+                        statusMsg.style.color = "#0f0";
+                    }
+                }
+            };
+
+            socket.onclose = function() {
+                statusMsg.innerText = "● OFF (재접속...)";
+                statusMsg.style.color = "red";
+                setTimeout(connect, 3000);
+            };
+        }
+
+        // ==========================================
+        // [6] 페이지 초기 실행
+        // ==========================================
+        loadSettings(); // 1. 초기 설정 로드
+        connect();      // 2. 웹소켓 연결
+    </script>
+</div>
 </html>

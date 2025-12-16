@@ -1,31 +1,26 @@
 # 웹소캣을 통한 데이터 전송
 
+import cv2
+import asyncio
+import websockets
+from common.config import PCPath
+from  fastapi import APIRouter
+
+# 웹소캣을 통한 데이터 전송
 import sys
 import os
-
-# from apps.action_router.main import root_dir
-
-# 경로설정
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-# from apps.action_router.camera import phone_connect, snap_cam_connect, camera_disconnect, cam_connect
-import cv2
-import asyncio
-import websockets
-import json
-from common.config import PCPath
-from apps.action_router.detector import MotionDetector
-
-
 '''
+
 # 원본 코드
 async def camera_post_video(pc_id, cam_id):
     pc2 = PCPath(pc_id)
     url = f"ws://{pc2.PC_IP}:8000/ws/input"
-    
+
     Md = MotionDetector(settings_path=None)
 
     # cap = phone_connect(cam_id)
@@ -62,6 +57,7 @@ async def camera_post_video(pc_id, cam_id):
                 camera_disconnect(cap)
                 break
 '''
+
 # 인자 4개 받도록 변경
 async def camera_post_video(source, detector, pc_id, cam_id):
     pc = PCPath(pc_id)
@@ -98,3 +94,12 @@ async def camera_post_video(source, detector, pc_id, cam_id):
 
     finally:
         source.release()
+
+
+router = APIRouter()
+
+
+
+
+
+
