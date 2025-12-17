@@ -65,7 +65,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 2">
+                            <img id="live-image-2" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status">AI 분석 중...</span>
@@ -81,7 +82,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 3">
+                            <img id="live-image-3" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-3" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status">AI 분석 중...</span>
@@ -97,11 +99,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 4">
-                            <div class="bounding-box"
-                                 style="top: 60%; left: 45%; width: 25%; height: 30%;">
-                                <span class="box-label">물체 이동</span>
-                            </div>
+                            <img id="live-image-4" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status text-cyan">물체 이동 감지</span>
@@ -170,114 +169,657 @@
 
     <!-- WebSocket 스크립트 -->
     <script>
-        const socket = new WebSocket("ws://localhost:8000/ws/video");
-        const imgElement = document.getElementById("live-image");
-        const canvas = document.getElementById("detection-canvas");
-        const ctx = canvas.getContext("2d");
-        let lastJsonData = null;
-        socket.binaryType = "blob";
+        // CCTV-01 WebSocket 연결
+        const socket1 = new WebSocket("ws://localhost:8080/ws/video");
+        const imgElement1 = document.getElementById("live-image");
+        const canvas1 = document.getElementById("detection-canvas");
+        const ctx1 = canvas1.getContext("2d");
+        let lastJsonData1 = null;
+        socket1.binaryType = "blob";
 
-        socket.onopen = function () {
-            console.log("Java 서버 접속");
+        // CCTV-02 WebSocket 연결
+        const socket2 = new WebSocket("ws://localhost:8080/ws/video");
+        const imgElement2 = document.getElementById("live-image-2");
+        const canvas2 = document.getElementById("detection-canvas-2");
+        const ctx2 = canvas2.getContext("2d");
+        let lastJsonData2 = null;
+        socket2.binaryType = "blob";
+
+        // CCTV-03 WebSocket 연결
+        const socket3 = new WebSocket("ws://localhost:8080/ws/video");
+        const imgElement3 = document.getElementById("live-image-3");
+        const canvas3 = document.getElementById("detection-canvas-3");
+        const ctx3 = canvas1.getContext("2d");
+        let lastJsonData3 = null;
+        socket1.binaryType = "blob";
+
+        // CCTV-04 WebSocket 연결
+        const socket4 = new WebSocket("ws://localhost:8080/ws/video");
+        const imgElement4 = document.getElementById("live-image-4");
+        const canvas4 = document.getElementById("detection-canvas-4");
+        const ctx4 = canvas2.getContext("2d");
+        let lastJsonData4 = null;
+        socket2.binaryType = "blob";
+
+        // 알림 시스템 변수
+        const alertListContainer = document.getElementById("alert-list-container");
+        const detectionLogContainer = document.getElementById("detection-log-container");
+        const detectionStartTimes = {}; // { "CCTV-02_fire": timestamp, "CCTV-02_smoke": timestamp }
+        const activeAlerts = new Map(); // Map<"CCTV-02_fire", alertElement>
+        const ALERT_DURATION_THRESHOLD = 5000; // 5초 (밀리초)
+        const MAX_ALERTS = 7; // 최대 알림 개수
+        const MAX_DETECTION_LOGS = 30; // 탐지 로그 최대 개수
+
+        // 시간 포맷팅 함수
+        function formatTime(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const seconds = date.getSeconds();
+            const ampm = hours >= 12 ? '오후' : '오전';
+            const displayHours = hours % 12 || 12;
+            return `${ampm} ${displayHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // 알림 카드 생성 함수
+        function createAlertCard(cctvName, detectionType, timeString) {
+            const alertCard = document.createElement("div");
+            const isFire = detectionType === "fire";
+            const alertClass = isFire ? "warning" : "warning";
+            const iconClass = isFire ? "fa-solid fa-fire" : "fa-solid fa-smog";
+            const alertText = isFire ? "화재 감지" : "연기 감지";
+
+            alertCard.className = `alert-card ${alertClass}`;
+            alertCard.innerHTML = `
+                <div class="alert-header">
+                    <i class="${iconClass}"></i> ${alertText}
+                </div>
+                <div class="alert-info">
+                    <span class="badge">${cctvName}</span>
+                    <span class="time">${timeString}</span>
+                </div>
+            `;
+
+            return alertCard;
+        }
+
+        // 탐지 로그 카드 생성 함수
+        function createDetectionLogCard(cctvName, box, timeString) {
+            const logCard = document.createElement("div");
+            const boxClass = box.class || box.event_type || "unknown";
+            const isFire = boxClass === "fire";
+            const iconClass = isFire ? "fa-solid fa-fire" : "fa-solid fa-smog";
+            const titleText = isFire ? "화재 탐지" : (boxClass === "smoke" ? "연기 탐지" : "객체 탐지");
+            const confidenceText = typeof box.confidence === "number" ? `신뢰도: ${(box.confidence * 100).toFixed(0)}%` : "";
+
+            logCard.className = "alert-card detection-log-card";
+            logCard.innerHTML = `
+                <div class="alert-header">
+                    <i class="${iconClass}"></i> ${titleText}
+                </div>
+                <div class="alert-info">
+                    <span class="badge">${cctvName}</span>
+                    <span class="time">${timeString}</span>
+                </div>
+                <div class="alert-info">
+                    <span class="badge">${boxClass}</span>
+                    <span class="time">${confidenceText}</span>
+                </div>
+            `;
+
+            return logCard;
+        }
+
+        // 알림 추가 함수
+        function addAlert(cctvName, detectionType) {
+            const alertKey = `${cctvName}_${detectionType}`;
+
+            // 이미 알림이 있으면 시간 갱신하고 맨 위로 이동
+            if (activeAlerts.has(alertKey)) {
+                const existingAlert = activeAlerts.get(alertKey);
+                const timeElement = existingAlert.querySelector(".time");
+                if (timeElement) {
+                    timeElement.textContent = formatTime(new Date());
+                }
+                // 알림을 맨 위로 이동 (최신순 유지)
+                alertListContainer.insertBefore(existingAlert, alertListContainer.firstChild);
+                return;
+            }
+
+            // 새 알림 생성
+            const timeString = formatTime(new Date());
+            const alertCard = createAlertCard(cctvName, detectionType, timeString);
+
+            // 알림 리스트에 추가 (맨 위에 - 최신순)
+            alertListContainer.insertBefore(alertCard, alertListContainer.firstChild);
+            activeAlerts.set(alertKey, alertCard);
+
+            // 최대 알림 개수 초과 시 오래된 알림 제거 (맨 아래부터)
+            while (alertListContainer.children.length > MAX_ALERTS) {
+                const lastChild = alertListContainer.lastChild;
+                const lastAlertKey = Array.from(activeAlerts.entries())
+                    .find(([key, element]) => element === lastChild)?.[0];
+                if (lastAlertKey) {
+                    activeAlerts.delete(lastAlertKey);
+                }
+                alertListContainer.removeChild(lastChild);
+            }
+
+            // 알림 개수 업데이트
+            updateAlertCount();
+        }
+
+        // 알림 제거 함수
+        function removeAlert(cctvName, detectionType) {
+            const alertKey = `${cctvName}_${detectionType}`;
+            if (activeAlerts.has(alertKey)) {
+                const alertElement = activeAlerts.get(alertKey);
+                alertListContainer.removeChild(alertElement);
+                activeAlerts.delete(alertKey);
+                updateAlertCount();
+            }
+        }
+
+        // 알림 개수 업데이트
+        function updateAlertCount() {
+            const count = activeAlerts.size;
+            const subLabel = document.querySelector(".alert-section .sub-label");
+            if (subLabel) {
+                subLabel.textContent = `고위험 알람 (${count})`;
+            }
+        }
+
+        // 탐지 로그 추가 함수
+        function addDetectionLog(cctvName, fireMap) {
+            if (!detectionLogContainer || !Array.isArray(fireMap)) return;
+
+            const timeString = formatTime(new Date());
+
+            fireMap.forEach(box => {
+                const logCard = createDetectionLogCard(cctvName, box, timeString);
+                // 로그를 맨 위에 추가 (최신순)
+                detectionLogContainer.insertBefore(logCard, detectionLogContainer.firstChild);
+            });
+
+            // 최대 개수 초과 시 오래된 로그 제거
+            while (detectionLogContainer.children.length > MAX_DETECTION_LOGS) {
+                detectionLogContainer.removeChild(detectionLogContainer.lastChild);
+            }
+        }
+
+        // 감지 상태 확인 및 알림 처리
+        function checkAndProcessAlerts(jsonData, cctvName) {
+            if (!jsonData || !jsonData.fire_json || !Array.isArray(jsonData.fire_json)) {
+                return;
+            }
+
+            // fire_map 찾기
+            let fireMap = null;
+            for (let i = 0; i < jsonData.fire_map.length; i++) {
+                const item = jsonData.fire_map[i];
+                if (Array.isArray(item) && item.length > 0) {
+                    if (item && typeof item === 'object') {
+                        if ('x1' in item || 'y1' in item || 'x2' in item || 'y2' in item || 'class' in item) {
+                            fireMap = item;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!fireMap || fireMap.length === 0) {
+                // 감지가 없으면 시작 시간만 초기화 (알림은 제거하지 않음)
+                const fireKey = `${cctvName}_fire`;
+                const smokeKey = `${cctvName}_smoke`;
+                if (detectionStartTimes[fireKey]) {
+                    delete detectionStartTimes[fireKey];
+                }
+                if (detectionStartTimes[smokeKey]) {
+                    delete detectionStartTimes[smokeKey];
+                }
+                return;
+            }
+
+            // 감지된 타입 확인
+            const detectedTypes = new Set();
+            fireMap.forEach(box => {
+                const boxClass = box.class || box.event_type;
+                if (boxClass === "fire" || boxClass === "smoke") {
+                    detectedTypes.add(boxClass);
+                }
+            });
+
+            const now = Date.now();
+
+            // 각 감지 타입별로 처리
+            ["fire", "smoke"].forEach(detectionType => {
+                const alertKey = `${cctvName}_${detectionType}`;
+
+                if (detectedTypes.has(detectionType)) {
+                    // 감지가 있으면 시작 시간 기록 또는 확인
+                    if (!detectionStartTimes[alertKey]) {
+                        detectionStartTimes[alertKey] = now;
+                    } else {
+                        // 감지가 지속되고 있는 경우
+                        const duration = now - detectionStartTimes[alertKey];
+                        if (duration >= ALERT_DURATION_THRESHOLD) {
+                            // 5초 이상 지속되면 알림 추가 (또는 시간 업데이트 및 맨 위로 이동)
+                            addAlert(cctvName, detectionType);
+                        }
+                    }
+                } else {
+                    // 감지가 없으면 시작 시간만 초기화 (알림은 제거하지 않음)
+                    if (detectionStartTimes[alertKey]) {
+                        delete detectionStartTimes[alertKey];
+                    }
+                }
+            });
+
+            // 탐지 로그 추가 (감지가 있는 경우 매 프레임 기록)
+            addDetectionLog(cctvName, fireMap);
+        }
+
+        socket1.onopen = function () {
+            console.log("CCTV-01 Java 서버 접속");
         };
 
-        // 이미지 로드 후 Canvas 크기 조정 및 박스 그리기
-        function drawBoundingBoxes(jsonData) {
-            if (!jsonData || !jsonData.fire_info) return;
-            
-            const fireInfo = jsonData.fire_info;
-            if (!fireInfo || !Array.isArray(fireInfo) || fireInfo.length < 1) return;
-            
-            const fireMap = fireInfo[0]; // fire_map은 첫 번째 요소
-            if (!Array.isArray(fireMap)) return;
-            
+        socket2.onopen = function () {
+            console.log("CCTV-02 Java 서버 접속");
+        };
+
+        socket3.onopen = function () {
+            console.log("CCTV-03 Java 서버 접속");
+        };
+
+        socket4.onopen = function () {
+            console.log("CCTV-04 Java 서버 접속");
+        };
+
+        // 이미지 로드 후 Canvas 크기 조정 및 박스 그리기 (CCTV-01용 - 기존 함수 유지)
+        function drawBoundingBoxes(jsonData, imgElement, canvas, ctx) {
+            console.log("drawBoundingBoxes 호출:", jsonData);
+            if (!jsonData || !jsonData.fire_json) {
+                console.log("drawBoundingBoxes: jsonData 또는 fire_info 없음");
+                return;
+            }
+
+            const fireJson = jsonData.fire_json;
+            if (!fireJson || !Array.isArray(fireJson) || fireJson.length < 1) {
+                console.log("drawBoundingBoxes: fireInfo 유효하지 않음");
+                return;
+            }
+
+            const fireMap = jsonData.fire_map
+            console.log("drawBoundingBoxes: fireMap", fireMap);
+            if (!Array.isArray(fireMap)) {
+                console.log("drawBoundingBoxes: fireMap이 배열이 아님");
+                return;
+            }
+
+            if (fireMap.length === 0) {
+                console.log("drawBoundingBoxes: fireMap이 비어있음");
+                return;
+            }
+
+            console.log("drawBoundingBoxes: 박스 그리기 시작, 개수:", fireMap.length);
+
             // Canvas 크기를 이미지에 맞춤
             canvas.width = imgElement.offsetWidth;
             canvas.height = imgElement.offsetHeight;
-            
+
             // 이전 그리기 지우기
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // 이미지 실제 크기와 표시 크기 비율 계산
             const scaleX = canvas.width / imgElement.naturalWidth;
             const scaleY = canvas.height / imgElement.naturalHeight;
-            
+
             // 각 바운딩 박스 그리기
             fireMap.forEach(box => {
                 if (!box.x1 && box.x1 !== 0) return; // 유효한 박스인지 확인
-                
+
                 const x1 = box.x1 * scaleX;
                 const y1 = box.y1 * scaleY;
                 const x2 = box.x2 * scaleX;
                 const y2 = box.y2 * scaleY;
                 const width = x2 - x1;
                 const height = y2 - y1;
-                
+
                 // 클래스에 따라 색상 결정
                 const isFire = box.class === "fire";
                 const color = isFire ? "#FF0000" : "#FF8C00"; // fire: 빨강, smoke: 주황
-                
+
                 // 박스 그리기
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 3;
                 ctx.strokeRect(x1, y1, width, height);
-                
+
                 // 라벨 배경
                 const label = box.class;
                 ctx.font = "bold 14px Arial";
                 const textMetrics = ctx.measureText(label);
                 const labelWidth = textMetrics.width + 10;
                 const labelHeight = 20;
-                
+
                 ctx.fillStyle = color;
                 ctx.fillRect(x1, y1 - labelHeight, labelWidth, labelHeight);
-                
+
                 // 라벨 텍스트
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillText(label, x1 + 5, y1 - 5);
             });
         }
 
-        socket.onmessage = function (event) {
+        // 이미지 로드 후 Canvas 크기 조정 및 박스 그리기 (CCTV-02 전용)
+        function drawBoundingBoxesCCTV2(jsonData, imgElement, canvas, ctx) {
+            console.log("drawBoundingBoxesCCTV2 호출:", jsonData);
+
+            // 이미지가 로드되지 않았으면 대기
+            if (!imgElement.complete || imgElement.naturalWidth === 0 || imgElement.naturalHeight === 0) {
+                console.log("drawBoundingBoxesCCTV2: 이미지가 아직 로드되지 않음");
+                return;
+            }
+
+            if (!jsonData || !jsonData.fire_json) {
+                console.log("drawBoundingBoxesCCTV2: jsonData 또는 fire_info 없음");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            const fireJson = jsonData.fire_json;
+            if (!fireJson || !Array.isArray(fireJson) || fireJson.length < 1) {
+                console.log("drawBoundingBoxesCCTV2: fireInfo 유효하지 않음");
+                if (canvas.width > 0 && canvas.height > 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                return;
+            }
+
+            let fireMap = null;
+
+            fireMap = jsonData.fire_map
+
+            console.log("drawBoundingBoxesCCTV2: fireMap", fireMap, "타입:", typeof fireMap, "isArray:", Array.isArray(fireMap));
+            console.log("drawBoundingBoxesCCTV2: fireMap 전체:", JSON.stringify(fireMap));
+
+            if (!Array.isArray(fireMap)) {
+                console.log("drawBoundingBoxesCCTV2: fireMap이 배열이 아님, 타입:", typeof fireMap);
+                if (canvas.width > 0 && canvas.height > 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                return;
+            }
+
+            if (fireMap.length === 0) {
+                console.log("drawBoundingBoxesCCTV2: fireMap이 비어있음 (박스 없음)");
+                if (canvas.width > 0 && canvas.height > 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                return;
+            }
+
+            console.log("drawBoundingBoxesCCTV2: fireMap에 박스", fireMap.length, "개 있음");
+
+            console.log("drawBoundingBoxesCCTV2: 박스 그리기 시작, 개수:", fireMap.length);
+
+            // Canvas 크기를 이미지에 맞춤
+            canvas.width = imgElement.offsetWidth || imgElement.clientWidth;
+            canvas.height = imgElement.offsetHeight || imgElement.clientHeight;
+
+            if (canvas.width === 0 || canvas.height === 0) {
+                console.log("drawBoundingBoxesCCTV2: Canvas 크기가 0");
+                return;
+            }
+
+            // 이전 그리기 지우기
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 이미지 실제 크기와 표시 크기 비율 계산
+            const naturalWidth = imgElement.naturalWidth;
+            const naturalHeight = imgElement.naturalHeight;
+
+            if (naturalWidth === 0 || naturalHeight === 0) {
+                console.log("drawBoundingBoxesCCTV2: 이미지 natural 크기가 0");
+                return;
+            }
+
+            const scaleX = canvas.width / naturalWidth;
+            const scaleY = canvas.height / naturalHeight;
+
+            console.log("drawBoundingBoxesCCTV2: 스케일 계산 - scaleX:", scaleX, "scaleY:", scaleY);
+            console.log("drawBoundingBoxesCCTV2: Canvas 크기 - width:", canvas.width, "height:", canvas.height);
+            console.log("drawBoundingBoxesCCTV2: 이미지 크기 - naturalWidth:", naturalWidth, "naturalHeight:", naturalHeight);
+
+            // 각 바운딩 박스 그리기
+            fireMap.forEach((box, index) => {
+                console.log(`drawBoundingBoxesCCTV2: 박스 ${index}:`, JSON.stringify(box));
+
+                // 박스 좌표 유효성 검사
+                if (typeof box.x1 !== 'number' || typeof box.y1 !== 'number' ||
+                    typeof box.x2 !== 'number' || typeof box.y2 !== 'number') {
+                    console.log(`drawBoundingBoxesCCTV2: 박스 ${index} - 좌표가 유효하지 않음`, box);
+                    return;
+                }
+
+                const x1 = box.x1 * scaleX;
+                const y1 = box.y1 * scaleY;
+                const x2 = box.x2 * scaleX;
+                const y2 = box.y2 * scaleY;
+                const width = x2 - x1;
+                const height = y2 - y1;
+
+                console.log(`drawBoundingBoxesCCTV2: 박스 ${index} 좌표 - x1:${x1}, y1:${y1}, x2:${x2}, y2:${y2}, width:${width}, height:${height}`);
+
+                // 클래스 결정: class 필드가 있으면 사용, 없으면 event_type 사용
+                const boxClass = box.class || box.event_type || "unknown";
+                const isFire = boxClass === "fire";
+                const color = isFire ? "#FF0000" : "#FF8C00"; // fire: 빨강, smoke: 주황
+
+                // 박스 그리기
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x1, y1, width, height);
+
+                // 라벨 배경
+                const label = boxClass;
+                ctx.font = "bold 14px Arial";
+                const textMetrics = ctx.measureText(label);
+                const labelWidth = textMetrics.width + 10;
+                const labelHeight = 20;
+
+                ctx.fillStyle = color;
+                ctx.fillRect(x1, y1 - labelHeight, labelWidth, labelHeight);
+
+                // 라벨 텍스트
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillText(label, x1 + 5, y1 - 5);
+
+                console.log(`drawBoundingBoxesCCTV2: 박스 ${index} 그리기 완료`);
+            });
+
+            console.log("drawBoundingBoxesCCTV2: 모든 박스 그리기 완료");
+        }
+
+        // Action 정보 표시 (CCTV-02용)
+        function updateActionStatus(jsonData, statusElement) {
+            if (!jsonData || !jsonData.action_json) return;
+
+            const actionJson = jsonData.action_json;
+            if (actionJson.event_type && actionJson.event_type !== "Safe") {
+                statusElement.textContent = actionJson.event_type;
+                statusElement.className = "ai-status text-cyan";
+            } else {
+                statusElement.textContent = "AI 분석 중...";
+                statusElement.className = "ai-status";
+            }
+        }
+
+        // CCTV-01 메시지 처리 (fire_router 데이터는 무시)
+        socket1.onmessage = function (event) {
             if (typeof event.data === 'string') {
                 // JSON 메시지 수신 (감지 발생 시에만 전송됨)
                 try {
-                    lastJsonData = JSON.parse(event.data);
-                    console.log("JSON 수신 (감지 발생):", lastJsonData);
+                    const jsonData = JSON.parse(event.data);
+                    console.log("CCTV-01 JSON 수신:", jsonData);
+
+                    // fire_router 스트림은 CCTV-01에서 무시
+                    if (jsonData.stream_id === "fire_router") {
+                        return;  // CCTV-01은 fire_router 데이터 무시
+                    }
+
+                    lastJsonData1 = jsonData;
                     // 이미지가 로드된 후 박스 그리기
-                    if (imgElement.complete && imgElement.naturalWidth > 0) {
-                        drawBoundingBoxes(lastJsonData);
+                    if (imgElement1.complete && imgElement1.naturalWidth > 0) {
+                        drawBoundingBoxes(lastJsonData1, imgElement1, canvas1, ctx1);
                     }
                 } catch (e) {
-                    console.error("JSON 파싱 오류:", e);
+                    console.error("CCTV-01 JSON 파싱 오류:", e);
                 }
             } else if (event.data instanceof Blob) {
                 // 이미지 메시지 수신 (항상 전송됨)
-                if (imgElement.src.startsWith("blob:")) {
-                    URL.revokeObjectURL(imgElement.src);
+                // fire_router 데이터는 CCTV-01에서 무시하기 위해 lastJsonData1 확인
+                if (lastJsonData1 && lastJsonData1.stream_id === "fire_router") {
+                    return;  // CCTV-01은 fire_router 이미지 무시
+                }
+
+                if (imgElement1.src.startsWith("blob:")) {
+                    URL.revokeObjectURL(imgElement1.src);
                 }
                 const imageUrl = URL.createObjectURL(event.data);
-                imgElement.src = imageUrl;
-                
+                imgElement1.src = imageUrl;
+
                 // 이미지 로드 후 처리
-                imgElement.onload = function() {
+                imgElement1.onload = function() {
                     // Canvas 크기 조정
-                    canvas.width = imgElement.offsetWidth;
-                    canvas.height = imgElement.offsetHeight;
-                    
-                    if (lastJsonData) {
-                        // JSON이 있으면 박스 그리기
-                        drawBoundingBoxes(lastJsonData);
+                    canvas1.width = imgElement1.offsetWidth;
+                    canvas1.height = imgElement1.offsetHeight;
+
+                    if (lastJsonData1 && lastJsonData1.stream_id !== "fire_router") {
+                        // JSON이 있고 fire_router가 아니면 박스 그리기
+                        drawBoundingBoxes(lastJsonData1, imgElement1, canvas1, ctx1);
                     } else {
-                        // JSON이 없으면 박스 지우기 (감지 없음)
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        // JSON이 없거나 fire_router면 박스 지우기
+                        ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
                     }
                 };
             }
         };
 
-        socket.onclose = function () {
-            console.log("서버 연결 끊김");
+        // CCTV-02 박스 그리기 및 상태 업데이트 함수
+        function updateCCTV2Display() {
+            console.log("=== updateCCTV2Display 호출 ===");
+            console.log("lastJsonData2:", lastJsonData2);
+            console.log("imgElement2 상태 - complete:", imgElement2.complete, "naturalWidth:", imgElement2.naturalWidth, "naturalHeight:", imgElement2.naturalHeight);
+            console.log("canvas2 크기 - width:", canvas2.width, "height:", canvas2.height);
+
+            if (!lastJsonData2 || lastJsonData2.stream_id !== "fire_router") {
+                // fire_router가 아니면 박스 지우기
+                console.log("updateCCTV2Display: fire_router 데이터 아님 또는 lastJsonData2 없음");
+                if (canvas2.width > 0 && canvas2.height > 0) {
+                    ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+                }
+                return;
+            }
+
+            // 바운딩 박스 그리기
+            console.log("updateCCTV2Display: drawBoundingBoxesCCTV2 호출 전");
+            drawBoundingBoxesCCTV2(lastJsonData2, imgElement2, canvas2, ctx2);
+            console.log("updateCCTV2Display: drawBoundingBoxesCCTV2 호출 후");
+
+            // 상태 업데이트
+            const statusElement2 = document.getElementById("ai-status-2");
+            if (lastJsonData2.fire_info && lastJsonData2.fire_info[0] && lastJsonData2.fire_info[0].length > 0) {
+                // fire_map에 박스가 있으면 감지 중
+                statusElement2.textContent = "화재 감지 중...";
+                statusElement2.className = "ai-status text-cyan";
+            } else {
+                // fire_map이 비어있으면 분석 중
+                statusElement2.textContent = "AI 분석 중...";
+                statusElement2.className = "ai-status";
+            }
+        }
+
+        // CCTV-02 메시지 처리 (fire_router만 표시)
+        socket2.onmessage = function (event) {
+            if (typeof event.data === 'string') {
+                // JSON 메시지 수신
+                try {
+                    const jsonData = JSON.parse(event.data);
+                    console.log("CCTV-02 JSON 수신:", jsonData);
+
+                    // fire_router 스트림만 처리
+                    if (jsonData.stream_id === "fire_router") {
+                        lastJsonData2 = jsonData;
+                        console.log("CCTV-02 JSON 저장:", JSON.stringify(jsonData, null, 2));
+                        console.log("fire_info 타입:", typeof jsonData.fire_info, "isArray:", Array.isArray(jsonData.fire_info));
+                        console.log("fire_info:", jsonData.fire_info);
+                        if (jsonData.fire_info && Array.isArray(jsonData.fire_info) && jsonData.fire_info.length > 0) {
+                            console.log("fire_info[0] 타입:", typeof jsonData.fire_info[0], "isArray:", Array.isArray(jsonData.fire_info[0]));
+                            console.log("fire_info[0]:", jsonData.fire_info[0]);
+                            if (Array.isArray(jsonData.fire_info[0])) {
+                                console.log("fire_map (fire_info[0]) 개수:", jsonData.fire_info[0].length);
+                                if (jsonData.fire_info[0].length > 0) {
+                                    console.log("fire_map 첫 번째 박스:", jsonData.fire_info[0][0]);
+                                }
+                            } else {
+                                console.log("⚠️ fire_info[0]이 배열이 아닙니다!");
+                            }
+                        }
+
+                        // 알림 처리 (CCTV-02)
+                        const cctvName = jsonData.cam_id ? `CCTV-${jsonData.cam_id}` : "CCTV-02";
+                        checkAndProcessAlerts(jsonData, cctvName);
+
+                        // 이미지 로드 상태 확인
+                        console.log("CCTV-02 이미지 상태 - complete:", imgElement2.complete, "naturalWidth:", imgElement2.naturalWidth, "naturalHeight:", imgElement2.naturalHeight);
+
+                        // 이미지가 이미 로드되어 있으면 바로 박스 그리기
+                        if (imgElement2.complete && imgElement2.naturalWidth > 0) {
+                            console.log("CCTV-02: 이미지 로드 완료, 박스 그리기 시도");
+                            updateCCTV2Display();
+                        } else {
+                            console.log("CCTV-02: 이미지 아직 로드 중, onload 대기");
+                            // 이미지가 로드되지 않았으면 onload 이벤트 리스너 추가
+                            imgElement2.onload = function() {
+                                console.log("CCTV-02: 이미지 로드 완료 (onload), 박스 그리기 시도");
+                                updateCCTV2Display();
+                            };
+                        }
+                    }
+                    // fire_router가 아니면 무시 (action_router 데이터는 CCTV-02에서 표시 안 함)
+                } catch (e) {
+                    console.error("CCTV-02 JSON 파싱 오류:", e);
+                }
+            } else if (event.data instanceof Blob) {
+                // 이미지 메시지 수신
+                // fire_router 데이터만 표시 (lastJsonData2가 fire_router인 경우만)
+                if (lastJsonData2 && lastJsonData2.stream_id !== "fire_router") {
+                    console.log("CCTV-02: fire_router가 아니므로 이미지 무시");
+                    return;  // fire_router가 아니면 무시
+                }
+
+                console.log("CCTV-02: 이미지 Blob 수신");
+
+                if (imgElement2.src.startsWith("blob:")) {
+                    URL.revokeObjectURL(imgElement2.src);
+                }
+                const imageUrl = URL.createObjectURL(event.data);
+                imgElement2.src = imageUrl;
+
+                // 이미지 로드 후 처리
+                imgElement2.onload = function() {
+                    console.log("CCTV-02: 이미지 로드 완료 (Blob onload), 박스 그리기 시도");
+                    // 이미지가 업데이트될 때마다 박스 상태 확인 및 업데이트
+                    updateCCTV2Display();
+                };
+            }
+        };
+
+        socket1.onclose = function () {
+            console.log("CCTV-01 서버 연결 끊김");
+        };
+
+        socket2.onclose = function () {
+            console.log("CCTV-02 서버 연결 끊김");
         };
     </script>
     <!--    페이지 콘텐츠 끝    -->
