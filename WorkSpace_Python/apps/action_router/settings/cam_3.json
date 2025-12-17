@@ -1,0 +1,10 @@
+{
+    "cam_id": 3,
+    "fall_check": true,
+    "zone_check": true,
+    "ai_check": true,
+    "fall_ratio": 1.2,
+    "ai_threshold": 0.7,
+    "lock_duration": 30,
+    "zones": []
+}
