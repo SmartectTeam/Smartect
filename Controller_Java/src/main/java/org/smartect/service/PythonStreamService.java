@@ -55,6 +55,7 @@ public class PythonStreamService implements CommandLineRunner {
             @Override
             protected void handleTextMessage(WebSocketSession session, TextMessage message) {
                 lastJsonData = message.getPayload();
+                System.out.println("📨 JSON 수신: " + lastJsonData.substring(0, Math.min(100, lastJsonData.length())));
             }
 
             @Override
@@ -64,6 +65,11 @@ public class PythonStreamService implements CommandLineRunner {
                     byte[] imageBytes = new byte[imageBuffer.remaining()];
                     imageBuffer.get(imageBytes);
 
+                    // 디버깅: JSON이 있는지 확인
+                    if (lastJsonData != null && lastJsonData.contains("fire_router")) {
+                        System.out.println("🖼️ 이미지 + JSON 전송: " + imageBytes.length + " bytes");
+                    }
+                    
                     videoWebSocketHandler.livePostData(lastJsonData, imageBytes);
                     
                 } catch (Exception e) {

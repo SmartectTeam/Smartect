@@ -100,7 +100,7 @@ class WebcamStream:
         if isinstance(source, int):
             self.cap = snap_cam_connect(source)
         else:
-            self.cap = phone_connect(source)
+            self.cap = cam_connect(source)
 
     def read(self):
         return self.cap.read()
