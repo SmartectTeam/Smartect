@@ -180,6 +180,7 @@ class MotionDetector:
                             danger_lvl = 1
 
                     # (3) AI 행동 인식
+                    current_score = 0.0 # 점수 초기화
                     if self.settings['ai_check']:
                         anchor = get_stable_anchor(filled_kp, kps[:, 2])
                         state['buffer'].append((filled_kp - anchor).flatten())
@@ -189,18 +190,25 @@ class MotionDetector:
                             probs = self.models.predict_lstm(input_data)
                             if probs is not None:
                                 idx = np.argmax(probs)
-                                score = probs[idx]
-                                ai_th = self.settings.get('ai_threshold', 0.7)
-                                if score > ai_th:
-                                    label = self.models.class_names[idx] if idx < len(
-                                        self.models.class_names) else "Unknown"
-                                    state['label'] = label
+                                score = float(probs[idx])
+                                raw_label = self.models.class_names[idx] if idx < len(self.models.class_names) else "Unknown"
 
-                                    # 위협 행동 판단
-                                    is_danger = (label in self.DANGER_ACTIONS)
-                                    if label == 'theft' and self.settings['theft_check']:
+                                # 임계값 상관없이 현제상태 무조건 업데이트(시각화용)
+                                state['label'] = raw_label
+                                state['score'] = score
+                                current_score = score
+
+                                # AI 판단 임계값 적용(설정용)
+                                ai_th = self.settings.get('ai_threshold', 0.7)
+
+                                # 신뢰도가 높을때만 위협으로 간주
+                                if score > ai_th:
+                                    is_danger = (raw_label in self.DANGER_ACTIONS)
+
+                                    if raw_label == 'theft' and self.settings['theft_check']:
                                         is_danger = True
-                                    elif label == 'theft':
+                                    elif raw_label == 'theft':
+                                        # 도난감지 껐을 시 라밸표시 처리
                                         state['label'] = "Theft(Ignored)"
 
                                     if is_danger and danger_lvl < 2:
@@ -226,6 +234,8 @@ class MotionDetector:
                         "id": track_id,
                         "label": state['label'],
                         "status": current_status,
+                        "score": state.get('score', 0.0),
+                        "danger_level": danger_lvl,
                         "box": [bx1, by1, bx2, by2],
                         "keypoints": filled_kp.tolist()
                     })

@@ -175,6 +175,10 @@
         let currentPoints = []; // 현재 찍고 있는 점들
         let savedZones = [];    // 저장된 구역들 (0.0~1.0 비율 좌표)
 
+        let isDragging = false;
+        let dragZoneIdx = -1;
+        let lastMousePos = {x:0, y: 0};
+
         // 뼈대 정보
         const SKELETON_PAIRS = [
             [5, 7], [7, 9], [6, 8], [8, 10],
@@ -240,43 +244,77 @@
             updateZoneList();
         }
 
-        // 캔버스 이벤트 리스너 (그리기)
+        // 마우스 누름 (그리기 점추가 or 드레그 동작)
         canvas.addEventListener("mousedown", (e) => {
-            if (!isDrawingMode) return;
-
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const y = e.clientX - rect.top;
 
-            // 좌클릭: 점 추가
-            if (e.button === 0) {
-                currentPoints.push({x, y});
-            }
-            // 우클릭: 도형 완성
-            else if (e.button === 2) {
-                e.preventDefault();
-                if (currentPoints.length < 3) {
-                    alert("최소 3개 이상의 점이 필요합니다.");
-                    return;
+            // [A] 그리기 모드 -> 점찍기
+            if (isDrowingMode) {
+                // 좌클릭 : 점추가
+                if (e.butten === 0) {
+                    currentPoints.push({x, y});
                 }
-                const width = canvas.width;
-                const height = canvas.height;
-                const normalizedPoints = currentPoints.map(p => [p.x / width, p.y / height]);
+                // 우클릭 : 그리기 종료
+                else  if (e.button === 2){
+                    e.preventDefault();
+                    finishDrawing();
+                }
+                return;
+            }
+            // [B] 일반 모드일 때 -> 구역 선택(드래그 시작)
+            // 클릭한 위치 어느구역에 있는지 확인
+            dragZoneIdx = -1;
+            for (let i = 0; i < savedZones.length; i++){
+                const zone = savedZones[i];
+                if (!zone.points) continue;
 
-                savedZones.push({
-                    active: true,
-                    points: normalizedPoints
-                });
+                // 경로 생성 후 내부 판정
+                ctx.beginPath();
+                const start = zone.points[0];
+                ctx.moveTo(start[0] * canvas.width, start[1] * canvas.height);
+                for (let j = 1; j < zone.points.length; j++){
+                    const p = zone.points[j];
+                    ctx.lineTo(p[0] * canvas.width, p[1] * canvas.height);
+                }
 
-                updateZoneList();
-                cancelDrawing();
+                ctx.closePath();
+
+                if (ctx.isPointPath(x,y)){
+                    dragZoneIdx = i;
+                    isDragging = true;
+                    lastMousePos = {X,Y};
+                    break;
+
+                }
             }
         });
 
-        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+            // 마우스 이동(드래그중 좌표이동)
+            canvas.addEventListener("mousemove", (e) => {
+                if (!isDragging || dragZoneIdx === -1) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // 이동거리 계산
+                const dx = x - lastMousePos.x;
+                const dy = y - lastMousePos.y;
+
+                /////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////
+
+            })
+
 
         // ==========================================
-        // [3] 그리기 및 렌더링 함수 (통합)
+        // [3] 그리기 및 렌더링 함수
         // ==========================================
         function drawOverlays(objects) {
             if (imgElement.naturalWidth === 0) return;
@@ -294,59 +332,56 @@
             // 초기화
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. [사용자 구역 그리기] (노란색+빨간색)
-            ctx.lineWidth = 3;
-            savedZones.forEach(zone => {
+            // 1. [사용자 구역 그리기] (Canvas Stroke 활용 방식)
+            savedZones.forEach((zone, idx) => {
                 if (!zone.points || zone.points.length === 0) return;
 
-                // 캔버스 픽셀 좌표로 변환
+                // (1) 캔버스 픽셀 좌표로 변환
                 const pixelPoints = zone.points.map(p => ({
                     x: p[0] * canvas.width,
                     y: p[1] * canvas.height
-                }))
+                }));
 
-                // 구역의 중심점 계산(확장 기준)
-                let  cx = 0, cy = 0;
-                pixelPoints.forEach(p => { cx += p.x; cy += p.y; })
-                cx /= pixelPoints.length;
-                cy /= pixelPoints.length;
+                // (2) 구역의 크기 계산 (확장 비율 기준 잡기용)
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                pixelPoints.forEach(p => {
+                    if(p.x < minX) minX = p.x;
+                    if(p.x > maxX) maxX = p.x;
+                    if(p.y < minY) minY = p.y;
+                    if(p.y > maxY) maxY = p.y;
+                });
+                const w = maxX - minX;
+                const h = maxY - minY;
+                const zoneSize = Math.sqrt(w*w + h*h); // 대각선 길이
 
-                // 확장 거리 계산
+                // (3) 확장 범위 계산 (슬라이더 값 적용)
                 const reachEl = document.getElementById('sl-reach');
                 const reachVal = reachEl ? parseFloat(reachEl.value) : 0.85;
-                const expandDist = reachVal * 100;
 
-                // 중심점에서 바깥으로 점 밀어내기
-                const expandedPoints = pixelPoints.map(p =>{
-                    const dx = p.x - cx;
-                    const dy = p.y - cy;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist === 0) return p;
+                // stroke는 중심선 기준 양쪽으로 원하는 거리의 2배를 설정.
+                // 예: reachVal에 따라 적절한 픽셀 두께 계산
+                const strokeWidth = zoneSize * (reachVal * 0.4);
 
-                    // 현재 거리 + 확장 거리만큼 비율 늘리기
-                    const scale = (dist + expandDist) / dist;
-                    return{
-                        x: cx + dx * scale,
-                        y: cy + dy * scale
-                    };
-                });
-                // 노란색 경고구역 그리기
+                // --- [그리기 A] 노란색 경고 구역 (확장된 영역 - 배경처럼 깔기) ---
                 ctx.beginPath();
-                if (expandedPoints.length >0) {
-                    ctx.moveTo(expandedPoints[0].x, expandedPoints[0].y);
-                    for (let i = 1; i < expandedPoints.length; i++) {
-                        ctx.lineTo(expandedPoints[i].x, expandedPoints[i].y);
+                if (pixelPoints.length > 0) {
+                    ctx.moveTo(pixelPoints[0].x, pixelPoints[0].y);
+                    for(let i=1; i<pixelPoints.length; i++){
+                        ctx.lineTo(pixelPoints[i].x, pixelPoints[i].y);
                     }
                 }
                 ctx.closePath();
 
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "yellow";
-                ctx.setLineDash([5,5]);
-                ctx.stroke();
-                ctx.setLineDash([]);
+                // cv2.dilate 효과
+                ctx.lineJoin = "round";  // 모서리를 둥글게 (Round Join)
+                ctx.lineCap = "round";   // 선 끝을 둥글게
+                ctx.lineWidth = strokeWidth; // 두께를 뚱뚱하게 설정
+                ctx.strokeStyle = "rgba(255, 255, 0, 0.3)"; // 반투명 노란색
+                ctx.setLineDash([]); // 실선
+                ctx.stroke(); // 그리기
 
-                // 빨간 위험구역 그리기
+
+                // --- [그리기 B] 빨간색 위험 구역
                 ctx.beginPath();
                 if (pixelPoints.length > 0) {
                     ctx.moveTo(pixelPoints[0].x, pixelPoints[0].y);
@@ -355,12 +390,21 @@
                     }
                 }
                 ctx.closePath();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "red"
+
+                ctx.lineJoin = "miter"; // 원본은 각지게
+                ctx.lineWidth = 2;      // 얇은 선
+                ctx.strokeStyle = "red";
                 ctx.stroke();
-                ctx.fillStyle = "rgba(255,0,0, 0.2)";
+
+                ctx.fillStyle = "rgba(255, 0, 0, 0.2)"; // 내부 채우기
                 ctx.fill();
 
+                // (4) 구역 번호 표시
+                if(pixelPoints.length > 0){
+                    ctx.fillStyle = "red";
+                    ctx.font = "bold 14px Arial";
+                    ctx.fillText(`#${idx + 1}`, pixelPoints[0].x, pixelPoints[0].y - 5);
+                }
             });
 
             // 2. [현재 그리는 선] (빨간색)
@@ -605,6 +649,13 @@
         // ==========================================
         loadSettings(); // 1. 초기 설정 로드
         connect();      // 2. 웹소켓 연결
+
+
+
+
+
+
+
     </script>
 </div>
 </html>
