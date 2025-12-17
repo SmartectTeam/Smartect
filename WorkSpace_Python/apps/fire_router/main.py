@@ -10,6 +10,7 @@ if root_dir not in sys.path:
     sys.path.append(root_dir)
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from apps.fire_router.endpoints import router, fire_camera_stream
 
@@ -33,6 +34,7 @@ from apps.fire_router.endpoints import router, fire_camera_stream
 
 app = FastAPI()
 app.include_router(router)
+app.include_router(action_router)
 
 # 독자 실행 모드 플래그 (모듈 레벨)
 _fire_camera_mode = False

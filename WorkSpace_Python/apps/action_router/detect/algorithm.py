@@ -10,7 +10,7 @@ def check_fall(box, ratio_th=1.2):
     if height == 0: return False
     return width > (height * ratio_th)
 
-def check_zone(wrist_coords, zones, width, height):
+def check_zone(wrist_coords, zones, width, height, warning_px=30):
     # 위험구역 침입 감지
     status = "Safe"
 
@@ -27,10 +27,7 @@ def check_zone(wrist_coords, zones, width, height):
 
             if dist >= 0:
                 return "Danger"
-            elif dist >= -30: # 경계선 30픽셀 이내 접근 시 경고
+            elif dist >= -warning_px:
                 status = "Warning"
 
     return status
-
-
-

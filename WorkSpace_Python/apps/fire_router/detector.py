@@ -5,6 +5,11 @@ import cv2
 
 from common.schemas import EventJson
 
+#===================================
+# action_router 작업을위한 임시코드
+model = None
+#====================================
+
 
 from datetime import datetime
 

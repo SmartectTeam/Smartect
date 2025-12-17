@@ -43,8 +43,8 @@ watchdog>=4.0.0
 #===============================================================
 # [설치방법]
 
-# 1. PyTorch (GPU 버전) 설치
-# [터미널실행] pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# 1. PyTorch (GPU 버전) 설치 12.1 로 해야함 11.8 충돌남
+# [터미널실행] pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # 2. 꼬인 패키지 삭제
 # [터미널실행] pip uninstall opencv-python numpy -y

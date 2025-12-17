@@ -1,7 +1,8 @@
 # json (pydantic을 사용하여 데이터 모델을 정의)
 # __init__ 필요 없음(BaseModel 이 자동으로 처리)
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Any
+
 
 class EventJson(BaseModel):
     cam_no: int            # 2
@@ -9,6 +10,8 @@ class EventJson(BaseModel):
     danger_level: int      # 1
     event_time: str        # "2025-01-01T12:00:00"
     screenshot_path: str   #"/images/capture_123.png"
+    img_base64: Optional[str] = None    # 이미지를 문자로 변환해 담을 공간
+    objects: List[Any] = []
 
 
 class EventMap(BaseModel):

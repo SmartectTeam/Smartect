@@ -1,3 +1,4 @@
+# processor.py
 import numpy as np
 import cv2
 
@@ -42,20 +43,40 @@ def prepare_lstm_input(buffer):
 # [시각화] 화면에 박스와 텍스트 그리기
 # ============================
 def draw_info(img, box, kps, color, label):
-    # 박스 그리기
     bx1, by1, bx2, bt2 = map(int, box[:4])
+
+    # 박스 그리기
     cv2.rectangle(img, (bx1, by1), (bx2, bt2), color, 2)
 
-    # 텍스트 배경
+    # 텍스트 라벨
     (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-    cv2.rectangle(img, (bx1, by1 - 20), (bx1 + w, by1), color, -1)
-
-    # 라벨 쓰기
+    cv2.rectangle(img, (bx1, by1 - 25), (bx1 + w, by1), color, -1)
     cv2.putText(img, label, (bx1, by1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-    # 관절 점 찍기
+    # 뼈대 연결 정보
+    skeleton_connections = [
+        (5, 7), (7, 9),       # 왼팔 (어깨-팔꿈치-손목)
+        (6, 8), (8, 10),      # 오른팔
+        (11, 13), (13, 15),   # 왼다리 (골반-무릎-발목)
+        (12, 14), (14, 16),   # 오른다리
+        (5, 6), (11, 12),     # 어깨 사이, 골반 사이
+        (5, 11), (6, 12)      # 몸통 (좌/우)
+    ]
+
+    # 뼈대 그리기
+    for p1, p2 in skeleton_connections:
+        # kps[i]는 [x, y] 좌표를 가짐
+        x1, y1 = kps[p1]
+        x2, y2 = kps[p2]
+
+        # 두 점 다 화면 안에 있을 때만 선 긋기
+        if x1 > 0 and y1 > 0 and x2 > 0 and y2 > 0:
+            cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+
+    # 5. 관절(점) 그리기
     for x, y in kps:
-        cv2.circle(img, (int(x), int(y)), 3, color, -1)
+        if x > 0 and y > 0:
+            cv2.circle(img, (int(x), int(y)), 4, color, -1)
 
 
 

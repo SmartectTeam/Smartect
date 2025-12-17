@@ -1,9 +1,7 @@
 # 매인 실행문
-from sympy import roots
 import asyncio
 import sys
 import os
-import asyncio
 
 # [경로 설정] common 폴더 인식을 위한 상위경로 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,14 +9,17 @@ root_dir = os.path.abspath(os.path.join(current_dir, "../.."))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
+# 설정 파일 경로(app/action_router/settings/)
+SETTINGS_DIR = os.path.join(current_dir, "settings")
+os.makedirs(SETTINGS_DIR, exist_ok=True)
+
 from apps.action_router.endpoints import camera_post_video
 from apps.action_router.camera import WebcamStream, FileLoofStream
 from apps.action_router.detector import  MotionDetector
 from apps.action_router.detect.ai_models import AIModels
 
-# 설정 파일 경로(app/action_router/settings/)
-SETTINGS_DIR = os.path.join(current_dir, "settings")
-os.makedirs(SETTINGS_DIR, exist_ok=True)
+
+
 
 # [CCTV-01] 파일 반복
 CAM_ID_1 = "HSYCAM"
@@ -40,6 +41,7 @@ CONFIG_FILE_4 = os.path.join(SETTINGS_DIR, "cam_4.json")
 async def main(pc_id):
     print(">>>[System] Initializing Models...")
     shared_models = AIModels()
+
 
     # CCTV 01
     # print(">>>[Setup] CCTV-1(live)")

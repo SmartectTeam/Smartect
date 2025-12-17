@@ -2,6 +2,7 @@
 import cv2
 import asyncio
 import json
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from datetime import datetime
 
@@ -10,8 +11,62 @@ from apps.fire_router.camera import cam_connect, camera_disconnect
 from common.config import PCPath
 from common.schemas import CombinedJson
 
+# 경로 설정 (액션라우터가 보는 settings 폴더와 같은 곳을 바라보게 함)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+SETTINGS_DIR = os.path.abspath(os.path.join(current_dir, "../action_router/settings"))
+
 router = APIRouter()
 service = ImageProcessor()
+
+# =================================================================
+# 웹에서 오는 설정 받기
+# =================================================================
+# 프론트에서 저장할때 오는 데이터
+class SettingsRequest(BaseModel):
+    cam_id: int
+    fall_check: bool
+    zone_check: bool
+    ai_check: bool
+    fall_ratio: float
+    reach_ratio: float
+    hip_ratio: float
+    ai_threshold: float
+    lock_duration: int
+    zones: List[List[List[float]]]
+
+    # 보기설정
+    vis_alert: bool
+    vis_bbox: bool
+    vis_skeleton: bool
+    vis_text: bool
+
+# 셋팅 파일 생성
+@router.post("/settings/update")
+async def update_settings(data: SettingsRequest):
+    os.makedirs(SETTINGS_DIR, exist_ok=True)
+    file_path = os.path.join(SETTINGS_DIR, f"cam_{data.cam_id}.json")
+
+    try:
+        with open(file_path, "w", encoding='utf-8') as f:
+            json.dump(data.dict(), f, indent=4, ensure_ascii=False)
+        return {"status": "success", "message": "Saved"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+# 설정 불러오기
+@router.get("/settings/get")
+async def get_settings(cam_id: int):
+    file_path = os.path.join(SETTINGS_DIR, f"cam_{cam_id}.json")
+
+    if not os.path.exists(file_path):
+        return {}
+
+    with open(file_path, "r", encoding='utf-8') as f:
+        return json.load(f)
+
+
+# =============================================================================
 
 connected_viewers = []
 
@@ -46,7 +101,7 @@ def _convert_pydantic_to_dict(data):
 async def output_api(websocket: WebSocket):
     await websocket.accept()
     connected_viewers.append(websocket)
-    print(f"PC3 접속, 현재 접속자 : {len(connected_viewers)}명")
+    print(f"PC3(웹) 접속, 현재 접속자 : {len(connected_viewers)}명")
 
     try:
         while True:
@@ -79,7 +134,7 @@ async def output_api(websocket: WebSocket):
 @router.websocket("/ws/input")
 async def input_api(websocket: WebSocket):
     await websocket.accept()
-    print("PC1 접속")
+    print("PC1(액션) 접속")
 
     frame_count = 0
     skip_frame = 30
@@ -90,9 +145,11 @@ async def input_api(websocket: WebSocket):
 
     try:
         while True:
+            # 1. 데이터 수신
             action_json = await websocket.receive_json()
             image_bytes = await websocket.receive_bytes()
 
+            # 2. 파이어 감지 (이미지 디코딩 안전하게)
             fire_json = None
             fire_map = None
             encoded_image_bytes = image_bytes
@@ -104,7 +161,8 @@ async def input_api(websocket: WebSocket):
             if frame_count % skip_frame == 0:
                 fire_json, fire_map, encoded_image_bytes = await service.process_frame(cam_no, image_bytes, threshold_map)
 
-            for viewer in connected_viewers:
+            # [핵심 수정] 리스트를 복사([:])해서 순회해야 삭제 시 에러 안 남
+            for viewer in connected_viewers[:]:
                 try:
                     # 감지가 발생했을 때만 JSON 전송
                     if fire_json is not None or (action_json is not None and action_json.get("is_touch")):

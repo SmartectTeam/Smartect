@@ -1,18 +1,610 @@
+<!-- settings.html -->
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{fragments/base}">
-    <head>
-        <!-- 페이지에 해당하는 css로 수정 -->
-        <link rel="stylesheet" th:href="@{/css/.css}">
-    </head>
-    <div layout:fragment="content">
-        <!-- 페이지 콘텐츠 시작 -->
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}">
+<head>
+    <title>CCTV 통합 관제</title>
+    <link rel="stylesheet" th:href="@{/css/settings.css}">
 
+</head>
 
+<div layout:fragment="content">
 
+    <div class="safe-container">
 
-        <!-- 페이지 콘텐츠 끝 -->
+        <!-- [LEFT] 영상 & 캔버스 -->
+        <div class="left-panel">
+            <div class="header-row">
+                <select id="cam-select">
+                    <option value="3" selected>CCTV-03 (실시간 웹캠)</option>
+                    <option value="4">CCTV-04 (파일 영상)</option>
+                </select>
+                <div id="status-msg" class="status-txt">연결 대기중...</div>
+            </div>
+
+            <div class="video-box" id="video-container">
+                <img id="live-img" src="" alt="NO SIGNAL">
+                <canvas id="zone-canvas"></canvas>
+            </div>
+
+            <!-- 그리기 안내 문구 (숨김 상태) -->
+            <div id="draw-guide" style="display:none; margin-top:10px; color:#aaa; font-size:13px; text-align:center;">
+                <i class="fa-solid fa-pen-nib"></i>
+                좌클릭: 점 추가 | 우클릭: 도형 완성 | <span style="color:#dc3545; cursor:pointer;" onclick="cancelDrawing()">[취소]</span>
+            </div>
+        </div>
+
+        <!-- [RIGHT] 설정 패널 -->
+        <div class="right-panel">
+            <div class="tab-header">
+                <button class="tab-btn active" onclick="changeTab('tab1')">감도 설정</button>
+                <button class="tab-btn" onclick="changeTab('tab2')">구역 관리</button>
+                <!-- [수정] 3번: 보기 설정, 4번: AI 대시보드 -->
+                <button class="tab-btn" onclick="changeTab('tab3')">보기 설정</button>
+                <button class="tab-btn" onclick="changeTab('tab4')">AI 대시보드</button>
+            </div>
+
+            <!-- [TAB 1] 감도 설정 -->
+            <div id="tab1" class="tab-body active">
+                <div class="control-row">
+                    <label><span>🤸 낙상 감지</span> <input type="checkbox" id="chk-fall" checked></label>
+                </div>
+                <div class="control-row">
+                    <label><span>🚧 구역 감지</span> <input type="checkbox" id="chk-zone" checked></label>
+                </div>
+                <div class="control-row">
+                    <label><span>🧠 AI 행동 인식</span> <input type="checkbox" id="chk-ai" checked></label>
+                </div>
+                <div class="control-row disabled-opt">
+                    <label><span>🔥 화재 감지 (미지원)</span> <input type="checkbox" disabled></label>
+                </div>
+
+                <!-- 슬라이더 목록 -->
+                <div class="control-row">
+                    <label>낙상 민감도: <span id="val-fall" style="color:#007bff">1.2</span></label>
+                    <input type="range" id="sl-fall" min="0.5" max="2.0" step="0.1" value="1.2"
+                           oninput="document.getElementById('val-fall').innerText=this.value">
+                </div>
+
+                <div class="control-row">
+                    <label>팔 뻗음 (Reach): <span id="val-reach" style="color:#007bff">0.85</span></label>
+                    <input type="range" id="sl-reach" min="0.5" max="1.0" step="0.05" value="0.85"
+                           oninput="document.getElementById('val-reach').innerText=this.value">
+                </div>
+
+                <div class="control-row">
+                    <label>손 높이 제한 (Hip Ratio): <span id="val-hip" style="color:#007bff">0.2</span></label>
+                    <input type="range" id="sl-hip" min="0.0" max="1.0" step="0.05" value="0.2"
+                           oninput="document.getElementById('val-hip').innerText=this.value">
+                </div>
+
+                <div class="control-row">
+                    <label>AI 신뢰도: <span id="val-ai" style="color:#007bff">0.7</span></label>
+                    <input type="range" id="sl-ai" min="0.1" max="1.0" step="0.05" value="0.7"
+                           oninput="document.getElementById('val-ai').innerText=this.value">
+                </div>
+
+                <div class="control-row">
+                    <label>경고 유지 (초): <span id="val-lock" style="color:#007bff">30</span></label>
+                    <input type="range" id="sl-lock" min="1" max="60" step="1" value="30"
+                           oninput="document.getElementById('val-lock').innerText=this.value">
+                </div>
+            </div>
+
+            <!-- [TAB 2] 구역 관리 -->
+            <div id="tab2" class="tab-body">
+                <div class="control-row">
+                    <label>구역 그리기</label>
+                    <button id="btn-draw-toggle" class="btn-draw" style="width:100%" onclick="toggleDrawingMode()">
+                        ✏️ 새 구역 그리기 시작
+                    </button>
+                </div>
+
+                <div class="control-row">
+                    <label>등록된 구역 목록</label>
+                    <ul id="zone-list-ui" style="list-style:none; padding:0; margin:0; font-size:13px; color:#aaa;">
+                        <li style="padding:10px; background:#333; border-radius:4px;">(저장된 구역 없음)</li>
+                    </ul>
+                    <button class="btn-draw" style="width:100%; margin-top:5px; background:#dc3545;" onclick="clearZones()">
+                        🗑️ 전체 삭제
+                    </button>
+                </div>
+            </div>
+
+            <!-- [TAB 3] 보기 설정 -->
+            <div id="tab3" class="tab-body">
+                <div class="group-box">
+                    <div class="group-title" style="color:#888; font-size:12px; margin-bottom:10px;">화면 표시 옵션</div>
+                    <div class="control-row"><label><span>🚨 위험 시에만 표시</span> <input type="checkbox" id="vis-alert"></label></div>
+                    <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;">
+                    <div class="control-row"><label><span>🔲 객체 박스</span> <input type="checkbox" id="vis-bbox" checked></label></div>
+                    <div class="control-row"><label><span>💀 관절 뼈대</span> <input type="checkbox" id="vis-skeleton" checked></label></div>
+                    <div class="control-row"><label><span>🏷️ 상태 텍스트</span> <input type="checkbox" id="vis-text" checked></label></div>
+                </div>
+            </div>
+
+            <!-- [TAB 4] AI 대시보드 -->
+            <div id="tab4" class="tab-body">
+                <h4 style="margin-top:0;">실시간 분석 상태</h4>
+
+                <div class="bar-wrap">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;">
+                        <span>Safe (안전)</span> <span>80%</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width:80%; background:#28a745;"></div>
+                    </div>
+                </div>
+
+                <div class="bar-wrap">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;">
+                        <span>Threat (위협)</span> <span>10%</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width:10%; background:#dc3545;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-save" onclick="saveSettings()">설정 저장 및 적용</button>
+        </div>
     </div>
 
+    <!-- 자바스크립트 로직 -->
+    <script>
+        // ==========================================
+        // [1] 전역 변수
+        // ==========================================
+        const WS_URL = `ws://${window.location.hostname}:8000/ws/output`;
+        const API_URL = "http://localhost:8000";
+
+        let socket;
+
+        const imgElement = document.getElementById("live-img");
+        const canvas = document.getElementById("zone-canvas");
+        const ctx = canvas.getContext("2d");
+        const statusMsg = document.getElementById("status-msg");
+        const selectBox = document.getElementById("cam-select");
+        const zoneListUI = document.getElementById("zone-list-ui");
+
+        let selectedCam = 3;
+
+        // 그리기 관련 변수
+        let isDrawingMode = false;
+        let currentPoints = []; // 현재 찍고 있는 점들
+        let savedZones = [];    // 저장된 구역들 (0.0~1.0 비율 좌표)
+
+        // 뼈대 정보
+        const SKELETON_PAIRS = [
+            [5, 7], [7, 9], [6, 8], [8, 10],
+            [11, 13], [13, 15], [12, 14], [14, 16],
+            [5, 6], [11, 12], [5, 11], [6, 12]
+        ];
+
+        // ==========================================
+        // [2] 구역 그리기 로직 (핵심)
+        // ==========================================
+        function toggleDrawingMode() {
+            isDrawingMode = !isDrawingMode;
+            const btn = document.getElementById("btn-draw-toggle");
+            const guide = document.getElementById("draw-guide");
+
+            if (isDrawingMode) {
+                btn.innerText = "🛑 그리기 종료 (우클릭 완성)";
+                btn.classList.add("active");
+                guide.style.display = "block";
+                canvas.style.pointerEvents = "auto";
+                currentPoints = [];
+            } else {
+                cancelDrawing();
+            }
+        }
+
+        function cancelDrawing() {
+            isDrawingMode = false;
+            currentPoints = [];
+            const btn = document.getElementById("btn-draw-toggle");
+            const guide = document.getElementById("draw-guide");
+
+            btn.innerText = "✏️ 새 구역 그리기 시작";
+            btn.classList.remove("active");
+            guide.style.display = "none";
+            canvas.style.pointerEvents = "none";
+        }
+
+        function clearZones() {
+            if(confirm("모든 구역을 삭제할까요?")) {
+                savedZones = [];
+                updateZoneList();
+            }
+        }
+
+        function updateZoneList() {
+            if (savedZones.length === 0) {
+                zoneListUI.innerHTML = '<li style="padding:10px; background:#333; border-radius:4px;">(저장된 구역 없음)</li>';
+                return;
+            }
+            let html = "";
+            savedZones.forEach((zone, idx) => {
+                html += `<li style="padding:10px; background:#333; margin-bottom:5px; border-radius:4px; display:flex; justify-content:space-between;">
+                            <span>Zone #${idx + 1}</span>
+                            <span style="color:red; cursor:pointer;" onclick="removeZone(${idx})">🗑️</span>
+                         </li>`;
+            });
+            zoneListUI.innerHTML = html;
+        }
+
+        window.removeZone = function(idx) {
+            savedZones.splice(idx, 1);
+            updateZoneList();
+        }
+
+        // 캔버스 이벤트 리스너 (그리기)
+        canvas.addEventListener("mousedown", (e) => {
+            if (!isDrawingMode) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // 좌클릭: 점 추가
+            if (e.button === 0) {
+                currentPoints.push({x, y});
+            }
+            // 우클릭: 도형 완성
+            else if (e.button === 2) {
+                e.preventDefault();
+                if (currentPoints.length < 3) {
+                    alert("최소 3개 이상의 점이 필요합니다.");
+                    return;
+                }
+                const width = canvas.width;
+                const height = canvas.height;
+                const normalizedPoints = currentPoints.map(p => [p.x / width, p.y / height]);
+
+                savedZones.push({
+                    active: true,
+                    points: normalizedPoints
+                });
+
+                updateZoneList();
+                cancelDrawing();
+            }
+        });
+
+        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+        // ==========================================
+        // [3] 그리기 및 렌더링 함수 (통합)
+        // ==========================================
+        function drawOverlays(objects) {
+            if (imgElement.naturalWidth === 0) return;
+
+            const rect = imgElement.getBoundingClientRect();
+
+            if (canvas.width !== rect.width || canvas.height !== rect.height){
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+
+            const scaleX = canvas.width / imgElement.naturalWidth;
+            const scaleY = canvas.height / imgElement.naturalHeight;
+
+            // 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. [사용자 구역 그리기] (노란색+빨간색)
+            ctx.lineWidth = 3;
+            savedZones.forEach(zone => {
+                if (!zone.points || zone.points.length === 0) return;
+
+                // 캔버스 픽셀 좌표로 변환
+                const pixelPoints = zone.points.map(p => ({
+                    x: p[0] * canvas.width,
+                    y: p[1] * canvas.height
+                }))
+
+                // 구역의 중심점 계산(확장 기준)
+                let  cx = 0, cy = 0;
+                pixelPoints.forEach(p => { cx += p.x; cy += p.y; })
+                cx /= pixelPoints.length;
+                cy /= pixelPoints.length;
+
+                // 확장 거리 계산
+                const reachEl = document.getElementById('sl-reach');
+                const reachVal = reachEl ? parseFloat(reachEl.value) : 0.85;
+                const expandDist = reachVal * 100;
+
+                // 중심점에서 바깥으로 점 밀어내기
+                const expandedPoints = pixelPoints.map(p =>{
+                    const dx = p.x - cx;
+                    const dy = p.y - cy;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist === 0) return p;
+
+                    // 현재 거리 + 확장 거리만큼 비율 늘리기
+                    const scale = (dist + expandDist) / dist;
+                    return{
+                        x: cx + dx * scale,
+                        y: cy + dy * scale
+                    };
+                });
+                // 노란색 경고구역 그리기
+                ctx.beginPath();
+                if (expandedPoints.length >0) {
+                    ctx.moveTo(expandedPoints[0].x, expandedPoints[0].y);
+                    for (let i = 1; i < expandedPoints.length; i++) {
+                        ctx.lineTo(expandedPoints[i].x, expandedPoints[i].y);
+                    }
+                }
+                ctx.closePath();
+
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "yellow";
+                ctx.setLineDash([5,5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // 빨간 위험구역 그리기
+                ctx.beginPath();
+                if (pixelPoints.length > 0) {
+                    ctx.moveTo(pixelPoints[0].x, pixelPoints[0].y);
+                    for(let i=1; i<pixelPoints.length; i++) {
+                        ctx.lineTo(pixelPoints[i].x, pixelPoints[i].y);
+                    }
+                }
+                ctx.closePath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "red"
+                ctx.stroke();
+                ctx.fillStyle = "rgba(255,0,0, 0.2)";
+                ctx.fill();
+
+            });
+
+            // 2. [현재 그리는 선] (빨간색)
+            if (isDrawingMode && currentPoints.length > 0) {
+                ctx.strokeStyle = "red";
+                ctx.beginPath();
+                ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
+                for(let i=1; i<currentPoints.length; i++) {
+                    ctx.lineTo(currentPoints[i].x, currentPoints[i].y);
+                }
+                ctx.stroke();
+
+                ctx.fillStyle = "red";
+                currentPoints.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                    ctx.fill();
+                });
+            }
+
+            // 그리기 모드일 때는 AI 박스 숨김 (방해 방지)
+            if (isDrawingMode) return;
+
+            // 3. [AI 결과 그리기]
+            if (!objects) return;
+
+            const showAlertOnly = document.getElementById('vis-alert').checked;
+            const showBBox = document.getElementById('vis-bbox').checked;
+            const showSkel = document.getElementById('vis-skeleton').checked;
+            const showText = document.getElementById('vis-text').checked;
+
+            objects.forEach(obj => {
+                if (showAlertOnly && obj.status === 'Safe') return;
+
+                let color = '#00ff00';
+                if (obj.status.includes('THREAT') || obj.status.includes('FALL')) color = '#ff00ff';
+                else if (obj.status.includes('WARNING')) color = '#00ffff';
+
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 2;
+
+                if (showBBox) {
+                    const [x1, y1, x2, y2] = obj.box;
+                    ctx.strokeRect(x1 * scaleX, y1 * scaleY, (x2 - x1) * scaleX, (y2 - y1) * scaleY);
+                }
+
+                if (showSkel && obj.keypoints) {
+                    SKELETON_PAIRS.forEach(([i, j]) => {
+                        const kp1 = obj.keypoints[i];
+                        const kp2 = obj.keypoints[j];
+                        if (kp1[0] > 0 && kp2[0] > 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(kp1[0] * scaleX, kp1[1] * scaleY);
+                            ctx.lineTo(kp2[0] * scaleX, kp2[1] * scaleY);
+                            ctx.stroke();
+                        }
+                    });
+                }
+
+                if (showText) {
+                    const [x1, y1] = obj.box;
+                    ctx.font = "bold 14px Arial";
+                    ctx.fillText(`${obj.label} (${obj.status})`, x1 * scaleX, (y1 * scaleY) - 5);
+                }
+            });
+        }
+
+        // ==========================================
+        // [4] 기본 UI 동작
+        // ==========================================
+        function changeTab(tabId) {
+            document.querySelectorAll('.tab-body').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        function saveSettings() {
+            // 1. 현재 화면의 설정값 읽어오기
+            const settingsData = {
+                "cam_id": selectedCam,
+                "fall_check": document.getElementById('chk-fall').checked,
+                "zone_check": document.getElementById('chk-zone').checked,
+                "ai_check": document.getElementById('chk-ai').checked, // 여기가 핵심
+                "fall_ratio": parseFloat(document.getElementById('sl-fall').value),
+                "reach_ratio": parseFloat(document.getElementById('sl-reach').value),
+                "hip_ratio":parseFloat(document.getElementById('sl-hip').value),
+                "ai_threshold": parseFloat(document.getElementById('sl-ai').value),
+                "lock_duration": parseInt(document.getElementById('sl-lock').value),
+
+                "vis_alert": document.getElementById('vis-alert').checked,
+                "vis_bbox": document.getElementById('vis-bbox').checked,
+                "vis_skeleton": document.getElementById('vis-skeleton').checked,
+                "vis_text": document.getElementById('vis-text').checked,
+
+                "zones": savedZones.map(z => z.points)
+            };
+
+            fetch(`${API_URL}/settings/update`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json',},
+                body: JSON.stringify(settingsData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert("설정이 저장되었습니다.");
+                    loadSettings(); // 저장 후 다시 불러옴
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert("저장 실패");
+                });
+        }
+        // ==========================================
+        // [수정됨] 설정 불러오기 및 이벤트 통합
+        // ==========================================
+
+        // 1. 서버에서 설정값 가져오기 함수
+        function loadSettings() {
+            fetch(`${API_URL}/settings/get?cam_id=${selectedCam}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log(`[CAM ${selectedCam}] 설정 로드 성공:`, data);
+
+                    // (1) 구역 데이터 복원
+                    if (data.zones) {
+                        savedZones = data.zones.map(points => ({
+                            active: true,
+                            points: points
+                        }));
+                        updateZoneList(); // 리스트 UI 갱신
+                    }
+
+                    // (2) 체크박스 상태 동기화
+                    if (data.fall_check !== undefined) document.getElementById('chk-fall').checked = data.fall_check;
+                    if (data.zone_check !== undefined) document.getElementById('chk-zone').checked = data.zone_check;
+                    if (data.ai_check !== undefined) document.getElementById('chk-ai').checked = data.ai_check;
+
+                    // (3) 슬라이더 값 및 텍스트 동기화
+                    if (data.fall_ratio !== undefined) {
+                        document.getElementById('sl-fall').value = data.fall_ratio;
+                        document.getElementById('val-fall').innerText = data.fall_ratio;
+                    }
+                    if (data.reach_ratio !== undefined) {
+                        document.getElementById('sl-reach').value = data.reach_ratio;
+                        document.getElementById('val-reach').innerText = data.reach_ratio;
+                    }
+                    if (data.hip_ratio !== undefined) {
+                        document.getElementById('sl-hip').value = data.hip_ratio;
+                        document.getElementById('val-hip').innerText = data.hip_ratio;
+                    }
+
+
+                    if (data.ai_threshold !== undefined) {
+                        document.getElementById('sl-ai').value = data.ai_threshold;
+                        document.getElementById('val-ai').innerText = data.ai_threshold;
+                    }
+                    if (data.lock_duration !== undefined) {
+                        document.getElementById('sl-lock').value = data.lock_duration;
+                        document.getElementById('val-lock').innerText = data.lock_duration;
+                    }
+                    // 필요 시 나머지 슬라이더도 동일하게 추가...
+                })
+                .catch(err => {
+                    console.error("설정 로드 실패 (API 확인 필요):", err);
+                });
+        }
+
+        // 2. 카메라 변경 이벤트 (초기화 + 로드 통합)
+        selectBox.addEventListener("change", function() {
+            selectedCam = parseInt(this.value);
+            imgElement.src = "";
+
+            // 캔버스 & 데이터 비우기 (UI 초기화)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            savedZones = [];
+            updateZoneList();
+
+            statusMsg.innerText = `CCTV-${selectedCam}번 연결 중...`;
+            statusMsg.style.color = "orange";
+
+            // 새로운 카메라의 설정 불러오기
+            loadSettings();
+        });
+
+        // ==========================================
+        // [5] 통신 로직
+        // ==========================================
+        function connect() {
+            socket = new WebSocket(WS_URL);
+            socket.binaryType = "arraybuffer"; // [중요] 바이너리 받을 준비
+
+            socket.onopen = function() {
+                console.log("✅ 웹소켓(바이너리) 연결됨");
+                statusMsg.innerText = `● LIVE (CAM ${selectedCam})`;
+                statusMsg.style.color = "#0f0";
+            };
+
+            // 데이터를 저장해둘 변수
+            let lastActionInfo = null;
+
+            socket.onmessage = function(event) {
+                // 1. 텍스트 데이터 (JSON) 도착 -> 정보만 갱신
+                if (typeof event.data === "string") {
+                    try {
+                        const data = JSON.parse(event.data);
+                        // 파이어 라우터에서 보낸 구조에 맞춤
+                        if (data.action_info) {
+                            lastActionInfo = data.action_info;
+                        }
+                    } catch (e) { console.error(e); }
+                }
+                // 2. 바이너리 데이터 (이미지) 도착 -> 그리기 수행
+                else if (event.data instanceof ArrayBuffer) {
+                    // (1) 이미지 그리기
+                    const blob = new Blob([event.data], { type: "image/jpeg" });
+                    const url = URL.createObjectURL(blob);
+
+                    // 이전 이미지 URL 메모리 해제 (메모리 누수 방지)
+                    if (imgElement.src) URL.revokeObjectURL(imgElement.src);
+                    imgElement.src = url;
+
+                    // (2) 아까 받은 정보(JSON)가 내 카메라 번호랑 맞으면 박스 그리기
+                    if (lastActionInfo && lastActionInfo.cam_no == selectedCam) {
+                        drawOverlays(lastActionInfo.objects);
+                        statusMsg.innerText = `● LIVE (CAM ${selectedCam})`;
+                        statusMsg.style.color = "#0f0";
+                    }
+                }
+            };
+
+            socket.onclose = function() {
+                statusMsg.innerText = "● OFF (재접속...)";
+                statusMsg.style.color = "red";
+                setTimeout(connect, 3000);
+            };
+        }
+
+        // ==========================================
+        // [6] 페이지 초기 실행
+        // ==========================================
+        loadSettings(); // 1. 초기 설정 로드
+        connect();      // 2. 웹소켓 연결
+    </script>
+</div>
 </html>
