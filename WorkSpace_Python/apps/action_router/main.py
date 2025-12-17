@@ -25,16 +25,17 @@ CAM_ID_1 = "HSYCAM"
 CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
 
 # [CCTV-02] 파일 반복
-CAM_ID_2 = "AHSCAM"
+VIDEO_PATH_2 = r"C:\Users\hsy\Desktop\old.mp4"
 CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
 
 # [CCTV-03] 실시간 카메라
-VIDEO_PATH_3 = ""
+VIDEO_PATH_3 = r"C:\Users\hsy\Desktop\old.mp4"
 CONFIG_FILE_3 = os.path.join(SETTINGS_DIR, "cam_3.json")
 
 # [CCTV-04] 파일 반복
-VIDEO_PATH_4 = ""
+VIDEO_PATH_4 = r"C:\Users\hsy\Desktop\old.mp4"
 CONFIG_FILE_4 = os.path.join(SETTINGS_DIR, "cam_4.json")
+
 
 async def main(pc_id):
     print(">>>[System] Initializing Models...")
@@ -66,10 +67,10 @@ async def main(pc_id):
 
     print(">>> [System] Streams Started.")
     await asyncio.gather(
-        #camera_post_video(source1, detector1, pc_id, 1),
-        camera_post_video(source2, detector2, pc_id, CAM_ID_2),
-        # camera_post_video(source3, detector3, pc_id, 3),
-        # camera_post_video(source4, detector4, pc_id, 4)
+        camera_post_video(source1, detector1, pc_id, 1),
+        camera_post_video(source2, detector2, pc_id, 2),
+        camera_post_video(source3, detector3, pc_id, 3),
+        camera_post_video(source4, detector4, pc_id, 4)
     )
 
 

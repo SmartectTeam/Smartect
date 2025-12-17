@@ -20,48 +20,6 @@ from common.config import PCPath
 from apps.action_router.detector import MotionDetector
 
 
-'''
-# 원본 코드
-async def camera_post_video(pc_id, cam_id):
-    pc2 = PCPath(pc_id)
-    url = f"ws://{pc2.PC_IP}:8000/ws/input"
-    
-    Md = MotionDetector(settings_path=None)
-
-    # cap = phone_connect(cam_id)
-    # cap = snap_cam_connect(cam_id)
-    cap = cam_connect(cam_id)
-
-    async with websockets.connect(url) as websocket:
-        print("PC2 연결 성공!")
-
-        frame_count = 0
-        skip_frame = 1000
-
-        while True:
-            ret, frame = cap.read()
-            if not ret: break
-
-            Md.process_frame(frame)
-
-            action_data = {"is_touch": False, "confidence": 0.0}
-
-            frame = cv2.resize(frame, (640, 480))
-
-            if frame_count % skip_frame == 0:
-                action_json = action_model_video(frame)
-
-            ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
-
-            await websocket.send(json.dumps(action_json))
-            await websocket.send(buffer.tobytes())
-
-            # await asyncio.sleep(0.01)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                camera_disconnect(cap)
-                break
-'''
 # 카메라 ID를 정수로 변환하는 매핑
 def cam_id_to_int(cam_id):
     """카메라 ID 문자열을 정수로 변환 (EventJson의 cam_no는 int 타입)"""
@@ -112,7 +70,7 @@ async def camera_post_video(source, detector, pc_id, cam_id):
                     # 이미지 바이트 전송
                     await websocket.send(buffer.tobytes())
 
-                await asyncio.sleep(0.01)
+                # await asyncio.sleep(0.01)
 
     except Exception as e:
         print(f"[Endpoint] Error on CCTV-{cam_id}: {e}")

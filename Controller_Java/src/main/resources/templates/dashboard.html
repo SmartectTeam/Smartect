@@ -65,6 +65,7 @@
                         </div>
                         <div class="video-display" style="position: relative;">
                             <img id="live-image-2" src="" alt="CCTV 2" style="width: 100%; height: 100%; object-fit: contain;">
+
                             <canvas id="detection-canvas-2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
@@ -81,7 +82,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 3">
+                            <img id="live-image-3" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-3" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status">AI 분석 중...</span>
@@ -97,11 +99,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 4">
-                            <div class="bounding-box"
-                                 style="top: 60%; left: 45%; width: 25%; height: 30%;">
-                                <span class="box-label">물체 이동</span>
-                            </div>
+                            <img id="live-image-4" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status text-cyan">물체 이동 감지</span>
@@ -152,6 +151,7 @@
     <script src="/js/logs.js"></script>
     <script src="/js/render.js"></script>
     <script src="/js/stream.js"></script>
+
     <!--    페이지 콘텐츠 끝    -->
 </div>
 
