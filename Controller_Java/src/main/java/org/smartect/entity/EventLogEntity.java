@@ -1,33 +1,43 @@
 package org.smartect.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // Entity 접근 제한
 @Table(name="event_log")
 public class EventLogEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="event_no")
     private Long eventNo;
 
-    @Column(name="cam_no")
-    private int camNo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    // EventLog 에서 cam 참조(cam에서는 OneToMany명시 필요 없음)
+    // CamEntity
+    @JoinColumn(name="cam_no",nullable=false) // FK JOIN
+    private CamEntity camEntity;
 
-    @Column(name="event_type")
+    @Column(name="event_type",length=100,nullable = false)
     private String eventType;
 //
 //    @Column(name="danger_level")
 //    private Integer dangerLevel; // 위험도 0~3?
-    @Column(name="screenshot_path")
+    @Column(name="screenshot_path",length=500,nullable = false)
     private String screenshotPath; // Python에서 저장, 경로만 넘어옴
 
+    @Lob // DB : TEXT
     @Column(name="memo")
     private String memo;
 
-    @Column(name="created_at")
+    @CreationTimestamp
+    @Column(name="created_at",nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name="checked_at")

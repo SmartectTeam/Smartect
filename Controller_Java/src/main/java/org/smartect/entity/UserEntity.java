@@ -1,45 +1,54 @@
 package org.smartect.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.smartect.common.enums.UserRole;
+import org.smartect.common.enums.UserStatus;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name="user")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name="users")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="user_no")
     private Long userNo; // Autoincrement
 
-    @Column(name="user_id")
+    @Column(name="user_id",length = 50,nullable = false,unique = true)
     private String userId; // 아이디
 
-    @Column(name="password")
+    @Column(name="password",nullable = false,length = 255)
     private String password;
 
-    @Column(name="name")
+    @Column(name="name",nullable = false,length = 50)
     private String name;
 
-    @Column(name="role")
-    private UserRole role;
+    @Enumerated(EnumType.STRING) // 'ADMIN','STAFF'
+    @Column(name="role",nullable = false,length = 20)
+    private UserRole role = UserRole.STAFF; // DEFAULT = STAFF
 
-    @Column(name="status")
-    private Status status;
+    @Enumerated(EnumType.STRING) // 'ACTIVE','INACTIVE','WITHDRAWAL'
+    @Column(name="status",nullable = false,length = 20)
+    private UserStatus status = UserStatus.ACTIVE; //DEFAULT = ACTIVE
 
     @CreationTimestamp// DB에 처음 저장될 때 자동으로
-    @Column(name="created_at", updatable = false) // 수정 X
+    @Column(name="created_at", updatable = false,nullable = false) // 수정 X
     private LocalDateTime createdAt;
 
-    @Column(name="lastLogin")
-    private LocalDateTime last_login;
+    @Column(name="last_login")
+    private LocalDateTime lastLogin;
 
-    public enum UserRole{
-        ADMIN,STAFF
-    }
-    public enum Status{
-        ACTIVE,INACTIVE,WITHDRAWAL
-    }
+// org.smartect.common.enums 로 이동
+//    public enum UserRole{
+//        ADMIN,STAFF
+//    }
+//    public enum Status{
+//        ACTIVE,INACTIVE,WITHDRAWAL
+//    }
 }
