@@ -179,6 +179,7 @@
 /* 미확인 */
 #eventList li.unchecked {
     font-weight: 600;
+    border-right:2px solid yellow;
 }
 
 /* 선택됨 */

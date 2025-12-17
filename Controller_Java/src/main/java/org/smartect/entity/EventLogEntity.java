@@ -45,4 +45,12 @@ public class EventLogEntity {
 
 
 
+    // JPA 영속성 컨텍스트 + 더티체킹
+    // 때문에 객체 값 바꾸면 자동으로 DB가 업데이트된다.
+    public void updateCheckedAt(LocalDateTime now) {
+        this.checkedAt = now;
+    }
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
 }
