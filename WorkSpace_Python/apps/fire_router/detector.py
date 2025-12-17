@@ -1,16 +1,10 @@
 # 화재 감지 모델 탑재 - json 파일로 변환
 # 실행 : uvicorn apps.fire_router.main:app --reload
-from ultralytics import YOLO
-from common.config import ModelPath
 import numpy as np
 import cv2
-from common.schemas import EventJson, EventMap, CombinedJson
 from datetime import datetime
 
-
-model = YOLO(ModelPath.FIRE_MODEL)
-if model:
-    print("Model loaded")
+from common.schemas import EventJson, EventMap, CombinedJson
 
 
 def frame_detector(image_bytes):
@@ -19,7 +13,7 @@ def frame_detector(image_bytes):
     return decoded_frame
 
 
-def fire_model_video(frame, threshold_map):
+def fire_model_video(model, frame, threshold_map, cam_no):
     min_conf = min(threshold_map.values())
     results = model(frame, stream=True, conf=min_conf, verbose=False)
     fire_map = []
@@ -47,7 +41,7 @@ def fire_model_video(frame, threshold_map):
                 ))
                 if class_name == "fire":
                     fire_json.append(EventJson(
-                        cam_no=0,
+                        cam_no=cam_no,
                         event_type="fire",
                         danger_level=3,
                         event_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -56,7 +50,7 @@ def fire_model_video(frame, threshold_map):
 
                 elif class_name == "smoke":
                     fire_json.append(EventJson(
-                        cam_no=0,
+                        cam_no=cam_no,
                         event_type="smoke",
                         danger_level=3,
                         event_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
