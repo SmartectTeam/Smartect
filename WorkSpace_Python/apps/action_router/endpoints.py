@@ -62,12 +62,33 @@ async def camera_post_video(pc_id, cam_id):
                 camera_disconnect(cap)
                 break
 '''
+# 카메라 ID를 정수로 변환하는 매핑
+def cam_id_to_int(cam_id):
+    """카메라 ID 문자열을 정수로 변환 (EventJson의 cam_no는 int 타입)"""
+    cam_id_map = {
+        "HSYCAM": 1,
+        "AHSCAM": 2,
+    }
+    
+    # 매핑에 있으면 해당 정수 반환
+    if cam_id in cam_id_map:
+        return cam_id_map[cam_id]
+    
+    # 매핑에 없으면 문자열이 숫자면 그대로 반환, 아니면 해시값 사용
+    try:
+        return int(cam_id)
+    except ValueError:
+        return abs(hash(cam_id)) % 1000
+
 # 인자 4개 받도록 변경
 async def camera_post_video(source, detector, pc_id, cam_id):
     pc = PCPath(pc_id)
     url = f"ws://{pc.PC_IP}:8000/ws/input"
 
     print(f"[Endpoint] Connecting CCTV={cam_id} to {url} ...")
+    
+    # cam_id를 정수로 변환 (detector.process_frame의 EventJson.cam_no는 int 타입)
+    cam_no = cam_id_to_int(cam_id)
 
     try:
         async with websockets.connect(url) as websocket:
@@ -79,8 +100,8 @@ async def camera_post_video(source, detector, pc_id, cam_id):
                     print(f"[Endpoint] Source ended for CCTV-{cam_id}")
                     break
 
-                # 로직 수행 : cam_id 울 넘겨서 데이터 안에 번호를 담음
-                annotated_frame, event_data = detector.process_frame(frame, cam_id)
+                # 로직 수행 : cam_no(정수)를 넘겨서 데이터 안에 번호를 담음
+                annotated_frame, event_data = detector.process_frame(frame, cam_no)
 
                 # 이미지 인코딩
                 ret, buffer = cv2.imencode('.jpg', annotated_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])

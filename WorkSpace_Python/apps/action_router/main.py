@@ -25,7 +25,7 @@ CAM_ID_1 = "HSYCAM"
 CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
 
 # [CCTV-02] 파일 반복
-VIDEO_PATH_2 = ""
+CAM_ID_2 = "AHSCAM"
 CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
 
 # [CCTV-03] 실시간 카메라
@@ -41,33 +41,33 @@ async def main(pc_id):
     shared_models = AIModels()
 
     # CCTV 01
-    print(">>>[Setup] CCTV-1(live)")
-    detector1 = MotionDetector(settings_path=CONFIG_FILE_1)
-    detector1.models = shared_models
-    source1 = WebcamStream(CAM_ID_1)
+    # print(">>>[Setup] CCTV-1(live)")
+    # detector1 = MotionDetector(settings_path=CONFIG_FILE_1)
+    # detector1.models = shared_models
+    # source1 = WebcamStream(CAM_ID_1)
 
     # CCTV 02
     print(">>>[Setup] CCTV-2(live)")
     detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
     detector2.models = shared_models
-    source2 = FileLoofStream(VIDEO_PATH_2)
+    source2 = WebcamStream(CAM_ID_2)
 
     # CCTV 03
-    print(">>>[Setup] CCTV-3(live)")
-    detector3 = MotionDetector(settings_path=CONFIG_FILE_3)
-    detector3.models = shared_models
-    source3 = FileLoofStream(VIDEO_PATH_3)
+    # print(">>>[Setup] CCTV-3(live)")
+    # detector3 = MotionDetector(settings_path=CONFIG_FILE_3)
+    # detector3.models = shared_models
+    # source3 = FileLoofStream(VIDEO_PATH_3)
 
-    # CCTV 04
-    print(f">>>[Setup] CCTV-4(file)")
-    detector4 = MotionDetector(settings_path=CONFIG_FILE_4)
-    detector4.models = shared_models
-    source4 = FileLoofStream(VIDEO_PATH_4)
+    # # CCTV 04
+    # print(f">>>[Setup] CCTV-4(file)")
+    # detector4 = MotionDetector(settings_path=CONFIG_FILE_4)
+    # detector4.models = shared_models
+    # source4 = FileLoofStream(VIDEO_PATH_4)
 
     print(">>> [System] Streams Started.")
     await asyncio.gather(
-        camera_post_video(source1, detector1, pc_id, 1),
-        # camera_post_video(source2, detector2, pc_id, 2),
+        #camera_post_video(source1, detector1, pc_id, 1),
+        camera_post_video(source2, detector2, pc_id, CAM_ID_2),
         # camera_post_video(source3, detector3, pc_id, 3),
         # camera_post_video(source4, detector4, pc_id, 4)
     )
