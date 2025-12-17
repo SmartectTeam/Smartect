@@ -26,6 +26,8 @@ class SettingsRequest(BaseModel):
     zone_check: bool
     ai_check: bool
     fall_ratio: float
+    reach_ratio: float
+    hip_ratio: float
     ai_threshold: float
     lock_duration: int
     zones: List[List[List[float]]]

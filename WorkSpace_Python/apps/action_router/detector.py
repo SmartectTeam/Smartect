@@ -88,29 +88,7 @@ class MotionDetector:
         self.reload_settings()
 
         # =========================================================================
-        # [A] 성능 테스트용 Bypass (AI 끄면 단순 중계)
-        # =========================================================================
-        if not self.settings.get('ai_check', True):
-            h_org, w_org = frame.shape[:2]
-            new_w = 800
-            new_h = int(h_org * (new_w / w_org))
-            frame_resized = cv2.resize(frame, (new_w, new_h))
-
-            # 바이너리 전송이므로 Base64 변환 안 함 (빈 값)
-            current_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            event_data = EventJson(
-                cam_no=cam_id,
-                event_type="Safe (Bypass)",
-                danger_level=0,
-                event_time=current_time,
-                screenshot_path="",
-                img_base64="",
-                objects=[]
-            )
-            return frame_resized, event_data
-
-        # =========================================================================
-        # [B] AI 모드 (프레임 스킵 + 로직 통합)
+        # AI 모드 (프레임 스킵 + 로직 통합)
         # =========================================================================
         if self.models is None: self.models = ai_models.AIModels()
 
@@ -175,23 +153,23 @@ class MotionDetector:
 
                     # (1) 낙상 감지
                     if self.settings['fall_check']:
-                        if algorithm.check_fall(box, self.settings['fall_ratio']):
+                        if algorithm.check_fall(box, self.settings.get('fall_ratio', 1.2)):
                             current_status = "Fall"
                             danger_lvl = 3
 
-                    # (2) 구역 감지 [오류 수정된 코드]
+                    # (2) 구역 감지
                     if self.settings['zone_check'] and danger_lvl < 2:
                         wrists = [filled_kp[9], filled_kp[10]]
-
-                        # [[수정됨]] 리스트 -> 딕셔너리 자동 변환
+                        pixel_range = self.settings.get('reach_ratio', 0.85) * 100
                         formatted_zones = []
+
                         for z in self.settings['zones']:
                             if isinstance(z, list):
                                 formatted_zones.append({'points': z, 'active': True})
                             else:
                                 formatted_zones.append(z)
 
-                        zone_res = algorithm.check_zone(wrists, formatted_zones, w, h)
+                        zone_res = algorithm.check_zone(wrists, formatted_zones, w, h, warning_px=pixel_range)
 
                         if zone_res == "Danger":
                             current_status = "THREAT(Zone)"

@@ -294,21 +294,73 @@
             // 초기화
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. [사용자 구역 그리기] (노란색)
+            // 1. [사용자 구역 그리기] (노란색+빨간색)
             ctx.lineWidth = 3;
             savedZones.forEach(zone => {
                 if (!zone.points || zone.points.length === 0) return;
-                ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
-                ctx.fillStyle = "rgba(255, 255, 0, 0.2)";
+
+                // 캔버스 픽셀 좌표로 변환
+                const pixelPoints = zone.points.map(p => ({
+                    x: p[0] * canvas.width,
+                    y: p[1] * canvas.height
+                }))
+
+                // 구역의 중심점 계산(확장 기준)
+                let  cx = 0, cy = 0;
+                pixelPoints.forEach(p => { cx += p.x; cy += p.y; })
+                cx /= pixelPoints.length;
+                cy /= pixelPoints.length;
+
+                // 확장 거리 계산
+                const reachEl = document.getElementById('sl-reach');
+                const reachVal = reachEl ? parseFloat(reachEl.value) : 0.85;
+                const expandDist = reachVal * 100;
+
+                // 중심점에서 바깥으로 점 밀어내기
+                const expandedPoints = pixelPoints.map(p =>{
+                    const dx = p.x - cx;
+                    const dy = p.y - cy;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist === 0) return p;
+
+                    // 현재 거리 + 확장 거리만큼 비율 늘리기
+                    const scale = (dist + expandDist) / dist;
+                    return{
+                        x: cx + dx * scale,
+                        y: cy + dy * scale
+                    };
+                });
+                // 노란색 경고구역 그리기
                 ctx.beginPath();
-                const pts = zone.points;
-                ctx.moveTo(pts[0][0] * canvas.width, pts[0][1] * canvas.height);
-                for(let i=1; i<pts.length; i++) {
-                    ctx.lineTo(pts[i][0] * canvas.width, pts[i][1] * canvas.height);
+                if (expandedPoints.length >0) {
+                    ctx.moveTo(expandedPoints[0].x, expandedPoints[0].y);
+                    for (let i = 1; i < expandedPoints.length; i++) {
+                        ctx.lineTo(expandedPoints[i].x, expandedPoints[i].y);
+                    }
                 }
                 ctx.closePath();
+
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "yellow";
+                ctx.setLineDash([5,5]);
                 ctx.stroke();
+                ctx.setLineDash([]);
+
+                // 빨간 위험구역 그리기
+                ctx.beginPath();
+                if (pixelPoints.length > 0) {
+                    ctx.moveTo(pixelPoints[0].x, pixelPoints[0].y);
+                    for(let i=1; i<pixelPoints.length; i++) {
+                        ctx.lineTo(pixelPoints[i].x, pixelPoints[i].y);
+                    }
+                }
+                ctx.closePath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "red"
+                ctx.stroke();
+                ctx.fillStyle = "rgba(255,0,0, 0.2)";
                 ctx.fill();
+
             });
 
             // 2. [현재 그리는 선] (빨간색)
@@ -395,9 +447,16 @@
                 "zone_check": document.getElementById('chk-zone').checked,
                 "ai_check": document.getElementById('chk-ai').checked, // 여기가 핵심
                 "fall_ratio": parseFloat(document.getElementById('sl-fall').value),
+                "reach_ratio": parseFloat(document.getElementById('sl-reach').value),
+                "hip_ratio":parseFloat(document.getElementById('sl-hip').value),
                 "ai_threshold": parseFloat(document.getElementById('sl-ai').value),
                 "lock_duration": parseInt(document.getElementById('sl-lock').value),
-                // 구역 데이터 포함
+
+                "vis_alert": document.getElementById('vis-alert').checked,
+                "vis_bbox": document.getElementById('vis-bbox').checked,
+                "vis_skeleton": document.getElementById('vis-skeleton').checked,
+                "vis_text": document.getElementById('vis-text').checked,
+
                 "zones": savedZones.map(z => z.points)
             };
 
@@ -446,6 +505,16 @@
                         document.getElementById('sl-fall').value = data.fall_ratio;
                         document.getElementById('val-fall').innerText = data.fall_ratio;
                     }
+                    if (data.reach_ratio !== undefined) {
+                        document.getElementById('sl-reach').value = data.reach_ratio;
+                        document.getElementById('val-reach').innerText = data.reach_ratio;
+                    }
+                    if (data.hip_ratio !== undefined) {
+                        document.getElementById('sl-hip').value = data.hip_ratio;
+                        document.getElementById('val-hip').innerText = data.hip_ratio;
+                    }
+
+
                     if (data.ai_threshold !== undefined) {
                         document.getElementById('sl-ai').value = data.ai_threshold;
                         document.getElementById('val-ai').innerText = data.ai_threshold;
