@@ -29,7 +29,7 @@
 
         <!-- 글 작성 -->
         <div class="board-write">
-            <form th:action="@{/post}" method="post" id="postForm">
+            <form th:action="@{/api/post}" method="post" id="postForm">
                 <!--    csrf 토큰, 작성자 ip 정보 전달 추가해야함 @@        -->
                 <input name="title" type="text" placeholder="제목" required>
                 <textarea name="content" placeholder="내용을 입력해 주세요." required></textarea>

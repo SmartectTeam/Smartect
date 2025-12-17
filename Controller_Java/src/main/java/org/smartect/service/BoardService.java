@@ -8,7 +8,7 @@ import org.smartect.entity.BoardEntity;
 import org.smartect.repository.BoardRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.format.DateTimeFormatter;
+import static org.smartect.common.formatter.DateTimeFormatters.DEFAULT;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +17,6 @@ import java.util.List;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-
-    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
 
     @Transactional
     public BoardDTO create(BoardRequest request,String ip) {
@@ -37,7 +34,7 @@ public class BoardService {
                 saved.getWriterInfo(),
                 saved.getTitle(),
                 saved.getContent(),
-                saved.getCreatedAt().format(FORMATTER)
+                saved.getCreatedAt().format(DEFAULT)
         ); // 화면에 표시할 객체 전달
     }
 
@@ -52,7 +49,7 @@ public class BoardService {
                     entity.getWriterInfo(), // 생성자 입력 순서 주의
                     entity.getTitle(),
                     entity.getContent(),
-                    entity.getCreatedAt().format(FORMATTER)
+                    entity.getCreatedAt().format(DEFAULT)
             );
             dtoList.add(dto);
         }

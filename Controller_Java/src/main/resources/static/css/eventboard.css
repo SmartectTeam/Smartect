@@ -1,6 +1,5 @@
 /* ===========================================================
    EventBoard 전체 컨테이너
-   (Dashboard 스타일과 톤을 정확히 맞춘 버전)
 =========================================================== */
 .eventboard-container {
     display: flex;
@@ -10,7 +9,7 @@
 }
 
 /* ===========================================================
-   상단 헤더 (Dashboard와 통일)
+   상단 헤더
 =========================================================== */
 .eventboard-header {
     height: 60px;
@@ -34,7 +33,7 @@
 }
 
 /* ===========================================================
-   메인 2분할 구조
+   메인 레이아웃
 =========================================================== */
 .eventboard-main {
     display: flex;
@@ -44,14 +43,14 @@
 }
 
 /* ===========================================================
-   왼쪽 EVENT LIST
+   LEFT : 이벤트 목록
 =========================================================== */
 .event-list {
     width: 35%;
     background-color: #0f172a;
     border: 1px solid #334155;
     border-radius: 6px;
-    padding: 14px;          /* 기존 20px → ↓ */
+    padding: 14px;
     overflow-y: auto;
 }
 
@@ -93,18 +92,16 @@
 
 /* ========================= 필터 그룹 ========================= */
 .filter-group {
-    display: flex;              /* 가로 정렬 */
+    display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;        /* 높이 줄이기 */
+    margin-bottom: 10px;
 }
 
 .filter-label {
-    display: inline-block;
-    font-size: 12px;            /* ↓ */
+    font-size: 12px;
     color: #94a3b8;
-    min-width: 70px;            /* 라벨 폭 고정 */
-    margin-bottom: 0;           /* 세로 여백 제거 */
+    min-width: 70px;
 }
 
 .chip-group {
@@ -114,29 +111,29 @@
 }
 
 .chip-btn {
-    padding: 3px 9px;           /* ↓ */
+    padding: 3px 9px;
+    height: 24px;
+    font-size: 11px;
     border-radius: 999px;
     border: 1px solid #334155;
     background: #1e293b;
     color: #e2e8f0;
-    font-size: 11px;
     cursor: pointer;
-    height: 24px;               /* ↓ */
-    line-height: 1;
 }
 
+.chip-btn:hover {
+    background: #334155;
+}
 
- .chip-btn:hover {
-     background: #334155;
- }
+.chip-btn.active {
+    background: #06b6d4;
+    border-color: #06b6d4;
+    color: #0f172a;
+}
 
- .chip-btn.active {
-     background: #06b6d4;
-     border-color: #06b6d4;
-     color: #0f172a;
- }
-
-/* ========================= 이벤트 목록 ========================= */
+/* ===========================================================
+   이벤트 목록 카드 (기본)
+=========================================================== */
 #eventList {
     list-style: none;
     padding: 0;
@@ -145,12 +142,13 @@
 
 #eventList li {
     background: #1e293b;
-    padding: 8px 10px;          /* ↓ */
-    margin-bottom: 6px;         /* ↓ */
-    border-radius: 5px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    border: 2px solid transparent;
     cursor: pointer;
+    font-size: 12px;
     transition: 0.15s;
-    font-size: 12px;            /* ↓ */
 }
 
 #eventList li:hover {
@@ -158,10 +156,10 @@
 }
 
 #eventList li strong {
-    color: #06b6d4;
-    font-size: 12px;
     display: block;
     margin-bottom: 2px;
+    font-size: 12px;
+    color: #06b6d4;
 }
 
 #eventList li .event-time {
@@ -170,7 +168,54 @@
 }
 
 /* ===========================================================
-   오른쪽 상세보기
+   상태별 스타일
+=========================================================== */
+
+/* 확인됨 */
+#eventList li.checked {
+    opacity: 0.6;
+}
+
+/* 미확인 */
+#eventList li.unchecked {
+    font-weight: 600;
+}
+
+/* 선택됨 */
+#eventList li.selected {
+    border: 2px solid #06b6d4;
+    background-color: #334155;
+}
+
+/* ===========================================================
+   FIRE 이벤트
+=========================================================== */
+#eventList li.fire {
+    border-left: 2px solid #ef4444;
+    background: linear-gradient(
+        90deg,
+        rgba(239, 68, 68, 0.15),
+        #1e293b
+    );
+}
+
+#eventList li.fire strong {
+    color: #f87171;
+}
+
+/* FIRE + 선택됨 */
+#eventList li.fire.selected {
+    border: 2px solid #f87171;
+    background: linear-gradient(
+        90deg,
+        rgba(239, 68, 68, 0.2),
+        #334155
+    );
+}
+
+
+/* ===========================================================
+   RIGHT : 상세보기
 =========================================================== */
 .event-detail {
     width: 65%;
@@ -194,7 +239,7 @@
 }
 
 /* ===========================================================
-   스크롤바 (Dashboard 스타일 동일)
+   스크롤바
 =========================================================== */
 .event-list::-webkit-scrollbar,
 .event-detail::-webkit-scrollbar {
@@ -210,14 +255,4 @@
 .event-list::-webkit-scrollbar-track,
 .event-detail::-webkit-scrollbar-track {
     background: #1e293b;
-}
-
-/* FIRE 이벤트 강조 */
-#eventList li.fire {
-    border-left: 4px solid #ef4444;
-    background: linear-gradient(90deg, rgba(239,68,68,0.15), #1e293b);
-}
-
-#eventList li.fire strong {
-    color: #f87171;
 }

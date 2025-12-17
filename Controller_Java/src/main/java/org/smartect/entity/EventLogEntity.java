@@ -19,9 +19,10 @@ public class EventLogEntity {
     private Long eventNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    // EventLog 에서만 cam 참조함(cam에서는 OneToMany명시 필요 없음)
+    // EventLog 에서 cam 참조(cam에서는 OneToMany명시 필요 없음)
+    // CamEntity
     @JoinColumn(name="cam_no",nullable=false) // FK JOIN
-    private CamEntity cam;
+    private CamEntity camEntity;
 
     @Column(name="event_type",length=100,nullable = false)
     private String eventType;

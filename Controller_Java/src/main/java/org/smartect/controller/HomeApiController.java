@@ -5,22 +5,24 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.smartect.dto.BoardDTO;
 import org.smartect.dto.BoardRequest;
+import org.smartect.dto.EventLogDTO;
 import org.smartect.service.BoardService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.smartect.service.EventLogService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
-public class BoardApiController {
+@RequestMapping("/api")
+public class HomeApiController {
+    private final BoardService boardService;
 
-    @Autowired
-    private BoardService boardService;
+    public HomeApiController(BoardService boardService) {
+        this.boardService = boardService;
+    }
 
-    // ajax 방식 게시물 등록
+    // 비동기 방식 게시물 등록
     @PostMapping(value="/post",consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public BoardDTO boardInsert(@RequestBody @Valid BoardRequest req,
@@ -30,5 +32,7 @@ public class BoardApiController {
         // 게시물 저장 로직
         return boardService.create(req,ip);
     }
+
+
 
 }

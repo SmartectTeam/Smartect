@@ -27,9 +27,9 @@
 
                 <div class="filter-row">
                     <input id="searchBox" type="text" placeholder="검색 (카메라 / 위치 / 유형)">
-                    <button class="primary-btn" onclick="loadEvents()">검색</button>
+                    <button class="primary-btn" onclick="renderEvents()">검색</button>
                 </div>
-
+                <!-- --------------- 이벤트 필터 --------------- start -->
                 <!-- 유형 -->
                 <div class="filter-group">
                     <span class="filter-label">이벤트 유형</span>
@@ -45,10 +45,10 @@
                 <div class="filter-group">
                     <span class="filter-label">기간</span>
                     <div class="chip-group" data-filter="period">
-                        <button class="chip-btn active" data-value="ALL">전체</button>
+                        <button class="chip-btn active" data-value="ALL">ALL</button>
                         <button class="chip-btn" data-value="TODAY">오늘</button>
-                        <button class="chip-btn" data-value="WEEK">1주</button>
-                        <button class="chip-btn" data-value="MONTH">1개월</button>
+                        <button class="chip-btn" data-value="WEEK">일주일</button>
+                        <button class="chip-btn" data-value="MONTH">한달</button>
                     </div>
                 </div>
 
@@ -57,11 +57,13 @@
                     <span class="filter-label">확인 상태</span>
                     <div class="chip-group" data-filter="checked">
                         <button class="chip-btn active" data-value="ALL">ALL</button>
-                        <button class="chip-btn" data-value="UNCHECKED">미확인</button>
-                        <button class="chip-btn" data-value="CHECKED">확인</button>
+                        <button class="chip-btn" data-value="UNCHECKED">UNCHECK</button>
+                        <button class="chip-btn" data-value="CHECKED">CHECKED</button>
                     </div>
                 </div>
+                <!-- --------------- 이벤트 필터 --------------- end -->
 
+                <!-- 이벤트 목록 -->
                 <ul id="eventList"></ul>
             </div>
 
@@ -77,31 +79,55 @@
     </div>
 
     <script>
+        /* ================= 더미 데이터 =================
         const events = [
             {id:1, cam:"CAM-01", location:"전시장 A", type:"FIRE", createdAt:"2025-01-15T10:32", memo:"연기 감지", checkedAt:null},
             {id:2, cam:"CAM-02", location:"출입구", type:"ACCESS", createdAt:"2025-01-15T09:58", memo:"출입 제한 구역 침입", checkedAt:"2025-01-15T10:05"},
             {id:3, cam:"CAM-03", location:"복도", type:"SUSPICIOUS", createdAt:"2025-01-14T18:21", memo:"의심 행동 감지", checkedAt:null}
         ];
-        <!-- 로그 목록 선택 상태 초기화 -->
+        */
+        let events = [];
+
         let selectedEventId = null;
         let filters = { type:'ALL', period:'ALL', checked:'ALL' };
 
+        /* ================= 필터 버튼 ================= */
         document.querySelectorAll('.chip-group').forEach(group => {
             group.addEventListener('click', e => {
                 if (!e.target.classList.contains('chip-btn')) return;
 
-                const filterType = group.dataset.filter;
+                const key = group.dataset.filter;
                 const value = e.target.dataset.value;
 
                 group.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
 
-                filters[filterType] = value;
-                loadEvents();
+                filters[key] = value;
+                renderEvents();
             });
         });
 
-        function loadEvents() {
+        // DB 데이터 가져오기
+        function loadEvents(){
+            fetch("/api/events")
+                .then(res => res.json())
+                .then(data =>{
+                    events = data.map(e =>({
+                        id:e.eventNo,
+                        cam : e.camDTO.name,
+                        location : e.camDTO.location,
+                        type : e.eventType,
+                        memo : e.memo,
+                        createdAt : e.createdAt,
+                        checkedAt : e.checkedAt
+                    }));
+                    renderEvents(); // 랜더링
+                })
+                .catch(err => console.error("로그 목록 로딩 실패",err));
+        }
+
+        // 더미데이터 삭제 후 loadEvents -> renderEvents 랜더링 전용으로 이름 변경
+        function renderEvents() {
             const list = document.getElementById("eventList");
             const keyword = document.getElementById("searchBox").value.toLowerCase();
             list.innerHTML = "";
@@ -136,60 +162,58 @@
                 return;
             }
 
-                    filtered.forEach(e => {
-            const li = document.createElement("li");
+            filtered.forEach(e => {
+                const li = document.createElement("li");
 
-            li.classList.add(e.checkedAt ? 'checked' : 'unchecked');
-            if (e.type === 'FIRE') li.classList.add('fire');
-            if (e.id === selectedEventId) li.classList.add('selected');
+                li.classList.add(e.checkedAt ? 'checked' : 'unchecked');
+                if (e.type === 'FIRE') li.classList.add('fire');
+                if (e.id === selectedEventId) li.classList.add('selected');
 
-            li.onclick = () => {
-                selectedEventId = e.id;
-                showDetail(e);
-                loadEvents(); // 선택 표시 갱신
-            };
+                li.onclick = () => {
+                    selectedEventId = e.id;
+                    showDetail(e);
+                    renderEvents();
+                };
 
-            li.innerHTML = `
-                <strong>${e.cam}</strong>
-                <div>${e.location}</div>
-                <div class="event-type">${e.type}</div>
-                <div class="event-time">${e.createdAt.replace('T',' ')}</div>
-            `;
-            list.appendChild(li);
-        });
-
-
-        }
-        <!-- 확인 처리 함수 -->
-        function markChecked(id) {
-            const target = events.find(e => e.id === id);
-            if (!target) return;
-
-            target.checkedAt = new Date().toISOString();
-
-            showDetail(target);
-            loadEvents();
+                li.innerHTML = `
+                    <strong>${e.cam}</strong>
+                    <div>${e.location}</div>
+                    <div class="event-type">${e.type}</div>
+                    <div class="event-time">${e.createdAt}</div>
+                `;
+                list.appendChild(li);
+            });
         }
 
+        /* ================= 상세보기 ================= */
         function showDetail(e) {
-            const checked = e.checkedAt ? '확인됨' : '미확인';
-
             document.getElementById("detailBox").innerHTML = `
                 <h3>${e.type}</h3>
                 <p><strong>카메라:</strong> ${e.cam}</p>
                 <p><strong>위치:</strong> ${e.location}</p>
-                <p><strong>발생 시각:</strong> ${e.createdAt.replace('T',' ')}</p>
+                <p><strong>발생 시각:</strong> ${e.createdAt}</p>
                 <p><strong>설명:</strong> ${e.memo}</p>
-                <p><strong>상태:</strong> ${checked}</p>
 
-                ${!e.checkedAt ? `
-                <button class="primary-btn" onclick="markChecked(${e.id})">
-                    ✔ 확인 처리
-                </button>
-                ` : ''}
+                <label class="check-row">
+                    <input type="checkbox"
+                           ${e.checkedAt ? 'checked' : ''}
+                           onchange="toggleChecked(${e.id}, this.checked)">
+                    확인 완료
+                </label>
             `;
         }
 
+        /* ================= 확인 처리 (비동기 준비) ================= */
+        function toggleChecked(id, checked) {
+            const target = events.find(e => e.id === id);
+            if (!target) return;
+
+            // ▶ 실제 DB 연동 시 여기서 fetch(PATCH) 사용
+            target.checkedAt = checked ? new Date().toISOString() : null;
+
+            showDetail(target);
+            loadEvents();
+        }
 
         window.onload = loadEvents;
     </script>
