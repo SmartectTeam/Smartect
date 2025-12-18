@@ -893,7 +893,7 @@
                             if (Array.isArray(z)) {
                                 return {active: true, points: z, scale: 1.0}; // 기본값 부여
                             }
-                            // [Case B] 데이터가 최신 방식(객체)인 경우
+                                // [Case B] 데이터가 최신 방식(객체)인 경우
                             // 예: { points: [...], scale: 1.5 } 형태
                             else {
                                 let safeScale = parseFloat(z.scale);
