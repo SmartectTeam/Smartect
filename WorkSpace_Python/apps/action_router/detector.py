@@ -159,25 +159,63 @@ class MotionDetector:
 
                     # (2) 구역 감지
                     if self.settings['zone_check'] and danger_lvl < 2:
-                        wrists = [filled_kp[9], filled_kp[10]]
-                        pixel_range = self.settings.get('reach_ratio', 0.85) * 100
-                        formatted_zones = []
 
-                        for z in self.settings['zones']:
-                            if isinstance(z, list):
-                                formatted_zones.append({'points': z, 'active': True})
-                            else:
-                                formatted_zones.append(z)
+                        # [A] 신체 기준점 확보 (어깨, 골반)
+                        # 5,6: 어깨 / 11,12: 골반
+                        shoulder_y = (filled_kp[5][1] + filled_kp[6][1]) / 2
+                        hip_y = (filled_kp[11][1] + filled_kp[12][1]) / 2
 
-                        zone_res = algorithm.check_zone(wrists, formatted_zones, w, h, warning_px=pixel_range)
+                        # [B] 사람의 크기(몸통 길이) 계산 (Pixel 단위)
+                        # 영상 좌표계: 아래로 갈수록 Y 증가 -> 보통 골반(Hip) > 어깨(Shoulder)
+                        # 원근감 해결의 핵심: 이 값이 사람이 멀면 작아지고, 가까우면 커짐
+                        torso_height = abs(hip_y - shoulder_y)
 
-                        if zone_res == "Danger":
-                            current_status = "THREAT(Zone)"
-                            danger_lvl = 2
-                            state['cooldown'] = self.settings['lock_duration']
-                        elif zone_res == "Warning" and danger_lvl < 1:
-                            current_status = "Warning"
-                            danger_lvl = 1
+                        # 안전장치: 몸통 길이가 너무 작으면(오류 등) 최소 1px로 보정
+                        if torso_height < 1: torso_height = 1
+
+                        # [C] 손 높이 제한선(Limit Y) 계산
+                        user_hip_ratio = self.settings.get('hip_ratio', 0.2)
+                        limit_y = hip_y - (torso_height * user_hip_ratio)
+
+                        # [D] 유효한 손목만 골라내기 (높이 제한 필터링)
+                        valid_wrists = []
+                        for w_idx in [9, 10]:
+                            wx, wy = filled_kp[w_idx]
+                            # 좌표 유효성 & 높이 제한(Limit Y보다 위에 있어야 함 -> Y값이 작아야 함) 체크
+                            if wx > 0 and wy > 0 and wy < limit_y:
+                                valid_wrists.append((wx, wy))
+
+                        # [E] 구역 검사 실행
+                        if valid_wrists:
+                            # ==========================================================
+                            # [핵심 수정] 고정 픽셀(100) 대신 '몸통 길이'를 기준 단위로 사용
+                            # 슬라이더(reach_ratio)가 1.0이면 -> 경고 범위는 '몸통 길이만큼' (약 1m)
+                            # 슬라이더가 0.5면 -> '몸통 길이의 절반만큼' (약 50cm)
+                            # ==========================================================
+                            reach_ratio = self.settings.get('reach_ratio', 0.85)
+
+                            # 사람 크기에 비례한 동적 임계값 생성
+                            dynamic_warning_px = torso_height * reach_ratio
+
+                            formatted_zones = []
+                            for z in self.settings['zones']:
+                                if isinstance(z, list):
+                                    formatted_zones.append({'points': z, 'active': True, 'scale': 1.0})
+                                else:
+                                    if 'scale' not in z: z['scale'] = 1.0
+                                    formatted_zones.append(z)
+
+                            # 계산된 동적 거리(dynamic_warning_px)를 넘겨줌
+                            zone_res = algorithm.check_zone(valid_wrists, formatted_zones, w, h,
+                                                            warning_px=dynamic_warning_px)
+
+                            if zone_res == "Danger":
+                                current_status = "THREAT(Zone)"
+                                danger_lvl = 2
+                                state['cooldown'] = self.settings['lock_duration']
+                            elif zone_res == "Warning" and danger_lvl < 1:
+                                current_status = "Warning"
+                                danger_lvl = 1
 
                     # (3) AI 행동 인식
                     current_score = 0.0 # 점수 초기화

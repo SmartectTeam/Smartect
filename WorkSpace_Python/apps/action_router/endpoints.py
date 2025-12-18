@@ -75,7 +75,7 @@ async def camera_post_video(source, detector, pc_id, cam_id):
                     print(f"[Endpoint] Source ended for CCTV-{cam_id}")
                     break
 
-                # 로직 수행 : cam_id 울 넘겨서 데이터 안에 번호를 담음
+                # 로직 수행 : cam_id를 넘겨서 데이터 안에 번호를 담음
                 annotated_frame, event_data = detector.process_frame(frame, cam_id)
 
                 # 이미지 인코딩

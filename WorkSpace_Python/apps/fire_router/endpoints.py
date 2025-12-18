@@ -9,6 +9,7 @@ from pydantic import BaseModel
 import os
 
 from apps.fire_router.detector import fire_model_video, frame_detector
+from typing import List, Dict, Any, Union
 
 # 경로 설정 (액션라우터가 보는 settings 폴더와 같은 곳을 바라보게 함)
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -30,7 +31,7 @@ class SettingsRequest(BaseModel):
     hip_ratio: float
     ai_threshold: float
     lock_duration: int
-    zones: List[List[List[float]]]
+    zones: List[Dict[str, Any]]
 
     # 보기설정
     vis_alert: bool
