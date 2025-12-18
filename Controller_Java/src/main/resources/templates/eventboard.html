@@ -3,9 +3,9 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/base}">
+<th:block layout:fragment="title">EventLog : SmarTect</th:block>
 <head>
     <meta charset="UTF-8">
-    <title>Event Log</title>
     <link rel="stylesheet" th:href="@{/css/eventboard.css}">
 </head>
 
@@ -152,7 +152,7 @@
             });
 
             if (!filtered.length) {
-                list.innerHTML = "<li class='empty'>이벤트가 없습니다.</li>";
+                list.innerHTML = "<li class='empty'>이벤트 로그가 없습니다.</li>";
                 return;
             }
 
@@ -233,7 +233,7 @@
 
         /* ================= check ================= */
         function confirmCheck(id){
-    if(!confirm("이 이벤트를 확인 완료 처리하면 되돌릴 수 없습니다.\n계속하시겠습니까?")) return;
+    if(!confirm("이벤트 완료 처리 후 되돌릴 수 없습니다.\n계속하시겠습니까?")) return;
 
     fetch(`/api/events/${id}/check`, { method:"PATCH" })
         .then(() => {
@@ -263,9 +263,6 @@
             }
         });
 }
-
-
-
         window.onload = loadEvents;
     </script>
 

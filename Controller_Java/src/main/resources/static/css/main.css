@@ -21,7 +21,7 @@ body {
 .logo {
     font-size: 64px;
     font-weight: 800;
-    color: #4da6ff;
+    color: #06b6d4;
     margin-bottom: 15px;
 }
 
@@ -57,7 +57,7 @@ body {
 .board-title {
     font-size: 22px;
     margin-bottom: 20px;
-    color: #4da6ff;
+    color: #06b6d4;
 }
 
 /* 글 작성 */
@@ -87,7 +87,7 @@ body {
 .board-write button {
     width: 100%;
     padding: 12px;
-    background: #4da6ff;
+    background: #06b6d4;
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -111,7 +111,7 @@ body {
 
 .post-title {
     font-weight: 600;
-    color: #4da6ff;
+    color: #06b6d4;
 }
 
 .post-writer {
@@ -132,7 +132,7 @@ body {
 .main-btn {
     display: block;
     padding: 12px 26px;
-    background: #4da6ff;
+    background: #06b6d4;
     color: #0e1621;
     font-weight: 600;
     border-radius: 30px;
