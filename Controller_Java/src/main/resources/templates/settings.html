@@ -6,9 +6,9 @@
 <head>
     <title>CCTV 통합 관제</title>
     <link rel="stylesheet" th:href="@{/css/settings.css}">
-
 </head>
 
+<body>
 <div layout:fragment="content">
 
     <div class="safe-container">
@@ -23,9 +23,31 @@
                 <div id="status-msg" class="status-txt">연결 대기중...</div>
             </div>
 
-            <div class="video-box" id="video-container">
-                <img id="live-img" src="" alt="NO SIGNAL">
-                <canvas id="zone-canvas"></canvas>
+            <div class="video-box" id="video-container" style="position: relative;">
+                <img id="live-img" src="" alt="NO SIGNAL" style="width: 100%; height: auto; display: block;">
+                <!-- 캔버스는 CSS(settings.css)에서 absolute로 덮어씌워져 있어야 함 -->
+                <canvas id="zone-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+                <!-- 상단 알림 바 -->
+                <div id="ui-top-alert" style="display:none; position:absolute; top:0; left:0; width:100%; padding:10px; text-align:center; font-weight:bold; color:white; background:rgba(220,53,69,0.9); z-index:10;">
+                    🚨 위험 행동 감지!
+                </div>
+                <!-- 좌측 하단 대시보드 (리스트 & 그래프) -->
+                <div id="ui-dashboard" style="position:absolute; bottom:10px; left:10px; width:220px; background:rgba(0,0,0,0.6); padding:10px; border-radius:8px; color:white; z-index:10; font-family: sans-serif;">
+                    <div style="font-size:12px; margin-bottom:5px; border-bottom:1px solid #555; padding-bottom:3px; font-weight:bold; color:#ddd;">
+                        📋 위협 객체 목록
+                    </div>
+                    <!-- 위협 리스트 -->
+                    <ul id="ui-threat-list" style="list-style:none; padding:0; margin:0; font-size:12px; min-height:20px; max-height:80px; overflow-y:auto;">
+                        <li style="color:#aaa;">(감지 없음)</li>
+                    </ul>
+
+                    <div style="font-size:12px; margin-top:10px; margin-bottom:5px; font-weight:bold; color:#ddd;">
+                        📈 위험도 추이
+                    </div>
+                    <!-- 실시간 그래프 캔버스 -->
+                    <canvas id="ui-graph-canvas" width="200" height="50" style="background:rgba(255,255,255,0.1); border-radius:4px; display:block;"></canvas>
+                </div>
+
             </div>
 
             <!-- 그리기 안내 문구 (숨김 상태) -->
@@ -40,7 +62,6 @@
             <div class="tab-header">
                 <button class="tab-btn active" onclick="changeTab('tab1')">감도 설정</button>
                 <button class="tab-btn" onclick="changeTab('tab2')">구역 관리</button>
-                <!-- [수정] 3번: 보기 설정, 4번: AI 대시보드 -->
                 <button class="tab-btn" onclick="changeTab('tab3')">보기 설정</button>
                 <button class="tab-btn" onclick="changeTab('tab4')">AI 대시보드</button>
             </div>
@@ -170,10 +191,20 @@
 
         let selectedCam = 3;
 
+        // [수정] 드래그 중에도 박스를 그리기 위해 전역변수로 이동
+        let lastActionInfo = null;
+
         // 그리기 관련 변수
         let isDrawingMode = false;
-        let currentPoints = []; // 현재 찍고 있는 점들
-        let savedZones = [];    // 저장된 구역들 (0.0~1.0 비율 좌표)
+        let currentPoints = [];
+        let savedZones = [];
+
+        let isDragging = false;
+        let dragZoneIdx = -1;
+        let lastMousePos = {x:0, y: 0};
+
+        // 그래프용 데이터 저장소 (최근 50프레임)
+        let graphData = new Array(50).fill(0);
 
         // 뼈대 정보
         const SKELETON_PAIRS = [
@@ -182,8 +213,57 @@
             [5, 6], [11, 12], [5, 11], [6, 12]
         ];
 
+        // 우클릭 시 브라우저 메뉴 뜨는 것 방지
+        canvas.addEventListener('contextmenu', event => event.preventDefault());
+
+        // [1] 두 직선의 교차점 계산
+        function getLineIntersection(p1, p2, p3, p4) {
+            const d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+            if (d === 0) return null;
+
+            const t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / d;
+            return {
+                x: p1.x + t * (p2.x - p1.x),
+                y: p1.y + t * (p2.y - p1.y)
+            };
+        }
+
+        // [2] 다각형 확장 함수 (방향 수정됨)
+        function getOffsetPolygon(points, offset) {
+            const offsetLines = [];
+            for (let i = 0; i < points.length; i++) {
+                const p1 = points[i];
+                const p2 = points[(i + 1) % points.length];
+
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const len = Math.sqrt(dx*dx + dy*dy);
+
+                // [수정 핵심] 부호를 반대로 변경하여 안쪽->바깥쪽으로 확장되게 함
+                // 기존: (-dy, dx) -> 변경: (dy, -dx)
+                const ox = (dy / len) * offset;
+                const oy = (-dx / len) * offset;
+
+                offsetLines.push({
+                    p1: { x: p1.x + ox, y: p1.y + oy },
+                    p2: { x: p2.x + ox, y: p2.y + oy }
+                });
+            }
+
+            const newPoints = [];
+            for (let i = 0; i < offsetLines.length; i++) {
+                const line1 = offsetLines[i];
+                const line2 = offsetLines[(i + 1) % offsetLines.length];
+                const intersection = getLineIntersection(line1.p1, line1.p2, line2.p1, line2.p2);
+                if (intersection) newPoints.push(intersection);
+            }
+            return newPoints;
+        }
+
+
+
         // ==========================================
-        // [2] 구역 그리기 로직 (핵심)
+        // [2] 구역 그리기 로직
         // ==========================================
         function toggleDrawingMode() {
             isDrawingMode = !isDrawingMode;
@@ -210,16 +290,19 @@
             btn.innerText = "✏️ 새 구역 그리기 시작";
             btn.classList.remove("active");
             guide.style.display = "none";
-            canvas.style.pointerEvents = "none";
+            canvas.style.pointerEvents = "auto"; // 항상 이벤트는 받아야 드래그 가능
         }
 
         function clearZones() {
             if(confirm("모든 구역을 삭제할까요?")) {
                 savedZones = [];
                 updateZoneList();
+                // 삭제 즉시 화면 갱신
+                drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
             }
         }
 
+        // 슬라이더 UI 생성 함수
         function updateZoneList() {
             if (savedZones.length === 0) {
                 zoneListUI.innerHTML = '<li style="padding:10px; background:#333; border-radius:4px;">(저장된 구역 없음)</li>';
@@ -227,62 +310,219 @@
             }
             let html = "";
             savedZones.forEach((zone, idx) => {
-                html += `<li style="padding:10px; background:#333; margin-bottom:5px; border-radius:4px; display:flex; justify-content:space-between;">
-                            <span>Zone #${idx + 1}</span>
-                            <span style="color:red; cursor:pointer;" onclick="removeZone(${idx})">🗑️</span>
-                         </li>`;
+                // 저장된 값이 있으면 쓰고, 없으면 기본값 1.0 사용
+                const currentScale = (zone.scale !== undefined) ? zone.scale : 1.0;
+
+                html += `
+            <li style="padding:10px; background:#333; margin-bottom:5px; border-radius:4px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="font-weight:bold; color:#fff;">Zone #${idx + 1}</span>
+                    <span style="color:red; cursor:pointer;" onclick="removeZone(${idx})">🗑️ 삭제</span>
+                </div>
+                <div style="display:flex; align-items:center; font-size:12px; color:#ccc;">
+                    <label style="margin-right:10px; min-width:60px;">범위: <span id="txt-scale-${idx}" style="color:#007bff">x${currentScale}</span></label>
+
+                    <!-- [수정] 최소 0 ~ 최대 5, 기본값은 위에서 설정 -->
+                    <input type="range" min="0" max="5" step="0.1" value="${currentScale}"
+                           style="width:100%; cursor:pointer;"
+                           oninput="updateZoneScale(${idx}, this.value)">
+                </div>
+            </li>`;
             });
             zoneListUI.innerHTML = html;
+        }
+
+        // 그리기 완료 함수
+        function finishDrawing(){
+            // 점이 3개 미만이면 취소 (4개 자동완성 로직이 있어도 혹시 모를 예외처리)
+            if (currentPoints.length < 3){
+                alert("최소 3개 이상의 점이 필요합니다.");
+                return;
+            }
+            const width = canvas.width;
+            const height = canvas.height;
+            const normalizedPoints = currentPoints.map(p => [p.x / width, p.y / height]);
+
+            savedZones.push({
+                active: true,
+                points: normalizedPoints,
+                scale: 1.0  // [설정] 새 구역 생성 시 기본값 1.0
+            });
+
+            updateZoneList();
+            cancelDrawing();
+
+            // 완성 후 즉시 갱신
+            drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
+        }
+
+        // [추가] 슬라이더 조작 시 호출되는 함수
+        window.updateZoneScale = function(idx, val) {
+            savedZones[idx].scale = parseFloat(val);
+            // 숫자 텍스트 갱신
+            document.getElementById(`txt-scale-${idx}`).innerText = val;
+            // 화면 즉시 갱신 (꿀렁거리는 효과)
+            drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
         }
 
         window.removeZone = function(idx) {
             savedZones.splice(idx, 1);
             updateZoneList();
+            drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
         }
 
-        // 캔버스 이벤트 리스너 (그리기)
+        // 마우스 누름
         canvas.addEventListener("mousedown", (e) => {
-            if (!isDrawingMode) return;
+            // 구역관리탭이 아니면 즉시 종료
+            if (currentActiveTab !== 'tab2') return;
 
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
 
-            // 좌클릭: 점 추가
-            if (e.button === 0) {
-                currentPoints.push({x, y});
-            }
-            // 우클릭: 도형 완성
-            else if (e.button === 2) {
-                e.preventDefault();
-                if (currentPoints.length < 3) {
-                    alert("최소 3개 이상의 점이 필요합니다.");
-                    return;
+            // 화면상 크기와 실제 캔버스 해상도 비율 계산
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            // 보정된 정확한 캔버스 내부 좌표
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            // [A] 그리기 모드
+            if (isDrawingMode) {
+                if (e.button === 0) { // 좌클릭
+                    currentPoints.push({x, y});
+                    // 점이 4개가 되면 자동으로 완성하고 종료
+                    if (currentPoints.length === 4) {
+                        finishDrawing();
+                        return;
+                    }
+                }else if (e.button === 2){ // 우클릭
+                    e.preventDefault();
+                    finishDrawing();
                 }
-                const width = canvas.width;
-                const height = canvas.height;
-                const normalizedPoints = currentPoints.map(p => [p.x / width, p.y / height]);
+                drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
+                return;
+            }
 
-                savedZones.push({
-                    active: true,
-                    points: normalizedPoints
-                });
+            // [B] 일반 모드 (드래그 시작 판정 - 확장된 노란 영역 인식)
+            dragZoneIdx = -1;
+            const baseOffset = 15; // 클릭 판정 범위를 조금 넉넉하게 잡기 (기본값)
 
-                updateZoneList();
-                cancelDrawing();
+            for (let i = 0; i < savedZones.length; i++){
+                const zone = savedZones[i];
+                if (!zone.points) continue;
+
+                // 1. 현재 구역의 픽셀 좌표 계산
+                const pixelPoints = zone.points.map(p => ({
+                    x: p[0] * canvas.width,
+                    y: p[1] * canvas.height
+                }));
+
+                // 2. 현재 설정된 확장 크기 계산 (노란색 영역 크기)
+                const myScale = (zone.scale !== undefined) ? zone.scale : 1.0;
+                const offsetPx = baseOffset * myScale;
+
+                // 3. 클릭 판정용 다각형 생성 (노란색 영역과 동일하게 만듦)
+                // 만약 scale이 0이면 원래 얇은 선만 체크, 크면 큰 영역 체크
+                let hitPoints = pixelPoints;
+                if (offsetPx > 0) {
+                    const expanded = getOffsetPolygon(pixelPoints, offsetPx);
+                    if (expanded.length > 0) hitPoints = expanded;
+                }
+
+                // 4. 가상의 경로를 그려서 클릭 위치 확인
+                ctx.beginPath();
+                if (hitPoints.length > 0) {
+                    ctx.moveTo(hitPoints[0].x, hitPoints[0].y);
+                    for (let j = 1; j < hitPoints.length; j++) ctx.lineTo(hitPoints[j].x, hitPoints[j].y);
+                }
+                ctx.closePath();
+
+                // 5. 판별 (이제 노란색 부분을 눌러도 인식됨)
+                if (ctx.isPointInPath(x,y)){
+                    dragZoneIdx = i;
+                    isDragging = true;
+                    lastMousePos = {x,y};
+
+                    // 드래그 시작 시 선택된 구역을 즉시 시각적으로 표시하기 위해 갱신
+                    drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
+                    break;
+                }
             }
         });
 
-        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+        // 마우스 이동
+        canvas.addEventListener("mousemove", (e) => {
+            // 그리기 모드일 때 실시간 선 보여주기
+            if (isDrawingMode) {
+                drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
+                return;
+            }
+            if (!isDragging || dragZoneIdx === -1) return;
 
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            // [중요] 드래그 중인 현재 마우스의 보정된 좌표
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            // 픽셀 단위 이동 거리
+            const dx = currentX - lastMousePos.x;
+            const dy = currentY - lastMousePos.y;
+
+            // 정규화 좌표(0.0~1.0)로 변환
+            const dxNorm = dx / canvas.width;
+            const dyNorm = dy / canvas.height;
+
+            // 해당 구역 좌표 업데이트
+            const zone = savedZones[dragZoneIdx];
+            zone.points = zone.points.map(p => [p[0] + dxNorm, p[1] + dyNorm]);
+            lastMousePos = {x: currentX, y: currentY}; // 마지막 위치 갱신
+            drawOverlays(lastActionInfo ? lastActionInfo.objects : []); // 화면 즉시 갱신
+        });
+
+        // 마우스 뗌
+        canvas.addEventListener("mouseup", () => {
+            isDragging = false;
+            dragZoneIdx = -1;
+        });
+
+        canvas.addEventListener("mouseleave", () => {
+            isDragging = false;
+            dragZoneIdx = -1
+        });
+
+        function finishDrawing(){
+            if (currentPoints.length < 3){
+                alert("최소 3개 이상의 점이 필요합니다.");
+                return;
+            }
+            const width = canvas.width;
+            const height = canvas.height;
+            const normalizedPoints = currentPoints.map(p => [p.x / width, p.y / height]);
+
+            savedZones.push({
+                active: true,
+                points: normalizedPoints,
+                scale: 1.0  // [수정] 새 구역 생성 시 무조건 1.0 (1배)부터 시작
+            });
+
+            updateZoneList();
+            cancelDrawing();
+
+            // 완성 후 즉시 갱신
+            drawOverlays(lastActionInfo ? lastActionInfo.objects : []);
+        }
         // ==========================================
-        // [3] 그리기 및 렌더링 함수 (통합)
+        // [3] 그리기 및 렌더링 함수
         // ==========================================
         function drawOverlays(objects) {
+            // 이미지가 없어도 구역은 그릴 수 있도록 조건 완화 가능하지만,
+            // 비율 계산을 위해 naturalWidth가 필요함
             if (imgElement.naturalWidth === 0) return;
 
             const rect = imgElement.getBoundingClientRect();
-
             if (canvas.width !== rect.width || canvas.height !== rect.height){
                 canvas.width = rect.width;
                 canvas.height = rect.height;
@@ -291,81 +531,75 @@
             const scaleX = canvas.width / imgElement.naturalWidth;
             const scaleY = canvas.height / imgElement.naturalHeight;
 
-            // 초기화
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. [사용자 구역 그리기] (노란색+빨간색)
-            ctx.lineWidth = 3;
-            savedZones.forEach(zone => {
+            // 1. [구역 그리기]
+            savedZones.forEach((zone, idx) => {
                 if (!zone.points || zone.points.length === 0) return;
 
-                // 캔버스 픽셀 좌표로 변환
+                // (1) 캔버스 픽셀 좌표로 변환
                 const pixelPoints = zone.points.map(p => ({
                     x: p[0] * canvas.width,
                     y: p[1] * canvas.height
-                }))
+                }));
 
-                // 구역의 중심점 계산(확장 기준)
-                let  cx = 0, cy = 0;
-                pixelPoints.forEach(p => { cx += p.x; cy += p.y; })
-                cx /= pixelPoints.length;
-                cy /= pixelPoints.length;
+                // [수정 핵심] 기본 픽셀 단위를 10~15px 정도로 줄임 (기존이 너무 컸음)
+                const baseOffset = 15;
 
-                // 확장 거리 계산
-                const reachEl = document.getElementById('sl-reach');
-                const reachVal = reachEl ? parseFloat(reachEl.value) : 0.85;
-                const expandDist = reachVal * 100;
+                // 개별 스케일 적용 (없으면 1.0)
+                const myScale = zone.scale !== undefined ? zone.scale : 1.0;
 
-                // 중심점에서 바깥으로 점 밀어내기
-                const expandedPoints = pixelPoints.map(p =>{
-                    const dx = p.x - cx;
-                    const dy = p.y - cy;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist === 0) return p;
+                // 최종 확장 거리 계산
+                const offsetPx = baseOffset * myScale;
 
-                    // 현재 거리 + 확장 거리만큼 비율 늘리기
-                    const scale = (dist + expandDist) / dist;
-                    return{
-                        x: cx + dx * scale,
-                        y: cy + dy * scale
-                    };
-                });
-                // 노란색 경고구역 그리기
-                ctx.beginPath();
-                if (expandedPoints.length >0) {
+                // [A] 노란 확장 영역 (계산된 다각형 그리기)
+                const expandedPoints = getOffsetPolygon(pixelPoints, offsetPx);
+
+                if (expandedPoints.length > 0) {
+                    ctx.beginPath();
                     ctx.moveTo(expandedPoints[0].x, expandedPoints[0].y);
-                    for (let i = 1; i < expandedPoints.length; i++) {
-                        ctx.lineTo(expandedPoints[i].x, expandedPoints[i].y);
-                    }
+                    for(let i=1; i<expandedPoints.length; i++) ctx.lineTo(expandedPoints[i].x, expandedPoints[i].y);
+                    ctx.closePath();
+
+                    ctx.fillStyle = "rgba(255, 255, 0, 0.2)"; // 내부 채우기
+                    ctx.fill();
+
+                    // 드래그 중이면 테두리 진하게
+                    if (isDragging && dragZoneIdx === idx) ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+                    else ctx.strokeStyle = "rgba(255, 255, 0, 0.4)";
+
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]); // 점선 효과
+                    ctx.stroke();
+                    ctx.setLineDash([]); // 점선 초기화
                 }
-                ctx.closePath();
 
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "yellow";
-                ctx.setLineDash([5,5]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // 빨간 위험구역 그리기
+                // [B] 빨간 원본 영역 (기존 코드 유지)
                 ctx.beginPath();
-                if (pixelPoints.length > 0) {
-                    ctx.moveTo(pixelPoints[0].x, pixelPoints[0].y);
-                    for(let i=1; i<pixelPoints.length; i++) {
-                        ctx.lineTo(pixelPoints[i].x, pixelPoints[i].y);
-                    }
-                }
+                ctx.moveTo(pixelPoints[0].x, pixelPoints[0].y);
+                for(let i=1; i<pixelPoints.length; i++) ctx.lineTo(pixelPoints[i].x, pixelPoints[i].y);
                 ctx.closePath();
+
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = "red"
+                ctx.strokeStyle = "red";
                 ctx.stroke();
-                ctx.fillStyle = "rgba(255,0,0, 0.2)";
+
+                ctx.fillStyle = (isDragging && dragZoneIdx === idx) ? "rgba(255, 0, 0, 0.4)" : "rgba(255, 0, 0, 0.05)";
                 ctx.fill();
 
+                // 텍스트 표시
+                ctx.fillStyle = "white";
+                ctx.font = "bold 14px Arial";
+                ctx.fillText(`Zone #${idx + 1}`, pixelPoints[0].x, pixelPoints[0].y - 5);
             });
 
-            // 2. [현재 그리는 선] (빨간색)
+            // 2. [현재 그리는 선]
             if (isDrawingMode && currentPoints.length > 0) {
                 ctx.strokeStyle = "red";
+                ctx.fillStyle = "red"; // 점 색상
+                ctx.lineWidth = 2;
+
+                // (1) 선 그리기
                 ctx.beginPath();
                 ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
                 for(let i=1; i<currentPoints.length; i++) {
@@ -373,79 +607,246 @@
                 }
                 ctx.stroke();
 
-                ctx.fillStyle = "red";
-                currentPoints.forEach(p => {
+                // (2) ★ 점(Vertex) 그리기 추가 (첫 클릭 시 보이게 함)
+                for(let p of currentPoints) {
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); // 반지름 4px 원
                     ctx.fill();
-                });
+                }
             }
 
-            // 그리기 모드일 때는 AI 박스 숨김 (방해 방지)
-            if (isDrawingMode) return;
-
-            // 3. [AI 결과 그리기]
+            // 3. [객체(사람) 그리기]
             if (!objects) return;
 
             const showAlertOnly = document.getElementById('vis-alert').checked;
             const showBBox = document.getElementById('vis-bbox').checked;
             const showSkel = document.getElementById('vis-skeleton').checked;
             const showText = document.getElementById('vis-text').checked;
+            const hipRatioEl = document.getElementById('sl-hip');
+            const userHipRatio = hipRatioEl ? parseFloat(hipRatioEl.value) : 0.2;
 
             objects.forEach(obj => {
-                if (showAlertOnly && obj.status === 'Safe') return;
+                // (옵션) 알림 모드일 때 Safe 건너뛰기 등...
+                if (showAlertOnly && obj.danger_level === 0) return;
 
-                let color = '#00ff00';
-                if (obj.status.includes('THREAT') || obj.status.includes('FALL')) color = '#ff00ff';
-                else if (obj.status.includes('WARNING')) color = '#00ffff';
+                // 색상 결정
+                const colors = ['#00ff00', '#ffff00', '#ff0000', '#ff00ff']; // Safe, Warning, Danger, Fall
+                const color = colors[obj.danger_level] || '#ff0000';
 
-                ctx.strokeStyle = color;
-                ctx.fillStyle = color;
-                ctx.lineWidth = 2;
+                // 좌표 변환
+                const [x1, y1, x2, y2] = obj.box;
+                const bx = x1 * scaleX;
+                const by = y1 * scaleY;
+                const bw = (x2 - x1) * scaleX;
+                const bh = (y2 - y1) * scaleY;
 
+                // ======================================================
+                // [수정 1] 박스 그리기 & ID 표시
+                // ======================================================
                 if (showBBox) {
-                    const [x1, y1, x2, y2] = obj.box;
-                    ctx.strokeRect(x1 * scaleX, y1 * scaleY, (x2 - x1) * scaleX, (y2 - y1) * scaleY);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(bx, by, bw, bh);
+
+                    // ★ 박스 좌상단에는 무조건 'ID' 표시
+                    ctx.fillStyle = color; // 배경색과 맞춤
+                    ctx.font = "bold 14px Arial";
+                    ctx.fillText(`ID: ${obj.id}`, bx, by - 6);
                 }
 
+                // ======================================================
+                // [수정 2] 손 높이 제한선 (Limit Y) 시각화
+                // ======================================================
+                // 키포인트가 있다면 어깨/골반 기준으로 실제 Limit Y 계산
+                if (obj.keypoints) {
+                    const kp = obj.keypoints;
+                    // 어깨(5,6), 골반(11,12) Y좌표 평균
+                    const shoulderY = (kp[5][1] + kp[6][1]) / 2;
+                    const hipY = (kp[11][1] + kp[12][1]) / 2;
+
+                    // 데이터가 유효할 때만 계산
+                    if (shoulderY > 0 && hipY > 0) {
+                        // Y축은 아래로 갈수록 커짐 (어깨 < 골반)
+                        // ratio 0: 골반, 1: 어깨
+                        // 공식: 골반Y - (골반Y - 어깨Y) * ratio  (위쪽으로 올라감)
+                        const limitY_raw = hipY - (hipY - shoulderY) * userHipRatio;
+                        const limitY_screen = limitY_raw * scaleY;
+
+                        // 제한선 그리기 (하늘색 점선)
+                        ctx.beginPath();
+                        ctx.moveTo(bx, limitY_screen);
+                        ctx.lineTo(bx + bw, limitY_screen);
+                        ctx.strokeStyle = "cyan";
+                        ctx.setLineDash([4, 2]);
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                        ctx.setLineDash([]); // 점선 초기화
+                    }
+                }
+
+                // ======================================================
+                // [수정 3] 상태 텍스트 (Status) -> 손 옆에 표시
+                // ======================================================
+                if (showText) {
+                    let drawX = bx;
+                    let drawY = by + 20; // 기본 위치 (손 못 찾으면 박스 상단)
+
+                    // 손목(9:왼손, 10:오른손) 좌표 찾기
+                    if (obj.keypoints) {
+                        const lw = obj.keypoints[9]; // [x, y, conf]
+                        const rw = obj.keypoints[10];
+
+                        // 둘 중 Y좌표가 더 낮은(화면상 위쪽인) 손, 혹은 유효한 손 찾기
+                        // 편의상 오른쪽 손목(10) 우선, 없으면 왼쪽
+                        if (rw[0] > 0) {
+                            drawX = rw[0] * scaleX;
+                            drawY = rw[1] * scaleY;
+                        } else if (lw[0] > 0) {
+                            drawX = lw[0] * scaleX;
+                            drawY = lw[1] * scaleY;
+                        }
+                    }
+
+                    // 텍스트 내용: 백엔드의 'status' (Warning/Danger) 사용
+                    // status가 없으면 기본 label 사용
+                    const statusText = obj.status || obj.label || "Safe";
+
+                    // 글씨 배경 (가독성)
+                    const textWidth = ctx.measureText(statusText).width;
+                    ctx.fillStyle = "rgba(0,0,0,0.5)";
+                    ctx.fillRect(drawX, drawY - 14, textWidth + 4, 18);
+
+                    // 글씨 쓰기
+                    ctx.fillStyle = color; // 상태 색상(빨/노/초) 따라감
+                    ctx.font = "bold 14px Arial";
+                    ctx.fillText(statusText, drawX + 2, drawY);
+                }
+
+                // (뼈대 그리는 코드는 기존 유지...)
                 if (showSkel && obj.keypoints) {
                     SKELETON_PAIRS.forEach(([i, j]) => {
                         const kp1 = obj.keypoints[i];
                         const kp2 = obj.keypoints[j];
                         if (kp1[0] > 0 && kp2[0] > 0) {
                             ctx.beginPath();
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = color; // 뼈대도 상태 색상 따라감
                             ctx.moveTo(kp1[0] * scaleX, kp1[1] * scaleY);
                             ctx.lineTo(kp2[0] * scaleX, kp2[1] * scaleY);
                             ctx.stroke();
                         }
                     });
                 }
+            });
+        }
 
-                if (showText) {
-                    const [x1, y1] = obj.box;
-                    ctx.font = "bold 14px Arial";
-                    ctx.fillText(`${obj.label} (${obj.status})`, x1 * scaleX, (y1 * scaleY) - 5);
+
+        // ===================================================
+        // 대시보드 UI 업데이트 함수 (알림바, 리스트, 그래프)
+        // ===================================================
+
+        function updateDashboard(objects) {
+            if (!objects) objects = [];
+
+            const topAlert = document.getElementById("ui-top-alert");
+            const listUI = document.getElementById("ui-threat-list");
+            const graphCanvas = document.getElementById("ui-graph-canvas");
+            const gCtx = graphCanvas.getContext("2d");
+
+            // 1. [상단 알림바] & [데이터 수집]
+            let maxDanger = 0;
+            let maxScore = 0; // 그래프용 (0.0 ~ 1.0)
+            let threatHtml = "";
+
+            objects.forEach(obj => {
+                // 최고 위험도 찾기
+                if (obj.danger_level > maxDanger) maxDanger = obj.danger_level;
+                // 최고 점수 찾기 (그래프용)
+                if (obj.score > maxScore) maxScore = obj.score;
+
+                // 리스트 생성 (Safe가 아닌 경우만)
+                if (obj.danger_level > 0) {
+                    const badgeColor = obj.danger_level === 1 ? "#ffc107" : "#dc3545"; // 노랑 or 빨강
+                    const statusText = obj.status || "Unknown";
+                    threatHtml += `
+                    <li style="margin-bottom:4px; display:flex; justify-content:space-between;">
+                        <span><span style="color:${badgeColor};">●</span> ID:${obj.id}</span>
+                        <span style="color:#eee;">${statusText}</span>
+                    </li>`;
                 }
             });
+
+            // 알림바 표시 제어
+            if (maxDanger >= 2) {
+                topAlert.innerText = "🚨 경고: 위협 행동 감지됨!";
+                topAlert.style.background = "rgba(220,53,69,0.9)"; // 빨강
+                topAlert.style.display = "block";
+            } else if (maxDanger === 1) {
+                topAlert.innerText = "⚠️ 주의: 구역 접근 감지";
+                topAlert.style.background = "rgba(255,193,7,0.9)"; // 노랑
+                topAlert.style.display = "block";
+                topAlert.style.color = "black"; // 노랑바탕엔 검은글씨
+            } else {
+                topAlert.style.display = "none";
+            }
+
+            // 2. [위협 목록] 갱신
+            if (threatHtml === "") {
+                listUI.innerHTML = '<li style="color:#aaa;">(감지 없음)</li>';
+            } else {
+                listUI.innerHTML = threatHtml;
+            }
+
+            // 3. [실시간 그래프] 그리기
+            // 데이터 업데이트 (밀어내기)
+            graphData.push(maxScore);
+            graphData.shift();
+
+            // 캔버스 클리어
+            gCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            // 그래프 선 그리기
+            gCtx.beginPath();
+            gCtx.lineWidth = 2;
+            // 위험도에 따라 선 색상 변경 (높으면 빨강, 낮으면 초록)
+            gCtx.strokeStyle = maxScore > 0.7 ? "#dc3545" : "#28a745";
+
+            const w = graphCanvas.width;
+            const h = graphCanvas.height;
+            const step = w / (graphData.length - 1);
+
+            graphData.forEach((val, i) => {
+                const x = i * step;
+                const y = h - (val * h); // 1.0이면 맨 위(0), 0.0이면 맨 아래(h)
+                if (i === 0) gCtx.moveTo(x, y);
+                else gCtx.lineTo(x, y);
+            });
+            gCtx.stroke();
         }
 
         // ==========================================
         // [4] 기본 UI 동작
         // ==========================================
+
         function changeTab(tabId) {
             document.querySelectorAll('.tab-body').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).style.display = 'block';
             event.target.classList.add('active');
+
+            currentActiveTab = tabId; // 현재 탭 상태 업데이트
+            cancelDrawing();
+            isDragging = false;
+            dragZoneIdx = -1;
+
         }
 
         function saveSettings() {
-            // 1. 현재 화면의 설정값 읽어오기
             const settingsData = {
                 "cam_id": selectedCam,
                 "fall_check": document.getElementById('chk-fall').checked,
                 "zone_check": document.getElementById('chk-zone').checked,
-                "ai_check": document.getElementById('chk-ai').checked, // 여기가 핵심
+                "ai_check": document.getElementById('chk-ai').checked,
                 "fall_ratio": parseFloat(document.getElementById('sl-fall').value),
                 "reach_ratio": parseFloat(document.getElementById('sl-reach').value),
                 "hip_ratio":parseFloat(document.getElementById('sl-hip').value),
@@ -457,7 +858,10 @@
                 "vis_skeleton": document.getElementById('vis-skeleton').checked,
                 "vis_text": document.getElementById('vis-text').checked,
 
-                "zones": savedZones.map(z => z.points)
+                "zones": savedZones.map(z => ({
+                    points: z.points,
+                    scale: z.scale || 1.0
+                }))
             };
 
             fetch(`${API_URL}/settings/update`, {
@@ -468,31 +872,47 @@
                 .then(response => response.json())
                 .then(data => {
                     alert("설정이 저장되었습니다.");
-                    loadSettings(); // 저장 후 다시 불러옴
+                    loadSettings();
                 })
                 .catch((error) => {
                     console.error('Error:', error);
                     alert("저장 실패");
                 });
         }
-        // ==========================================
-        // [수정됨] 설정 불러오기 및 이벤트 통합
-        // ==========================================
 
-        // 1. 서버에서 설정값 가져오기 함수
         function loadSettings() {
             fetch(`${API_URL}/settings/get?cam_id=${selectedCam}`)
                 .then(res => res.json())
                 .then(data => {
                     console.log(`[CAM ${selectedCam}] 설정 로드 성공:`, data);
 
-                    // (1) 구역 데이터 복원
+                    // (1) 구역 데이터 복원 및 정규화
                     if (data.zones) {
-                        savedZones = data.zones.map(points => ({
-                            active: true,
-                            points: points
-                        }));
-                        updateZoneList(); // 리스트 UI 갱신
+                        savedZones = data.zones.map(z => {
+                            // [Case A] 데이터가 옛날 방식(단순 좌표 리스트)인 경우
+                            if (Array.isArray(z)) {
+                                return {active: true, points: z, scale: 1.0}; // 기본값 부여
+                            }
+                            // [Case B] 데이터가 최신 방식(객체)인 경우
+                            // 예: { points: [...], scale: 1.5 } 형태
+                            else {
+                                let safeScale = parseFloat(z.scale);
+                                if (isNaN(safeScale) || safeScale <= 0) safeScale = 1.0;
+                                return {
+                                    active: z.active !== undefined ? z.active : true,
+                                    points: z.points || [], // 점 정보가 없으면 빈 배열
+                                    scale: (z.scale !== undefined) ? z.scale : 1.0
+                                };
+                            }
+                        });
+
+                        // UI 리스트 갱신
+                        updateZoneList();
+
+                        // 화면에도 즉시 그려줌
+                        if (lastActionInfo) {
+                            drawOverlays(lastActionInfo.objects);
+                        }
                     }
 
                     // (2) 체크박스 상태 동기화
@@ -513,8 +933,6 @@
                         document.getElementById('sl-hip').value = data.hip_ratio;
                         document.getElementById('val-hip').innerText = data.hip_ratio;
                     }
-
-
                     if (data.ai_threshold !== undefined) {
                         document.getElementById('sl-ai').value = data.ai_threshold;
                         document.getElementById('val-ai').innerText = data.ai_threshold;
@@ -523,27 +941,21 @@
                         document.getElementById('sl-lock').value = data.lock_duration;
                         document.getElementById('val-lock').innerText = data.lock_duration;
                     }
-                    // 필요 시 나머지 슬라이더도 동일하게 추가...
                 })
                 .catch(err => {
                     console.error("설정 로드 실패 (API 확인 필요):", err);
                 });
         }
 
-        // 2. 카메라 변경 이벤트 (초기화 + 로드 통합)
         selectBox.addEventListener("change", function() {
             selectedCam = parseInt(this.value);
             imgElement.src = "";
-
-            // 캔버스 & 데이터 비우기 (UI 초기화)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             savedZones = [];
             updateZoneList();
 
             statusMsg.innerText = `CCTV-${selectedCam}번 연결 중...`;
             statusMsg.style.color = "orange";
-
-            // 새로운 카메라의 설정 불러오기
             loadSettings();
         });
 
@@ -552,7 +964,7 @@
         // ==========================================
         function connect() {
             socket = new WebSocket(WS_URL);
-            socket.binaryType = "arraybuffer"; // [중요] 바이너리 받을 준비
+            socket.binaryType = "arraybuffer";
 
             socket.onopen = function() {
                 console.log("✅ 웹소켓(바이너리) 연결됨");
@@ -560,33 +972,30 @@
                 statusMsg.style.color = "#0f0";
             };
 
-            // 데이터를 저장해둘 변수
-            let lastActionInfo = null;
-
             socket.onmessage = function(event) {
-                // 1. 텍스트 데이터 (JSON) 도착 -> 정보만 갱신
                 if (typeof event.data === "string") {
                     try {
                         const data = JSON.parse(event.data);
-                        // 파이어 라우터에서 보낸 구조에 맞춤
                         if (data.action_info) {
                             lastActionInfo = data.action_info;
                         }
                     } catch (e) { console.error(e); }
                 }
-                // 2. 바이너리 데이터 (이미지) 도착 -> 그리기 수행
                 else if (event.data instanceof ArrayBuffer) {
-                    // (1) 이미지 그리기
                     const blob = new Blob([event.data], { type: "image/jpeg" });
                     const url = URL.createObjectURL(blob);
 
-                    // 이전 이미지 URL 메모리 해제 (메모리 누수 방지)
                     if (imgElement.src) URL.revokeObjectURL(imgElement.src);
                     imgElement.src = url;
 
-                    // (2) 아까 받은 정보(JSON)가 내 카메라 번호랑 맞으면 박스 그리기
                     if (lastActionInfo && lastActionInfo.cam_no == selectedCam) {
-                        drawOverlays(lastActionInfo.objects);
+                        // 드래그 중이 아닐 때만 여기서 그림 (드래그 중이면 mousemove에서 그림)
+                        if(!isDragging) {
+                            drawOverlays(lastActionInfo.objects);
+                        }
+                        // 대시보드 UI 호출
+                        updateDashboard(lastActionInfo.objects);
+
                         statusMsg.innerText = `● LIVE (CAM ${selectedCam})`;
                         statusMsg.style.color = "#0f0";
                     }
@@ -603,8 +1012,12 @@
         // ==========================================
         // [6] 페이지 초기 실행
         // ==========================================
-        loadSettings(); // 1. 초기 설정 로드
-        connect();      // 2. 웹소켓 연결
+        loadSettings();
+        connect();
+
+
+
     </script>
 </div>
+</body>
 </html>
