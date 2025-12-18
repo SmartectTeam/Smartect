@@ -3,177 +3,109 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/base}">
 <head>
-    <!-- 기존 CSS -->
+    <title>통계 대시보드</title>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
-    <!-- Chart.js 및 PDF 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
-        /* [강제 레이아웃 보정] */
-        .chart-row {
-            display: flex; /* 무조건 가로 배치 */
-            flex-wrap: wrap;
-            margin-right: -15px;
-            margin-left: -15px;
-        }
-        .chart-col {
-            position: relative;
-            width: 50%; /* 무조건 화면 절반 */
-            padding-right: 15px;
-            padding-left: 15px;
-            box-sizing: border-box;
-        }
-        /* 화면이 너무 작아지면(모바일) 세로로 변경 */
-        @media (max-width: 992px) {
-            .chart-col { width: 100%; }
-        }
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-        /* [디자인 커스텀] */
+
+    <style>
+        .chart-row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
+        .chart-col { position: relative; width: 50%; padding-right: 15px; padding-left: 15px; box-sizing: border-box; }
+        @media (max-width: 992px) { .chart-col { width: 100%; } }
+
         .text-white { color: #fff !important; }
         .control-bar {
-            background-color: #212529;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background-color: #212529; border: 1px solid #444; border-radius: 8px;
+            padding: 15px; margin-bottom: 20px; display: flex;
+            justify-content: space-between; align-items: center;
         }
 
-        /* [버튼 그룹 커스텀] */
-        .custom-btn-group {
-            display: inline-flex;
-            border: 1px solid #6c757d;
-            border-radius: 4px;
-            overflow: hidden;
-        }
+        .custom-btn-group { display: inline-flex; border: 1px solid #6c757d; border-radius: 4px; overflow: hidden; }
         .custom-btn {
-            background-color: transparent;
-            color: #fff;
-            border: none;
-            padding: 5px 15px;
-            cursor: pointer;
-            border-right: 1px solid #6c757d;
+            background-color: transparent; color: #fff; border: none; padding: 5px 15px;
+            cursor: pointer; border-right: 1px solid #6c757d;
         }
         .custom-btn:last-child { border-right: none; }
-        .custom-btn.active {
-            background-color: #6c757d;
-            font-weight: bold;
-        }
+        .custom-btn.active { background-color: #6c757d; font-weight: bold; }
         .custom-btn:hover { background-color: #495057; }
 
-        /* [차트 카드 디자인] */
-        .card {
-            background-color: #212529;
-            color: white;
-            border: 1px solid #444;
-            margin-bottom: 20px;
-        }
-        .card-header {
-            border-bottom: 1px solid #444;
-            background-color: rgba(0,0,0,0.2);
-            font-weight: 600;
-            padding: 10px 15px;
-        }
+        .card { background-color: #212529; color: white; border: 1px solid #444; margin-bottom: 20px; }
+        .card-header { border-bottom: 1px solid #444; background-color: rgba(0,0,0,0.2); font-weight: 600; padding: 10px 15px; }
 
-        /* [날짜 입력창] */
         input[type="date"] {
             background-color: #2b3035; border: 1px solid #6c757d; color: white;
             border-radius: 4px; padding: 4px 10px; height: 32px;
         }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
     </style>
 </head>
 
 <div layout:fragment="content">
     <div class="container-fluid px-4" id="pdf-area">
 
-        <!-- 제목 -->
         <h1 class="mt-4 text-white">통계 대시보드</h1>
         <ol class="breadcrumb mb-4" style="background-color: transparent; padding-left: 0;">
             <li class="breadcrumb-item active text-white-50">1. 실시간 CCTV 감지 데이터 분석 리포트</li>
         </ol>
 
-        <!-- ★ 컨트롤 패널 (깨짐 방지용 커스텀 스타일 적용) ★ -->
         <div class="control-bar" id="control-panel">
             <div style="display: flex; align-items: center; gap: 15px;">
-                <!-- 1. 기간 버튼 (커스텀) -->
                 <div class="custom-btn-group">
-                    <button type="button" class="custom-btn active" onclick="setActive(this)">일간</button>
-                    <button type="button" class="custom-btn" onclick="setActive(this)">주간</button>
-                    <button type="button" class="custom-btn" onclick="setActive(this)">월간</button>
+                    <button type="button" class="custom-btn" onclick="setPeriod(0)">일간</button>
+                    <button type="button" class="custom-btn" onclick="setPeriod(7)">주간</button>
+                    <button type="button" class="custom-btn" onclick="setPeriod(30)">월간</button>
                 </div>
 
-                <!-- 2. 날짜 선택 -->
                 <div style="display: flex; align-items: center;">
-                    <input type="date" value="2025-12-02">
+                    <input type="date" id="startDate">
                     <span class="text-white mx-2">~</span>
-                    <input type="date" value="2025-12-18">
-                    <button class="btn btn-primary btn-sm ml-2" style="height: 32px;">
+                    <input type="date" id="endDate">
+                    <button class="btn btn-primary btn-sm ml-2" style="height: 32px;" onclick="refreshCharts()">
                         <i class="fas fa-search"></i> 조회
                     </button>
                 </div>
             </div>
 
-            <!-- 3. 다운로드 버튼 -->
             <div>
                 <button class="btn btn-outline-danger btn-sm" onclick="downloadPDF()">
                     <i class="fas fa-file-pdf"></i> PDF
                 </button>
-                <button class="btn btn-outline-success btn-sm" onclick="alert('준비 중')">
+                <button class="btn btn-outline-success btn-sm" onclick="downloadExcel()">
                     <i class="fas fa-file-excel"></i> Excel
                 </button>
             </div>
         </div>
 
-        <!-- ★ 강제 좌우 배치 (Flexbox 사용) ★ -->
         <div class="chart-row">
-            <!-- [왼쪽] Bar Chart -->
             <div class="chart-col">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-chart-bar mr-1"></i> 이벤트 유형별 발생 빈도
-                    </div>
+                    <div class="card-header"><i class="fas fa-chart-bar mr-1"></i> 이벤트 유형별 발생 빈도</div>
                     <div class="card-body">
-                        <!-- 높이 300px 고정 -->
-                        <div style="height: 300px; width: 100%;">
-                            <canvas id="myBarChart"></canvas>
-                        </div>
+                        <div style="height: 300px; width: 100%;"><canvas id="myBarChart"></canvas></div>
                     </div>
                 </div>
             </div>
-
-            <!-- [오른쪽] Pie Chart -->
             <div class="chart-col">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-chart-pie mr-1"></i> 카메라별 감지 비율
-                    </div>
+                    <div class="card-header"><i class="fas fa-chart-pie mr-1"></i> 카메라별 감지 비율</div>
                     <div class="card-body">
-                        <!-- 높이 300px 고정 -->
-                        <div style="height: 300px; width: 100%;">
-                            <canvas id="myPieChart"></canvas>
-                        </div>
+                        <div style="height: 300px; width: 100%;"><canvas id="myPieChart"></canvas></div>
                     </div>
                 </div>
             </div>
-        </div> <!-- Row End -->
+        </div>
 
-        <!-- [하단] Line Chart (전체 너비) -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-chart-area mr-1"></i> 시간대별 위험도 변화 (최근 24시간)
-                    </div>
+                    <div class="card-header"><i class="fas fa-chart-area mr-1"></i> 시간대별 위험도 변화 (선택 기간)</div>
                     <div class="card-body">
-                        <!-- 높이 350px 고정 -->
-                        <div style="height: 350px; width: 100%;">
-                            <canvas id="myLineChart"></canvas>
-                        </div>
+                        <div style="height: 350px; width: 100%;"><canvas id="myLineChart"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -182,64 +114,86 @@
     </div>
 
     <script th:inline="javascript">
-        // 버튼 활성화 스크립트
-        function setActive(btn) {
-            // 모든 버튼 비활성화
-            document.querySelectorAll('.custom-btn').forEach(b => b.classList.remove('active'));
-            // 클릭한 버튼 활성화
-            btn.classList.add('active');
+
+        window.onload = function() {
+            const serverStartDate = /*[[${startDate}]]*/ '2025-01-01';
+            const serverEndDate = /*[[${endDate}]]*/ '2025-01-01';
+
+            if (serverStartDate) document.getElementById('startDate').value = serverStartDate;
+            if (serverEndDate) document.getElementById('endDate').value = serverEndDate;
+
+            const diff = new Date(serverEndDate) - new Date(serverStartDate);
+            const days = diff / (1000 * 60 * 60 * 24);
+
+            const btns = document.querySelectorAll('.custom-btn');
+            btns.forEach(b => b.classList.remove('active'));
+
+            if (days === 0) btns[0].classList.add('active'); // 일간
+            else if (days === 7) btns[1].classList.add('active'); // 주간
+            else if (days === 30) btns[2].classList.add('active'); // 월간
+        };
+
+        function refreshCharts() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            location.href = '/statistics?startDate=' + start + '&endDate=' + end;
         }
 
-        // 차트 설정
+        function setPeriod(days) {
+            const today = new Date();
+            const targetDate = new Date();
+            targetDate.setDate(today.getDate() - days);
+
+            let endStr = today.toISOString().split('T')[0];
+            let startStr = targetDate.toISOString().split('T')[0];
+
+            if (days === 0) startStr = endStr;
+
+            location.href = '/statistics?startDate=' + startStr + '&endDate=' + endStr;
+        }
+
+        // --- 차트 데이터 (IDE 에러 방지 문법 적용) ---
+        const realBarData = /*[[${barData}]]*/ [10, 20, 30];
+        const realPieData = /*[[${pieData}]]*/ [30, 30, 40];
+        const realLineData = /*[[${lineData}]]*/ [0, 0, 0];
+
         Chart.defaults.color = '#fff';
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
         Chart.defaults.font.family = 'sans-serif';
 
-        // 1. Bar Chart
         new Chart(document.getElementById("myBarChart"), {
             type: 'bar',
             data: {
                 labels: ["화재", "연기", "침입", "쓰러짐"],
                 datasets: [{
                     label: "건수",
-                    backgroundColor: ['#ff4d4d', '#adb5bd', '#339af0', '#fcc419'],
-                    data: [12, 19, 3, 5],
+                    backgroundColor: ['#ff4d4d', '#339af0', '#fcc419', '#adb5bd'],
+                    data: realBarData,
                 }],
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: 'white' }, grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { color: 'white' } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { ticks: { color: 'white' }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: 'white' } } } }
         });
 
-        // 2. Pie Chart
+        // Pie Chart
         new Chart(document.getElementById("myPieChart"), {
             type: 'doughnut',
             data: {
-                labels: ["Camera 1 (로비)", "Camera 2 (복도)", "Camera 3 (창고)"],
+                labels: ["Camera 1 (교실)", "Camera 2 (복도)", "Camera 3 (창고)"],
                 datasets: [{
-                    data: [55, 30, 15],
+                    data: realPieData,
                     backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'],
                     borderColor: '#212529',
                 }],
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { color: 'white', boxWidth: 12 } } }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'white', boxWidth: 12 } } } }
         });
 
-        // 3. Line Chart
+        // Line Chart
         new Chart(document.getElementById("myLineChart"), {
             type: 'line',
             data: {
-                labels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "23:59"],
+                labels: Array.from({length: 24}, (_, i) => i + "시"),
                 datasets: [{
                     label: "위험 감지",
                     tension: 0.3,
@@ -247,36 +201,92 @@
                     borderColor: "#0d6efd",
                     pointBackgroundColor: "#0d6efd",
                     fill: true,
-                    data: [5, 2, 10, 35, 20, 15, 40],
+                    data: realLineData,
                 }],
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: 'white' }, grid: { display: false } },
-                    y: { ticks: { color: 'white' } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { ticks: { color: 'white' }, grid: { display: false } }, y: { ticks: { color: 'white' } } } }
         });
 
-        // PDF 다운로드
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
+
             const element = document.querySelector("#pdf-area");
             const btnPanel = document.querySelector("#control-panel");
             btnPanel.style.display = 'none';
 
-            const canvas = await html2canvas(element, { scale: 2, backgroundColor: "#1b1d1f", useCORS: true });
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                backgroundColor: "#1b1d1f",
+                useCORS: true
+            });
             const imgData = canvas.toDataURL('image/png');
 
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgWidth = 210;
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            pdf.addImage(imgData, 'PNG', 0, 10, imgWidth, imgHeight);
-            pdf.save("Report.pdf");
+            const pageWidth = 210;
+            const pageHeight = 297;
+
+            pdf.setFillColor(33, 37, 41);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+
+            pdf.setTextColor(255, 255, 255);
+
+            pdf.setFontSize(22);
+            pdf.setFont("helvetica", "bold");
+            pdf.text("SMARTECT Insight Report", pageWidth / 2, 20, { align: "center" });
+
+            const dateRange = document.getElementById('startDate').value + " ~ " + document.getElementById('endDate').value;
+            pdf.setFontSize(11);
+            pdf.setFont("helvetica", "normal");
+            pdf.setTextColor(200, 200, 200);
+            pdf.text("Date Range: " + dateRange, pageWidth / 2, 28, { align: "center" });
+
+            const imgHeight = canvas.height * pageWidth / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 35, pageWidth, imgHeight);
+
+            pdf.setFontSize(9);
+            pdf.setTextColor(100, 100, 100);
+            const footerText = "Generated by Smartect AI Monitoring System | Confidential";
+            pdf.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
+
+            pdf.save("Smartect_Report.pdf");
+
             btnPanel.style.display = 'flex';
+        }
+        function downloadExcel() {
+            const wb = XLSX.utils.book_new();
+
+            const reportData = [
+                ["SMARTECT CCTV 분석 리포트"],
+                ["조회 기간", document.getElementById('startDate').value + " ~ " + document.getElementById('endDate').value],
+                [],
+                ["[1] 이벤트 유형별 발생 빈도"],
+                ["이벤트 타입", "발생 건수"],
+                ["화재 (FIRE)", realBarData[0]],
+                ["연기 (SMOKE)", realBarData[1]],
+                ["침입 (ACCESS)", realBarData[2]],
+                ["이상행동 (SUSPICIOUS)", realBarData[3]],
+                [],
+                ["[2] 카메라별 감지 비율"],
+                ["카메라명", "감지 건수"],
+                ["Camera 1 (교실)", realPieData[0]],
+                ["Camera 2 (복도)", realPieData[1]],
+                ["Camera 3 (창고)", realPieData[2]],
+                [],
+                ["[3] 시간대별 위험도 변화 (0시 ~ 23시)"],
+                ["시간", "감지 건수"]
+            ];
+
+            for(let i=0; i<24; i++) {
+                reportData.push([i + "시", realLineData[i]]);
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(reportData);
+
+            ws['!cols'] = [{ wch: 25 }, { wch: 15 }];
+
+            XLSX.utils.book_append_sheet(wb, ws, "분석결과");
+            XLSX.writeFile(wb, "Smartect_Report.xlsx");
         }
     </script>
 </div>

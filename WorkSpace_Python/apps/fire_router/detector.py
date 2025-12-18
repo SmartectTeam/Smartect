@@ -24,12 +24,11 @@ def frame_detector(image_bytes):
 def fire_model_video(model, frame, threshold_map, cam_no):
     min_conf = min(threshold_map.values())
     results = model(frame, stream=True, conf=min_conf, verbose=False)
-    fire_data = None
+    fire_map = []
+    fire_json = []
 
     for result in results:
         boxes = result.boxes
-        fire_map = []
-        fire_json = []  # 리스트로 유지
 
         for box in boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -40,14 +39,14 @@ def fire_model_video(model, frame, threshold_map, cam_no):
             target_conf = threshold_map.get(class_name, 0.5)
 
             if conf >= target_conf:
-                fire_map.append({
-                    "x1": x1,
-                    "y1": y1,
-                    "x2": x2,
-                    "y2": y2,
-                    "event_type": class_name,
-                    "confidence": round(conf, 2)
-                })
+                fire_map.append(EventMap(
+                    x1=x1,
+                    y1=y1,
+                    x2=x2,
+                    y2=y2,
+                    event_type=class_name,
+                    confidence=conf
+                ))
                 if class_name == "fire":
                     fire_json.append(EventJson(
                         cam_no=cam_no,
@@ -65,6 +64,8 @@ def fire_model_video(model, frame, threshold_map, cam_no):
                         event_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         screenshot_path="/images/fire_detected.jpg"
                     ))
+
+    return fire_json, fire_map
 
 def fire_objects():
     result_image = ""

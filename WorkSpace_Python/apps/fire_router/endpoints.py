@@ -2,12 +2,16 @@
 import cv2
 import asyncio
 import json
+import os
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from datetime import datetime
 
+from pydantic import BaseModel
+
 from apps.fire_router.detector import fire_model_video, frame_detector
 from apps.fire_router.camera import cam_connect, camera_disconnect
+from apps.fire_router.services import ImageProcessor
 from common.config import PCPath
 from common.schemas import CombinedJson
 
@@ -96,6 +100,7 @@ def _convert_pydantic_to_dict(data):
     
     # 기본 타입은 그대로 반환
     return data
+
 
 @router.websocket("/ws/output")
 async def output_api(websocket: WebSocket):
