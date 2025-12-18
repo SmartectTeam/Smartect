@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> {
+    List<EventLogEntity> findAllByOrderByCreatedAtDesc();
 
     @Query(value = "SELECT event_type, COUNT(*) FROM event_log " +
             "WHERE created_at BETWEEN :start AND :end " + // ★ 날짜 조건 추가

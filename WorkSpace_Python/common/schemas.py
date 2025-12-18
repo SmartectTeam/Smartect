@@ -25,6 +25,7 @@ class EventMap(BaseModel):
 
 class CombinedJson(BaseModel):
     type: str = "COMBINED"
+
     fire_json: List[EventJson] = []
     fire_map: List[EventMap] = []
     action_json: List[EventJson] = []
