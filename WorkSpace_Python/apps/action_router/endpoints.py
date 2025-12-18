@@ -51,11 +51,11 @@ async def camera_post_video(source, detector, pc_id, cam_id):
                         fire_map=[]
                     )
 
-                    binary_payload = msgpack.packb(combined_json.model_dump())
+                    binary_payload = msgpack.packb(combined_json.model_dump(), use_bin_type=True)
 
                     await websocket.send(binary_payload)
 
-                    await asyncio.sleep(0.01)
+                    # await asyncio.sleep(0.01)
 
     except Exception as e:
         print(f"[Endpoint] Error on CCTV-{cam_id}: {e}")
