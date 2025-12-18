@@ -45,7 +45,6 @@ public class PythonStreamService implements CommandLineRunner {
         StandardWebSocketClient client = new StandardWebSocketClient(container);
 
         TextWebSocketHandler pythonHandler = new TextWebSocketHandler() {
-            private String lastJsonData = null; // JSON이 없을 수 있음
 
             @Override
             public void afterConnectionEstablished(WebSocketSession session) {
@@ -53,24 +52,15 @@ public class PythonStreamService implements CommandLineRunner {
             }
 
             @Override
-            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-                lastJsonData = message.getPayload();
-                System.out.println("📨 JSON 수신: " + lastJsonData.substring(0, Math.min(100, lastJsonData.length())));
-            }
-
-            @Override
             protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
                 try {
-                    ByteBuffer imageBuffer = message.getPayload();
-                    byte[] imageBytes = new byte[imageBuffer.remaining()];
-                    imageBuffer.get(imageBytes);
+                    ByteBuffer payload = message.getPayload();
+                    byte[] combinedData  = new byte[payload.remaining()];
+                    payload.get(combinedData);
 
-                    // 디버깅: JSON이 있는지 확인
-                    if (lastJsonData != null && lastJsonData.contains("fire_router")) {
-                        System.out.println("🖼️ 이미지 + JSON 전송: " + imageBytes.length + " bytes");
-                    }
+                    // System.out.println("통합 데이터 수신: " + combinedData.length + " bytes");
                     
-                    videoWebSocketHandler.livePostData(lastJsonData, imageBytes);
+                    videoWebSocketHandler.livePostData(combinedData);
                     
                 } catch (Exception e) {
                     System.out.println("이미지 처리 중 오류: " + e.getMessage());
@@ -88,6 +78,7 @@ public class PythonStreamService implements CommandLineRunner {
                 client.doHandshake(pythonHandler, new WebSocketHttpHeaders(), URI.create(PYTHON_SERVER_URL)).get();
             } catch (Exception e) {
                 System.out.println("⚠️ PC2 서버를 찾을 수 없습니다. (Python 서버가 켜져있는지 확인하세요)");
+                e.printStackTrace();
             }
         });
     }

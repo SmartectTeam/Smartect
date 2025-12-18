@@ -15,6 +15,7 @@ from datetime import datetime
 
 from common.schemas import EventJson, EventMap, CombinedJson
 
+
 def frame_detector(image_bytes):
     nparr = np.frombuffer(image_bytes, np.uint8)
     decoded_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -66,7 +67,3 @@ def fire_model_video(model, frame, threshold_map, cam_no):
                     ))
 
     return fire_json, fire_map
-
-def fire_objects():
-    result_image = ""
-    return result_image

@@ -53,7 +53,7 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-2(live)")
     detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
     detector2.models = shared_models
-    source2 = WebcamStream(VIDEO_PATH_2)
+    source2 = FileLoofStream(VIDEO_PATH_2)
 
     # CCTV 03
     print(">>>[Setup] CCTV-3(live)")
