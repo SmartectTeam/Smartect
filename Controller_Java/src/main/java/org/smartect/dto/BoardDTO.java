@@ -18,8 +18,8 @@ public class BoardDTO {
 
     private String content;
 
-    private LocalDateTime createdAt;
+    private String createdAt; // LocalDateTime -> String으로 포맷해서 전달됨
 
-    private String updatedAt;
+//    private String updatedAt;
 
 }

@@ -48,8 +48,7 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-                            <img id="live-image" src="" alt="CCTV 1">
-                            <canvas id="detection-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 1">
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status">AI 분석 중...</span>
@@ -64,11 +63,13 @@
                             </span>
                             <span class="rec-indicator">● REC</span>
                         </div>
-                        <div class="video-display">
-                            <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 2">
+                        <div class="video-display" style="position: relative;">
+                            <img id="live-image-2" src="" alt="CCTV 2" style="width: 100%; height: 100%; object-fit: contain;">
+
+                            <canvas id="detection-canvas-2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
-                            <span class="ai-status">AI 분석 중...</span>
+                            <span class="ai-status" id="ai-status-2">AI 분석 중...</span>
                         </div>
                     </div>
 
@@ -81,8 +82,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-<!--                        <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 3">-->
-                            <img id="cctv-3" th:src="@{/images/placeholder-grid.png}" alt="CCTV 3" style="width:100%; height:100%; object-fit:contain;">
+                            <img id="live-image-3" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-3" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status">AI 분석 중...</span>
@@ -98,13 +99,8 @@
                             <span class="rec-indicator">● REC</span>
                         </div>
                         <div class="video-display">
-<!--                        <img th:src="@{/images/placeholder-grid.png}" alt="CCTV 4">-->
-                            <img id="cctv-4" th:src="@{/images/placeholder-grid.png}" alt="CCTV 4" style="width:100%; height:100%; object-fit:contain;">
-                        </div>
-                            <div class="bounding-box"
-                                 style="top: 60%; left: 45%; width: 25%; height: 30%;">
-                                <span class="box-label">물체 이동</span>
-                            </div>
+                            <img id="live-image-4" src="" alt="CCTV 1">
+                            <canvas id="detection-canvas-4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
                         </div>
                         <div class="panel-footer">
                             <span class="ai-status text-cyan">물체 이동 감지</span>
@@ -117,53 +113,32 @@
             <!-- RIGHT : ALERTS -->
             <aside class="alert-section">
 
+                <!-- 알림 영역 -->
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
                 <div class="section-title error-text">
                     <i class="fa-regular fa-bell"></i> ALERTS
-                    <span class="sub-label">고위험 알람 (5)</span>
-                </div>
+                        <span class="sub-label">고위험 알람 (0)</span>
+                    </div>
 
-                <div class="alert-list-container">
-
-                    <div class="alert-card critical">
-                        <div class="alert-header">
-                            <i class="fa-solid fa-triangle-exclamation"></i> 침입자 감지
-                        </div>
-                        <div class="alert-info">
-                            <span class="badge">CCTV-01</span>
-                            <span class="time">오후 4:57:50</span>
+                    <div class="alert-list-container"
+                         id="alert-list-container"
+                         style="height: 220px; overflow-y: auto;">
+                        <!-- 알림이 동적으로 추가됩니다 -->
                         </div>
                     </div>
 
-                    <div class="alert-card warning">
-                        <div class="alert-header">
-                            <i class="fa-solid fa-fire"></i> 화재 감지
-                        </div>
-                        <div class="alert-info">
-                            <span class="badge">CCTV-01</span>
-                            <span class="time">오후 4:57:47</span>
-                        </div>
+                <!-- 탐지 객체 로그 영역 -->
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 200px;">
+                    <div class="section-title error-text">
+                        <i class="fa-solid fa-list"></i> DETECTION LOG
+                        <span class="sub-label">실시간 탐지 객체 로그</span>
                     </div>
 
-                    <div class="alert-card warning">
-                        <div class="alert-header">
-                            <i class="fa-solid fa-person-falling"></i> 낙상 감지
-                        </div>
-                        <div class="alert-info">
-                            <span class="badge">CCTV-03</span>
-                            <span class="time">오후 4:57:23</span>
-                        </div>
+                    <div class="alert-list-container"
+                         id="detection-log-container"
+                         style="height: 500px; overflow-y: auto;">
+                        <!-- 탐지 로그가 동적으로 추가됩니다 -->
                     </div>
-
-                    <div class="alert-card warning">
-                        <div class="alert-header">
-                            <i class="fa-solid fa-fire"></i> 화재 감지
-                        </div>
-                        <div class="alert-info">
-                            <span class="badge">CCTV-02</span>
-                            <span class="time">오후 4:56:56</span>
-                        </div>
-                    </div>
-
                 </div>
 
             </aside>
@@ -171,120 +146,12 @@
         </main>
     </div>
 
+    <!-- WebSocket 스크립트 (순서 주의) -->
+    <script src="/js/alerts.js"></script>
+    <script src="/js/logs.js"></script>
+    <script src="/js/render.js"></script>
+    <script src="/js/stream.js"></script>
 
-    <!-- WebSocket 스크립트 -->
-
-    <script>
-        const socket = new WebSocket("ws://localhost:8000/ws/video");
-        const imgElement = document.getElementById("live-image");
-        const canvas = document.getElementById("detection-canvas");
-        const ctx = canvas.getContext("2d");
-        let lastJsonData = null;
-        socket.binaryType = "blob";
-
-        socket.onopen = function () {
-            console.log("Java 서버 접속");
-        };
-
-        // 이미지 로드 후 Canvas 크기 조정 및 박스 그리기
-        function drawBoundingBoxes(jsonData) {
-            if (!jsonData || !jsonData.fire_info) return;
-            
-            const fireInfo = jsonData.fire_info;
-            if (!fireInfo || !Array.isArray(fireInfo) || fireInfo.length < 1) return;
-            
-            const fireMap = fireInfo[0]; // fire_map은 첫 번째 요소
-            if (!Array.isArray(fireMap)) return;
-            
-            // Canvas 크기를 이미지에 맞춤
-            canvas.width = imgElement.offsetWidth;
-            canvas.height = imgElement.offsetHeight;
-            
-            // 이전 그리기 지우기
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 이미지 실제 크기와 표시 크기 비율 계산
-            const scaleX = canvas.width / imgElement.naturalWidth;
-            const scaleY = canvas.height / imgElement.naturalHeight;
-            
-            // 각 바운딩 박스 그리기
-            fireMap.forEach(box => {
-                if (!box.x1 && box.x1 !== 0) return; // 유효한 박스인지 확인
-                
-                const x1 = box.x1 * scaleX;
-                const y1 = box.y1 * scaleY;
-                const x2 = box.x2 * scaleX;
-                const y2 = box.y2 * scaleY;
-                const width = x2 - x1;
-                const height = y2 - y1;
-                
-                // 클래스에 따라 색상 결정
-                const isFire = box.class === "fire";
-                const color = isFire ? "#FF0000" : "#FF8C00"; // fire: 빨강, smoke: 주황
-                
-                // 박스 그리기
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
-                ctx.strokeRect(x1, y1, width, height);
-                
-                // 라벨 배경
-                const label = box.class;
-                ctx.font = "bold 14px Arial";
-                const textMetrics = ctx.measureText(label);
-                const labelWidth = textMetrics.width + 10;
-                const labelHeight = 20;
-                
-                ctx.fillStyle = color;
-                ctx.fillRect(x1, y1 - labelHeight, labelWidth, labelHeight);
-                
-                // 라벨 텍스트
-                ctx.fillStyle = "#FFFFFF";
-                ctx.fillText(label, x1 + 5, y1 - 5);
-            });
-        }
-
-        socket.onmessage = function (event) {
-            if (typeof event.data === 'string') {
-                // JSON 메시지 수신 (감지 발생 시에만 전송됨)
-                try {
-                    lastJsonData = JSON.parse(event.data);
-                    console.log("JSON 수신 (감지 발생):", lastJsonData);
-                    // 이미지가 로드된 후 박스 그리기
-                    if (imgElement.complete && imgElement.naturalWidth > 0) {
-                        drawBoundingBoxes(lastJsonData);
-                    }
-                } catch (e) {
-                    console.error("JSON 파싱 오류:", e);
-                }
-            } else if (event.data instanceof Blob) {
-                // 이미지 메시지 수신 (항상 전송됨)
-                if (imgElement.src.startsWith("blob:")) {
-                    URL.revokeObjectURL(imgElement.src);
-                }
-                const imageUrl = URL.createObjectURL(event.data);
-                imgElement.src = imageUrl;
-                
-                // 이미지 로드 후 처리
-                imgElement.onload = function() {
-                    // Canvas 크기 조정
-                    canvas.width = imgElement.offsetWidth;
-                    canvas.height = imgElement.offsetHeight;
-                    
-                    if (lastJsonData) {
-                        // JSON이 있으면 박스 그리기
-                        drawBoundingBoxes(lastJsonData);
-                    } else {
-                        // JSON이 없으면 박스 지우기 (감지 없음)
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                };
-            }
-        };
-
-        socket.onclose = function () {
-            console.log("서버 연결 끊김");
-        };
-    </script>
     <!--    페이지 콘텐츠 끝    -->
 </div>
 

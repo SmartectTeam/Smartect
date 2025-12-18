@@ -120,3 +120,32 @@ body {
 .content-wrapper::-webkit-scrollbar-track { background: #0f172a; }
 .content-wrapper::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 .content-wrapper::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Footer */
+.system-footer {
+    height: 48px;
+    background-color: #1e293b;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    font-size: 12px;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+/* 좌측 */
+.system-footer .footer-left {
+    opacity: 0.9;
+}
+
+/* 우측 */
+.system-footer .footer-right {
+    opacity: 0.7;
+}
+
+/* hover 시 은은하게 */
+.system-footer:hover {
+    color: #cbd5f5;
+}

@@ -47,9 +47,11 @@ dependencies {
     // ----------------------------- 편리 -----------------------------
     // Thymeleaf security 태그
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    // Getter,Setter
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Lombok Getter,Setter
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
     // 검증 어노테이션 @Valid , @NotNull, @Min, @Pattern...등
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     // Thymeleaf base.html(공통 레이아웃)
