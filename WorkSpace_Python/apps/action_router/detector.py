@@ -28,7 +28,7 @@ from datetime import datetime
 
 
 # 공통 모듈
-from common.schemas import EventJson
+from common.schemas import EventJson, EventMap
 from detect import algorithm, ai_models
 from detect.processor import (fill_missing_keypoints, get_stable_anchor, prepare_lstm_input)
 
@@ -94,7 +94,7 @@ class MotionDetector:
 
         # 리사이즈
         h_org, w_org = frame.shape[:2]
-        new_w = 800
+        new_w = 640
         new_h = int(h_org * (new_w / w_org))
         frame_resized = cv2.resize(frame, (new_w, new_h))
         h, w = frame_resized.shape[:2]
@@ -309,18 +309,27 @@ class MotionDetector:
             except Exception as e:
                 print(f"[Detector] Save Error: {e}")
 
-        event_data = EventJson(
-            cam_no=cam_id,
-            event_type=primary_event_type,
-            danger_level=highest_danger_level,
-            event_time=current_time,
-            screenshot_path=screenshot_path,
-            img_base64="",  # [중요] 바이너리 전송하므로 여기는 비워둠 (속도 향상)
-            objects=detections
-        )
+        action_json = []
+        action_map = []
+        if detections:
+            for det in detections:
+                action_json_list = EventJson(
+                    cam_no=cam_id,
+                    event_type=det['status'],
+                    danger_level=det['danger_level'],
+                    event_time=current_time,
+                    screenshot_path=screenshot_path,
+                )
+                action_json.append(action_json_list)
 
-        return frame_resized, event_data
+                action_map_list = EventMap(
+                    x1=det['box'][0],
+                    y1=det['box'][1],
+                    x2=det['box'][2],
+                    y2=det['box'][3],
+                    event_type=det['status'],
+                    confidence=det['score'],
+                )
+                action_map.append(action_map_list)
 
-
-
-
+        return action_json, action_map

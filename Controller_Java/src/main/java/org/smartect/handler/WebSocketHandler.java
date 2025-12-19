@@ -28,16 +28,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
         System.out.println(session.getId() + "클라이언트의 접속이 끊겼습니다.");
     }
 
-    public void livePostData(String jsonData, byte[] imageBytes) {
+    public void livePostData(byte[] combinedPayload) {
 
         for (WebSocketSession session : CLIENTS.values()) {
             try {
                 if (session.isOpen()) {
                     synchronized (session) {
-                        if (jsonData != null) {
-                            session.sendMessage(new TextMessage(jsonData));
-                        }
-                        session.sendMessage(new BinaryMessage(imageBytes));
+                        session.sendMessage(new BinaryMessage(combinedPayload));
                     }
                 }
             } catch (IOException e) {

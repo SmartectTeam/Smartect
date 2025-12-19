@@ -5,7 +5,7 @@
 import cv2
 from common.config import PhoneCamPath
 
-'''
+
 def cam_connect(cam_id):
     cp = PhoneCamPath(cam_id)
 
@@ -53,7 +53,7 @@ def cam_connect(cam_id):
             continue
 
     exit(1)
-'''
+
 
 def phone_connect(cam_id):
     cp = PhoneCamPath(cam_id)
@@ -100,7 +100,7 @@ class WebcamStream:
         if isinstance(source, int):
             self.cap = snap_cam_connect(source)
         else:
-            self.cap = cam_connect(source)
+            self.cap = phone_connect(source)
 
     def read(self):
         return self.cap.read()

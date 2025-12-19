@@ -17,11 +17,8 @@ class ImageProcessor:
 
             fire_json, fire_map = fire_model_video(self.model, annotated_image, threshold_map, cam_no)
 
-            ret, buffer = cv2.imencode('.jpg', annotated_image, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
-            encoded_image_bytes = buffer.tobytes()
-
-            return fire_json, fire_map, encoded_image_bytes
+            return fire_json, fire_map
 
         except Exception as e:
             print(e)
-            return None, image_bytes
+            return None, None

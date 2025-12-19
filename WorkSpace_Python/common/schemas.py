@@ -10,8 +10,6 @@ class EventJson(BaseModel):
     danger_level: int      # 1
     event_time: str        # "2025-01-01T12:00:00"
     screenshot_path: str   #"/images/capture_123.png"
-    img_base64: Optional[str] = None    # 이미지를 문자로 변환해 담을 공간
-    objects: List[Any] = []
 
 
 class EventMap(BaseModel):
@@ -25,7 +23,8 @@ class EventMap(BaseModel):
 
 class CombinedJson(BaseModel):
     type: str = "COMBINED"
-
+    cam_no: int
+    img_bytes: Optional[bytes] = None
     fire_json: List[EventJson] = []
     fire_map: List[EventMap] = []
     action_json: List[EventJson] = []
