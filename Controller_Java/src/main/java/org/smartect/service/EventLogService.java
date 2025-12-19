@@ -95,7 +95,7 @@ public class EventLogService {
     public void process(byte[] combined_json) {
         try {
             CombinedJsonDTO combined_data = msgPackMapper.readValue(combined_json, CombinedJsonDTO.class);
-            System.out.println(combined_data.getAction_json());
+            //System.out.println(combined_data.getAction_json());
 
         } catch (Exception e) {
             System.err.println(e.getMessage());

@@ -2,6 +2,7 @@ package org.smartect.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -43,6 +44,21 @@ public class UserEntity {
 
     @Column(name="last_login")
     private LocalDateTime lastLogin;
+
+    @Builder
+    public UserEntity(String userId,
+                      String password,
+                      String name,
+                      UserRole role,
+                      UserStatus status) {
+        this.userId = userId;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+        this.status = status;
+    }
+
+
 
 // org.smartect.common.enums 로 이동
 //    public enum UserRole{
