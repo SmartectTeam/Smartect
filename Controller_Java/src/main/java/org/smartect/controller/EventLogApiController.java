@@ -14,11 +14,9 @@ import java.util.List;
 @RequestMapping("/api")
 public class EventLogApiController {
     private final EventLogService eventLogService;
-    private final EventLogRepository eventLogRepository;
 
-    public EventLogApiController(EventLogService eventLogService, EventLogRepository eventLogRepository) {
+    public EventLogApiController(EventLogService eventLogService) {
         this.eventLogService = eventLogService;
-        this.eventLogRepository = eventLogRepository;
     }
 
     // event board  - 비동기 이벤트로그 목록 조회
@@ -28,14 +26,14 @@ public class EventLogApiController {
     }
 
 
-    // memo
+    // event board - detail memo Update
     @PatchMapping("/events/{eventNo}/memo")
     public ResponseEntity<Void> updateMemo(@PathVariable Long eventNo,@RequestBody EventLogRequest request){
         eventLogService.updateMemo(eventNo,request.getMemo());
         return ResponseEntity.ok().build();
     }
 
-    // checked 확인안됨 -> 확인됨으로만 변경 가능, 되돌릴 수 없음
+    // event board - detail checked 확인안됨 -> 확인됨으로만 변경 가능, 되돌릴 수 없음!
     @PatchMapping("/events/{eventNo}/check")
     public ResponseEntity<Void> updateCheck(@PathVariable Long eventNo){
         eventLogService.checkEvent(eventNo);

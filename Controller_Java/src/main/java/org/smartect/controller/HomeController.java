@@ -35,8 +35,7 @@ public class HomeController {
         return "login";
     }
 
-    // activePage : 사이드바 active class 부여하는 용도
-
+    // Model - activePage : 사이드바 active class 부여하는 용도
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("activePage", "dashboard");

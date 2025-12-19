@@ -3,8 +3,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/base}">
+<th:block layout:fragment="title">Settings : SmarTect</th:block>
 <head>
-    <title>CCTV 통합 관제</title>
     <link rel="stylesheet" th:href="@{/css/settings.css}">
 </head>
 
@@ -53,7 +53,8 @@
             <!-- 그리기 안내 문구 (숨김 상태) -->
             <div id="draw-guide" style="display:none; margin-top:10px; color:#aaa; font-size:13px; text-align:center;">
                 <i class="fa-solid fa-pen-nib"></i>
-                좌클릭: 점 추가 | 우클릭: 도형 완성 | <span style="color:#dc3545; cursor:pointer;" onclick="cancelDrawing()">[취소]</span>
+                좌클릭: 점 추가 | 우클릭: 도형 완성 | <span style="color:#dc3545; cursor:pointer;"
+                                               onclick="cancelDrawing()">[취소]</span>
             </div>
         </div>
 
@@ -127,7 +128,8 @@
                     <ul id="zone-list-ui" style="list-style:none; padding:0; margin:0; font-size:13px; color:#aaa;">
                         <li style="padding:10px; background:#333; border-radius:4px;">(저장된 구역 없음)</li>
                     </ul>
-                    <button class="btn-draw" style="width:100%; margin-top:5px; background:#dc3545;" onclick="clearZones()">
+                    <button class="btn-draw" style="width:100%; margin-top:5px; background:#dc3545;"
+                            onclick="clearZones()">
                         🗑️ 전체 삭제
                     </button>
                 </div>
@@ -137,11 +139,15 @@
             <div id="tab3" class="tab-body">
                 <div class="group-box">
                     <div class="group-title" style="color:#888; font-size:12px; margin-bottom:10px;">화면 표시 옵션</div>
-                    <div class="control-row"><label><span>🚨 위험 시에만 표시</span> <input type="checkbox" id="vis-alert"></label></div>
+                    <div class="control-row"><label><span>🚨 위험 시에만 표시</span> <input type="checkbox"
+                                                                                    id="vis-alert"></label></div>
                     <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;">
-                    <div class="control-row"><label><span>🔲 객체 박스</span> <input type="checkbox" id="vis-bbox" checked></label></div>
-                    <div class="control-row"><label><span>💀 관절 뼈대</span> <input type="checkbox" id="vis-skeleton" checked></label></div>
-                    <div class="control-row"><label><span>🏷️ 상태 텍스트</span> <input type="checkbox" id="vis-text" checked></label></div>
+                    <div class="control-row"><label><span>🔲 객체 박스</span> <input type="checkbox" id="vis-bbox"
+                                                                                checked></label></div>
+                    <div class="control-row"><label><span>💀 관절 뼈대</span> <input type="checkbox" id="vis-skeleton"
+                                                                                checked></label></div>
+                    <div class="control-row"><label><span>🏷️ 상태 텍스트</span> <input type="checkbox" id="vis-text" checked></label>
+                    </div>
                 </div>
             </div>
 

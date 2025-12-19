@@ -7,10 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title layout:title-pattern="${title} :: Smartect">Smartect</title>
-
+    <title layout:title-pattern="SmarTect">
+        <th:block layout:fragment="title">SmarTect</th:block>
+    </title>
     <!-- 공통 CSS -->
     <link rel="stylesheet" th:href="@{/css/layout.css}">
+
+    <!--  파비콘  -->
+    <link rel="icon" th:href="@{/images/favicon.ico}">
 
     <!-- 공통 아이콘 & 폰트 -->
     <link rel="stylesheet"
