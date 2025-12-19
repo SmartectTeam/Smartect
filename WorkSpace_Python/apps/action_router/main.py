@@ -22,12 +22,14 @@ from apps.action_router.detect.ai_models import AIModels
 
 
 # [CCTV-01] 파일 반복
-CAM_ID_1 = "HSYCAM"
+CAM_ID_1 = 0
 CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
 # VIDEO_PATH_1 = r"C:\Users\hsy\Desktop\old.mp4"
 # CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
 
 # [CCTV-02] 파일 반복
+# CAM_ID_2 = "HSYCAM"
+# CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
 VIDEO_PATH_2 = r"C:\Users\hsy\Desktop\old.mp4"
 CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
 
@@ -56,6 +58,7 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-2(live)")
     detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
     detector2.models = shared_models
+    # source2 = WebcamStream(CAM_ID_2)
     source2 = FileLoofStream(VIDEO_PATH_2)
 
     # CCTV 03
@@ -73,9 +76,9 @@ async def main(pc_id):
     print(">>> [System] Streams Started.")
     await asyncio.gather(
         camera_post_video(source1, detector1, pc_id, 1),
-        # camera_post_video(source2, detector2, pc_id, 2),
-        # camera_post_video(source3, detector3, pc_id, 3),
-        # camera_post_video(source4, detector4, pc_id, 4)
+        camera_post_video(source2, detector2, pc_id, 2),
+        camera_post_video(source3, detector3, pc_id, 3),
+        camera_post_video(source4, detector4, pc_id, 4)
     )
 
 

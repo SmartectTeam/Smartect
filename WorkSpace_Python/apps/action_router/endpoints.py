@@ -6,7 +6,6 @@ import asyncio
 import msgpack
 import websockets
 from common.config import PCPath
-from  fastapi import APIRouter
 
 # 웹소캣을 통한 데이터 전송
 import sys
@@ -25,40 +24,43 @@ async def camera_post_video(source, detector, pc_id, cam_id):
 
     print(f"[Endpoint] Connecting CCTV={cam_id} to {url} ...")
 
-    try:
-        async with websockets.connect(url) as websocket:
-            print(f"[Endpoint] CCTV={cam_id} Connected!")
+    while True:
+        try:
+            async with websockets.connect(url, ping_interval=None, ping_timeout=None) as websocket:
+                print(f"[Endpoint] CCTV={cam_id} Connected!")
 
-            while True:
-                ret, frame = source.read()
-                if not ret:
-                    print(f"[Endpoint] Source ended for CCTV-{cam_id}")
-                    break
+                while True:
+                    ret, frame = source.read()
+                    if not ret:
+                        print(f"[Endpoint] Source ended for CCTV-{cam_id}")
+                        break
 
-                result, enc_img = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+                    result, enc_img = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
 
-                if result:
-                    img_bytes = enc_img.tobytes()
+                    if result:
+                        img_bytes = enc_img.tobytes()
 
-                    action_json, action_map = detector.process_frame(frame, cam_id)
+                        action_json, action_map = detector.process_frame(frame, cam_id)
 
-                    combined_json = CombinedJson(
-                        cam_no=cam_id,
-                        img_bytes=img_bytes,
-                        action_json=action_json,
-                        action_map=action_map,
-                        fire_json=[],
-                        fire_map=[]
-                    )
+                        combined_json = CombinedJson(
+                            cam_no=cam_id,
+                            img_bytes=img_bytes,
+                            action_json=action_json,
+                            action_map=action_map,
+                            fire_json=[],
+                            fire_map=[]
+                        )
 
-                    binary_payload = msgpack.packb(combined_json.model_dump(), use_bin_type=True)
+                        binary_payload = msgpack.packb(combined_json.model_dump(), use_bin_type=True)
 
-                    await websocket.send(binary_payload)
+                        await websocket.send(binary_payload)
 
-                    # await asyncio.sleep(0.01)
+                        await asyncio.sleep(0.01)
 
-    except Exception as e:
-        print(f"[Endpoint] Error on CCTV-{cam_id}: {e}")
+        except Exception as e:
+            print(f"[Endpoint] Error on CCTV-{cam_id}: {e}")
+            print("3초 후 재 접속")
+            await asyncio.sleep(3)
 
-    finally:
-        source.release()
+        finally:
+            source.release()

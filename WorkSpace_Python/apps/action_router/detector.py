@@ -49,7 +49,7 @@ class MotionDetector:
         }
 
         self.frame_count = 0
-        self.skip_interval = 6 # 프레임스킵!!!
+        self.skip_interval = 3 # 프레임스킵!!!
         # [추가] 초기값 안전장치
         self.last_detections = []
         self.last_danger = 0

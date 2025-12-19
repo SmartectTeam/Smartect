@@ -92,7 +92,7 @@ async def input_api(websocket: WebSocket):
     print("PC1 접속")
 
     frame_count = 0
-    skip_frame = 40
+    skip_frame = 10
     threshold_map = {'fire': 0.70, 'smoke': 0.30}
 
     try:
@@ -113,8 +113,11 @@ async def input_api(websocket: WebSocket):
                 img_bytes = data_dict.get('img_bytes')
                 fire_json, fire_map = await service.process_frame(cam_no, img_bytes, threshold_map)
 
-                data_dict['fire_json'] = fire_json
-                data_dict['fire_map'] = fire_map
+                fire_json_dicts = [item.model_dump() for item in fire_json]
+                fire_map_dicts = [item.model_dump() for item in fire_map]
+
+                data_dict['fire_json'] = fire_json_dicts
+                data_dict['fire_map'] = fire_map_dicts
 
                 final_payload = msgpack.packb(data_dict)
 
