@@ -76,9 +76,9 @@ async def main(pc_id):
     print(">>> [System] Streams Started.")
     await asyncio.gather(
         camera_post_video(source1, detector1, pc_id, 1),
-        camera_post_video(source2, detector2, pc_id, 2),
-        camera_post_video(source3, detector3, pc_id, 3),
-        camera_post_video(source4, detector4, pc_id, 4)
+        # camera_post_video(source2, detector2, pc_id, 2),
+        # camera_post_video(source3, detector3, pc_id, 3),
+        # camera_post_video(source4, detector4, pc_id, 4)
     )
 
 
