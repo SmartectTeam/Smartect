@@ -12,7 +12,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
     List<EventLogEntity> findAllByOrderByCreatedAtDesc();
 
     @Query(value = "SELECT event_type, COUNT(*) FROM event_log " +
-            "WHERE created_at BETWEEN :start AND :end " + // ★ 날짜 조건 추가
+            "WHERE created_at BETWEEN :start AND :end " + // 날짜 조건 추가
             "GROUP BY event_type", nativeQuery = true)
     List<Object[]> countByEventType(@Param("start") String start, @Param("end") String end);
 
