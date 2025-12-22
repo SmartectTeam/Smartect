@@ -149,3 +149,33 @@ body {
 .system-footer:hover {
     color: #cbd5f5;
 }
+
+/*=============== header 미확인 알람 벨 스타일 ==============*/
+
+.header-notification {
+    position:relative;
+    margin-right:25px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.alarm-badge {
+     position:absolute;
+     display: inline-block;
+     color: #ffffff;
+     font-size: 9px;
+     bottom: 12px;
+     left: 15px;
+}
+
+/* 반짝임 애니메이션 */
+@keyframes bellBlink {
+    0% { color: #94a3b8; }
+    50% { color: #ffec5e; }
+    100% { color: #94a3b8; }
+}
+
+.bell-active {
+    animation: bellBlink 1s infinite;
+}

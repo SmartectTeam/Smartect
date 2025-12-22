@@ -9,23 +9,23 @@
         <li>
             <a href="/dashboard"
                th:classappend="${activePage == 'dashboard'} ? 'active'">
-                <i class="fa-solid fa-chart-line"></i> Dashboard
+                <i class="fa-solid fa-video"></i> Dashboard
             </a>
         </li>
 
         <li>
             <a href="/eventboard"
                th:classappend="${activePage == 'eventboard'} ? 'active'">
-                <i class="fa-solid fa-video"></i> Events
+                <i class="fa-solid fa-clock-rotate-left"></i> Event Log
             </a>
         </li>
 
-        <li>
-            <a href="/history"
-               th:classappend="${activePage == 'history'} ? 'active'">
-                <i class="fa-solid fa-clock-rotate-left"></i> History
-            </a>
-        </li>
+<!--        <li>-->
+<!--            <a href="/history"-->
+<!--               th:classappend="${activePage == 'history'} ? 'active'">-->
+<!--                <i class="fa-solid fa-clock-rotate-left"></i> History-->
+<!--            </a>-->
+<!--        </li>-->
 
         <li>
             <a href="/statistics"

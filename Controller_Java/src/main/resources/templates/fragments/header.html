@@ -1,7 +1,8 @@
 <header th:fragment="header" class="system-header">
-    <i class="fa-regular fa-bell"
-       style="font-size: 20px; margin-right: 20px; color:#94a3b8; cursor:pointer;"></i>
-
+    <a href="/eventboard" class="header-notification">
+        <i id="alarmBell" class="fa-regular fa-bell"></i>
+        <span id="alarmCount" class="alarm-badge" style="display:none;"></span>
+    </a>
     <div class="user-profile">
         <span th:text="${#authentication.name} + ' 님'"></span>
         <span th:text="'[ '+${#strings.replace(#authentication.authorities.iterator().next().authority, 'ROLE_', '')}+' ]'"></span>
@@ -16,4 +17,32 @@
     font-size: 11px;" type="submit">로그아웃</button>
         </form>
     </div>
+    <script>
+        function loadUncheckedCount() {
+            fetch("/api/events/count/uncheck")
+                .then(res => res.json())
+                .then(data => {
+                    const count = data.count;
+                    const bell = document.getElementById("alarmBell");
+                    const badge = document.getElementById("alarmCount");
+
+                    if (count > 0) {
+                        bell.classList.add("bell-active");
+                        badge.style.display = "inline-block";
+                        // 99개까지만 표시 (99개 이상 -> 99+)
+                        badge.innerText = count > 99 ? "99+" : count;
+                    } else {
+                        bell.classList.remove("bell-active");
+                        badge.style.display = "none";
+                    }
+                })
+                .catch(err => console.error("알림 개수 로딩 실패", err));
+        }
+
+        // 최초 로딩
+        loadUncheckedCount();
+
+        // 10초마다 갱신
+        setInterval(loadUncheckedCount, 10000);
+    </script>
 </header>
