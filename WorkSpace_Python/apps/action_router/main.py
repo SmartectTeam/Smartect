@@ -22,23 +22,23 @@ from apps.action_router.detect.ai_models import AIModels
 
 
 # [CCTV-01] 파일 반복
-CAM_ID_1 = 0
-CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
-# VIDEO_PATH_1 = r"C:\Users\hsy\Desktop\old.mp4"
+# CAM_ID_1 = 0
 # CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
+VIDEO_PATH_1 = r"C:\video\test.mp4"
+CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
 
 # [CCTV-02] 파일 반복
 # CAM_ID_2 = "HSYCAM"
 # CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
-VIDEO_PATH_2 = r"C:\Users\hsy\Desktop\old.mp4"
+VIDEO_PATH_2 = r"C:\video\test1.mp4"
 CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
 
 # [CCTV-03] 실시간 카메라
-VIDEO_PATH_3 = r"C:\Users\hsy\Desktop\old.mp4"
+VIDEO_PATH_3 = r"C:\video\fire_test.mp4"
 CONFIG_FILE_3 = os.path.join(SETTINGS_DIR, "cam_3.json")
 
 # [CCTV-04] 파일 반복
-VIDEO_PATH_4 = r"C:\Users\hsy\Desktop\old.mp4"
+VIDEO_PATH_4 = r"C:\video\7. veryDangerTest.mp4"
 CONFIG_FILE_4 = os.path.join(SETTINGS_DIR, "cam_4.json")
 
 
@@ -51,8 +51,8 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-1(live)")
     detector1 = MotionDetector(settings_path=CONFIG_FILE_1)
     detector1.models = shared_models
-    source1 = WebcamStream(CAM_ID_1)
-    # source1 = FileLoofStream(VIDEO_PATH_1)
+    # source1 = WebcamStream(CAM_ID_1)
+    source1 = FileLoofStream(VIDEO_PATH_1)
 
     # CCTV 02
     print(">>>[Setup] CCTV-2(live)")
@@ -82,7 +82,7 @@ async def main(pc_id):
     )
 
 
-PC_ID = "HSYPC"
+PC_ID = "HSMPC"
 
 
 if __name__ == "__main__":
