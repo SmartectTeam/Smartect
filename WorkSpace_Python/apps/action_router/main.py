@@ -22,7 +22,7 @@ from apps.action_router.detect.ai_models import AIModels
 
 
 # [CCTV-01] 파일 반복
-CAM_ID_1 = 0
+CAM_ID_1 = 1
 CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
 # VIDEO_PATH_1 = r"C:\Users\hsy\Desktop\old.mp4"
 # CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
@@ -82,7 +82,7 @@ async def main(pc_id):
     )
 
 
-PC_ID = "HSYPC"
+PC_ID = "YJEPC"
 
 
 if __name__ == "__main__":
