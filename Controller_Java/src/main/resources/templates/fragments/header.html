@@ -3,7 +3,17 @@
        style="font-size: 20px; margin-right: 20px; color:#94a3b8; cursor:pointer;"></i>
 
     <div class="user-profile">
-        <span>관리자 (Admin)</span>
-        <div class="user-avatar">A</div>
+        <span th:text="${#authentication.name} + ' 님'"></span>
+        <span th:text="'[ '+${#strings.replace(#authentication.authorities.iterator().next().authority, 'ROLE_', '')}+' ]'"></span>
+
+        <form th:action="@{/logout}" method="post">
+            <button style="border: 1px solid #989898;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #989898;
+    color: white;
+    font-weight: 600;
+    font-size: 11px;" type="submit">로그아웃</button>
+        </form>
     </div>
 </header>

@@ -22,6 +22,7 @@ public class HomeController {
         this.eventLogService = eventLogService;
     }
 
+    // 메인화면 + 게시판
     @GetMapping("/")
     public String home(Model model) {
         List<BoardDTO> boardList = boardService.findAll();
@@ -29,7 +30,7 @@ public class HomeController {
         return "index"; // main
     }
 
-    // Spring Security 적용 전 login 화면 테스트용
+    // Spring Security 용 로그인 화면 매핑
     @GetMapping("login")
     public String loginTest(){
         return "login";
