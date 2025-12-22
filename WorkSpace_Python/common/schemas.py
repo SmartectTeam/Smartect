@@ -21,6 +21,7 @@ class EventMap(BaseModel):
     confidence: float
 
 
+
 class CombinedJson(BaseModel):
     type: str = "COMBINED"
     cam_no: int

@@ -1,161 +1,320 @@
-.safe-container {
-    width: 100%;
-    height: 85vh;
-    min-height: 600px;
-    background-color: #222;
-    color: #eee;
-    display: flex;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+:root {
+    --bg-dark: #1e1e24;
+    --bg-panel: #2b2b36;
+    --accent: #3a86ff;
+    --danger: #ef233c;
+    --text-main: #edf2f4;
 }
 
-/* 좌측 패널 */
-.left-panel {
-    width: 70%;
-    padding: 15px;
-    border-right: 1px solid #444;
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
     display: flex;
     flex-direction: column;
-    background-color: #151515;
+    height: 100%;
 }
 
-.header-row {
+/* 헤더 */
+.top-bar {
+    height: 60px;
+    background: #15151a;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    padding: 0 20px;
+    border-bottom: 1px solid #444;
 }
 
-select {
-    padding: 8px;
-    font-size: 15px;
-    background-color: #333;
-    color: white;
+.cam-controls select {
+    padding: 6px;
+    border-radius: 4px;
     border: 1px solid #555;
-    border-radius: 4px;
-    width: 300px;
+    background: #333;
+    color: #fff;
+    margin-left: 10px;
 }
 
-/* 영상 박스 */
-.video-box {
-    flex: 1;
-    width: 100%;
-    background-color: black;
-    border: 1px solid #444;
+.badge {
+    padding: 4px 8px;
     border-radius: 4px;
-    position: relative;
-    overflow: hidden;
+    font-size: 12px;
+    font-weight: bold;
+    background: #555;
+}
+
+.badge.connected {
+    background: #2ec4b6;
+    color: #000;
+}
+
+.badge.disconnected {
+    background: #d90429;
+    color: #fff;
+}
+
+/* 메인 레이아웃 */
+.main-content {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex: 1;
+    overflow: hidden;
 }
 
-#live-img {
+/* 영상 영역 */
+.video-section {
+    flex: 1;
+    position: relative;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.canvas-container {
+    position: relative;
     width: 100%;
     height: 100%;
+    background-color: #000; /* 빈 여백은 검은색 */
+
+    /* 내용물 중앙 정렬 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+canvas {
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+#overlayInfo {
+    position: absolute;
+    color: #666;
+    font-size: 24px;
+    pointer-events: none;
+}
+
+.video-footer {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+/* 설정 패널 */
+.config-section {
+    width: 400px;
+    background: var(--bg-panel);
+    border-left: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 탭 버튼 */
+.tab-header {
+    display: flex;
+    border-bottom: 1px solid #444;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    color: #aaa;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+    color: #fff;
+    border-bottom-color: var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* 탭 내용 */
+.tab-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
     display: block;
 }
 
-/* 캔버스 (영상 위에 겹침) */
-#zone-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* 평소엔 클릭 통과 */
-}
-
-/* 우측 패널 */
-.right-panel {
-    width: 30%;
-    background-color: #2a2a2a;
-    display: flex;
-    flex-direction: column;
-    min-width: 320px;
-}
-
-.tab-header {
-    display: flex;
-    background-color: #222;
-    border-bottom: 1px solid #444;
-}
-.tab-btn {
-    flex: 1;
-    padding: 12px;
-    background: transparent;
-    color: #888;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 13px;
-    transition: 0.2s;
-}
-.tab-btn:hover { background-color: #333; color: #ccc; }
-.tab-btn.active {
-    background-color: #2a2a2a;
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
-}
-
-.tab-body {
+/* 컨트롤 요소 */
+.group-box {
+    background: rgba(0, 0, 0, 0.2);
     padding: 15px;
-    display: none;
-    overflow-y: auto;
-    flex: 1;
+    border-radius: 6px;
+    margin-bottom: 15px;
 }
-.tab-body.active { display: block; }
+
+h3 {
+    margin-top: 0;
+    font-size: 14px;
+    color: #aaa;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
 
 .control-row {
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #3c3c3c;
+    margin-bottom: 8px;
 }
 
-label {
+.slider-row {
+    margin-bottom: 15px;
+}
+
+.slider-row label {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #ddd;
+    font-size: 13px;
+    margin-bottom: 5px;
 }
 
-input[type="range"] { width: 100%; cursor: pointer; accent-color: #007bff; }
-input[type="checkbox"] { transform: scale(1.2); cursor: pointer; accent-color: #007bff; }
+input[type=range] {
+    width: 100%;
+}
 
-.disabled-opt { opacity: 0.5; }
+/* 구역 리스트 스타일 */
+.guide-box {
+    background: rgba(58, 134, 255, 0.1);
+    border: 1px solid rgba(58, 134, 255, 0.3);
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
 
-.btn-save {
+.zone-card {
+    background: #333;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.zone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.zone-title {
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.btn-del {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-del:hover {
+    color: var(--danger);
+}
+
+.zone-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+/* 버튼 */
+.panel-footer {
+    padding: 15px;
+    border-top: 1px solid #444;
+}
+
+.btn-primary {
     width: 100%;
     padding: 12px;
-    background-color: #007bff;
+    background: var(--accent);
     color: white;
     border: none;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: auto;
-}
-.btn-save:hover { background-color: #0056b3; }
-
-/* 그리기 모드 버튼 스타일 */
-.btn-draw {
-    background-color: #444;
-    color: white;
-    border: 1px solid #666;
-    padding: 8px 15px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 16px;
+    font-weight: bold;
 }
-.btn-draw.active { background-color: #dc3545; border-color: #dc3545; }
 
-.status-txt { color: orange; font-weight: bold; font-size: 13px; }
+.btn-primary:hover {
+    background: #256eff;
+}
 
-/* 그래프 바 */
-.bar-wrap { margin-bottom: 10px; }
-.bar-bg { background: #444; height: 10px; border-radius: 5px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s; }
+.btn-danger {
+    background: #d90429;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* AI 로그 박스 스타일 */
+.ai-log-box {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.6); /* 반투명 검정 */
+    color: #00FF00; /* 터미널 느낌의 초록색 글씨 */
+    padding: 10px;
+    border-radius: 5px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    pointer-events: none; /* 클릭 통과 (구역 그리기 방해 안 되게) */
+    z-index: 10;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.log-header {
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.log-item {
+    margin-bottom: 2px;
+}
+
+.log-item.danger {
+    color: #FF4444; /* 위험한 행동은 빨간색 강조 */
+    font-weight: bold;
+}
+
+.log-item.safe {
+    color: #00CCFF; /* 안전한 행동은 하늘색 */
+}
