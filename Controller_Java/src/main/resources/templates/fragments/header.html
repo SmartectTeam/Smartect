@@ -8,13 +8,7 @@
         <span th:text="'[ '+${#strings.replace(#authentication.authorities.iterator().next().authority, 'ROLE_', '')}+' ]'"></span>
 
         <form th:action="@{/logout}" method="post">
-            <button style="border: 1px solid #989898;
-    border-radius: 5px;
-    padding: 5px;
-    background-color: #989898;
-    color: white;
-    font-weight: 600;
-    font-size: 11px;" type="submit">로그아웃</button>
+            <button class="logout-btn" type="submit">로그아웃</button>
         </form>
     </div>
     <script>
