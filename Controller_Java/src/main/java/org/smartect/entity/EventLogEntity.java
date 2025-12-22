@@ -53,4 +53,14 @@ public class EventLogEntity {
     public void updateMemo(String memo) {
         this.memo = memo;
     }
+
+    // 생성 편의를 위한 정적 팩토리 메서드
+    public static EventLogEntity create(CamEntity camEntity, String eventType, String screenshotPath) {
+        EventLogEntity entity = new EventLogEntity();
+        entity.camEntity = camEntity;
+        entity.eventType = eventType;
+        entity.screenshotPath = screenshotPath;
+        // memo, checkedAt 은 기본 null, createdAt 은 @CreationTimestamp 로 자동 설정
+        return entity;
+    }
 }
