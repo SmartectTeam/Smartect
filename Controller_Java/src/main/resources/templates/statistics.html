@@ -2,56 +2,52 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/base}">
-<th:block layout:fragment="title">Statistics : SmarTect</th:block>
 <head>
+    <title>통계 대시보드</title>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-
-    <style>
-        .chart-row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
-        .chart-col { position: relative; width: 50%; padding-right: 15px; padding-left: 15px; box-sizing: border-box; }
-        @media (max-width: 992px) { .chart-col { width: 100%; } }
-
-        .text-white { color: #fff !important; }
-        .control-bar {
-            background-color: #212529; border: 1px solid #444; border-radius: 8px;
-            padding: 15px; margin-bottom: 20px; display: flex;
-            justify-content: space-between; align-items: center;
-        }
-
-        .custom-btn-group { display: inline-flex; border: 1px solid #6c757d; border-radius: 4px; overflow: hidden; }
-        .custom-btn {
-            background-color: transparent; color: #fff; border: none; padding: 5px 15px;
-            cursor: pointer; border-right: 1px solid #6c757d;
-        }
-        .custom-btn:last-child { border-right: none; }
-        .custom-btn.active { background-color: #6c757d; font-weight: bold; }
-        .custom-btn:hover { background-color: #495057; }
-
-        .card { background-color: #212529; color: white; border: 1px solid #444; margin-bottom: 20px; }
-        .card-header { border-bottom: 1px solid #444; background-color: rgba(0,0,0,0.2); font-weight: 600; padding: 10px 15px; }
-
-        input[type="date"] {
-            background-color: #2b3035; border: 1px solid #6c757d; color: white;
-            border-radius: 4px; padding: 4px 10px; height: 32px;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1/dist/chartjs-chart-matrix.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/statistics.css}">
 </head>
 
 <div layout:fragment="content">
     <div class="container-fluid px-4" id="pdf-area">
+        <div id="pdf-only-header" style="display: none; margin-bottom: 30px; padding-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <!-- 왼쪽: 리포트 제목 & 기간 -->
+                <div>
+                    <h1 style="color: #fff; font-weight: bold; margin-bottom: 10px;">SMARTECT 분석 리포트</h1>
+                    <h5 style="color: #adb5bd;" id="pdf-date-range"></h5>
+                    <h6 style="color: #6c757d; font-size: 0.85rem;" id="pdf-gen-date"></h6>
+                </div>
 
-        <h1 class="mt-4 text-white">통계 대시보드</h1>
-        <ol class="breadcrumb mb-4" style="background-color: transparent; padding-left: 0;">
-            <li class="breadcrumb-item active text-white-50">1. 실시간 CCTV 감지 데이터 분석 리포트</li>
-        </ol>
+                <!-- 오른쪽: 결재란 -->
+                <table style="border-collapse: collapse; color: white; text-align: center; font-size: 0.9rem; background-color: #2b3035;">
+                    <tr>
+                        <td rowspan="2" style="border: 1px solid #6c757d; padding: 5px 15px; vertical-align: middle; background-color: #343a40; font-weight: bold;">결<br>재</td>
+                        <td style="border: 1px solid #6c757d; padding: 5px 20px; background-color: #343a40;">담 당</td>
+                        <td style="border: 1px solid #6c757d; padding: 5px 20px; background-color: #343a40;">팀 장</td>
+                        <td style="border: 1px solid #6c757d; padding: 5px 20px; background-color: #343a40;">센터장</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #6c757d; height: 60px; width: 80px;"></td>
+                        <td style="border: 1px solid #6c757d; height: 60px; width: 80px;"></td>
+                        <td style="border: 1px solid #6c757d; height: 60px; width: 80px;"></td>
+                    </tr>
+                </table>
+            </div>
+            <hr style="border-color: #6c757d; margin-top: 20px; margin-bottom: 20px;">
+        </div>
+        <header class="statistics-header" id="web-header">
+            <div class="header-left">
+                <h1>Statistics</h1>
+                <span class="sub-text">실시간 CCTV 감지 데이터 분석 리포트</span>
+            </div>
+        </header>
 
         <div class="control-bar" id="control-panel">
             <div style="display: flex; align-items: center; gap: 15px;">
@@ -60,17 +56,15 @@
                     <button type="button" class="custom-btn" onclick="setPeriod(7)">주간</button>
                     <button type="button" class="custom-btn" onclick="setPeriod(30)">월간</button>
                 </div>
-
-                <div style="display: flex; align-items: center;">
+                <div style="display: flex; align-items: center;gap: 10px;">
                     <input type="date" id="startDate">
-                    <span class="text-white mx-2">~</span>
+                    <span class="text-white">~</span>
                     <input type="date" id="endDate">
-                    <button class="btn btn-primary btn-sm ml-2" style="height: 32px;" onclick="refreshCharts()">
+                    <button class="btn btn-primary btn-sm" style="height: 32px;" onclick="refreshCharts()">
                         <i class="fas fa-search"></i> 조회
                     </button>
                 </div>
             </div>
-
             <div>
                 <button class="btn btn-outline-danger btn-sm" onclick="downloadPDF()">
                     <i class="fas fa-file-pdf"></i> PDF
@@ -78,6 +72,39 @@
                 <button class="btn btn-outline-success btn-sm" onclick="downloadExcel()">
                     <i class="fas fa-file-excel"></i> Excel
                 </button>
+            </div>
+        </div>
+
+        <div class="row-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">총 감지 건수</div>
+                <div class="kpi-value" id="kpi-total">0</div>
+                <div class="kpi-sub">Total Events</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">최다 발생 유형</div>
+                <div class="kpi-value" id="kpi-type" style="color: #ff6b6b;">-</div>
+                <div class="kpi-sub">Most Frequent</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">주요 위험 구역</div>
+                <div class="kpi-value" id="kpi-zone" style="color: #fcc419;">-</div>
+                <div class="kpi-sub">High Risk Zone</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">최고 위험 시간대</div>
+                <div class="kpi-value" id="kpi-time" style="color: #4dabf7;">-</div>
+                <div class="kpi-sub">Peak Time</div>
+            </div>
+        </div>
+
+        <div id="ai-insight-box" class="card mb-4" style="background-color: #2d3135; border: 1px solid #555;">
+            <div class="card-body">
+                <h5 style="color: #6495ED; font-weight: bold; margin-bottom: 15px;">
+                    <i class="fas fa-robot"></i> AI 요약 및 핵심 인사이트
+                </h5>
+                <div id="ai-insight-content" style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.8;">
+                </div>
             </div>
         </div>
 
@@ -103,191 +130,166 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header"><i class="fas fa-chart-area mr-1"></i> 시간대별 위험도 변화 (선택 기간)</div>
+                    <div class="card-header"><i class="fas fa-chart-area mr-1"></i> 시간대별 위험도 변화</div>
                     <div class="card-body">
-                        <div style="height: 350px; width: 100%;"><canvas id="myLineChart"></canvas></div>
+                        <div style="height: 300px; width: 100%;"><canvas id="myLineChart"></canvas></div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-table mr-1"></i> 최근 상세 감지 로그 (Recent 5 Logs)</div>
+                    <div class="card-body p-0">
+                        <table class="custom-table">
+                            <thead>
+                            <tr>
+                                <th>발생 시각</th>
+                                <th>감지 카메라</th>
+                                <th>이벤트 유형</th>
+                                <th>위험도</th>
+                                <th>상태</th>
+                            </tr>
+                            </thead>
+                            <tbody id="log-table-body">
+                            <!-- 서버에서 가져온 최근 로그 5개를 반복 출력하는 부분 -->
+                            <tr th:each="log : ${recentLogs}">
+                                <!-- 1. 발생 시각 -->
+                                <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+
+                                <!-- 2. 감지 카메라 -->
+                                <td th:text="'Camera ' + ${log.camEntity.camNo} + ' (' + ${log.camEntity.location} + ')'"></td>
+
+                                <!-- 3. 바로 여기입니다! (이벤트 유형) -->
+                                <td>
+                                    <th:block th:switch="${log.eventType.toUpperCase()}">
+                                        <!-- 화재 (FIRE) -->
+                                        <span th:case="'FIRE'" class="evt-badge badge-fire">
+                    <i class="fas fa-exclamation-triangle"></i> FIRE
+                </span>
+
+                                        <!-- 연기 (SMOKE) -->
+                                        <span th:case="'SMOKE'" class="evt-badge badge-smoke">
+                    <i class="fas fa-cloud"></i> SMOKE
+                </span>
+
+                                        <!-- 침입 (ACCESS / INTRUSION) -->
+                                        <span th:case="'ACCESS'" class="evt-badge badge-access">
+                    <i class="fas fa-user-secret"></i> INTRUSION
+                </span>
+
+                                        <!-- 안전 (SAFE) -->
+                                        <span th:case="'SAFE'" class="evt-badge badge-safe">
+                    <i class="fas fa-check-circle"></i> SECURE
+                </span>
+
+                                        <!-- 기타 -->
+                                        <span th:case="*" class="evt-badge badge-normal">
+                    <i class="fas fa-info-circle"></i> [[${log.eventType.toUpperCase()}]]
+                </span>
+                                    </th:block>
+                                </td>
+
+                                <!-- 4. 위험도 -->
+                                <td>
+                                    <th:block th:switch="${log.eventType.toUpperCase()}">
+                                        <span th:case="'FIRE'" style="color: #ff4d4d; font-weight: bold;">매우 높음</span>
+                                        <span th:case="'SMOKE'" style="color: #fd7e14; font-weight: bold;">높음</span>
+                                        <span th:case="'ACCESS'" style="color: #fcc419; font-weight: bold;">중간</span>
+                                        <span th:case="'SAFE'" style="color: #20c997;">안전</span>
+                                        <span th:case="*" style="color: #adb5bd;">보통</span>
+                                    </th:block>
+                                </td>
+
+                                <!-- 5. 상태 -->
+                                <td>
+                                    <span th:if="${log.checkedAt != null}" class="badge bg-success">처리 완료</span>
+                                    <span th:if="${log.checkedAt == null}" class="badge bg-warning text-dark">미처리</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-th mr-1"></i> 요일/시간별 위험도 히트맵 (Heatmap)
+                    </div>
+                    <div class="card-body">
+                        <!-- 1. 차트 영역 -->
+                        <div style="height: 350px; width: 100%;">
+                            <canvas id="myHeatMap"></canvas>
+                        </div>
+
+                        <!-- [수정됨] 발표용 고정 범례 (상시 표시) -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+
+                            <!-- 왼쪽: 시각적 강도 (그라데이션) -->
+                            <div style="display: flex; align-items: center;">
+                                <span style="font-size: 0.85rem; color: #adb5bd; margin-right: 10px; font-weight: bold;">위험 강도</span>
+                                <span style="font-size: 0.8rem; color: #888; margin-right: 8px;">Low</span>
+                                <div style="width: 120px; height: 12px;
+                                            background: linear-gradient(90deg, rgba(255, 77, 77, 0.15) 0%, rgba(255, 77, 77, 1) 100%);
+                                            border-radius: 6px; margin-right: 8px; border: 1px solid #555;">
+                                </div>
+                                <span style="font-size: 0.8rem; color: #ff6b6b;">High (Max)</span>
+                            </div>
+
+                            <!-- 오른쪽: 점수 산정 기준 (배지 형태) -->
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 0.85rem; color: #adb5bd; font-weight: bold; margin-right: 5px;">채점 기준:</span>
+
+                                <!-- 화재 -->
+                                <div style="display: flex; align-items: center; background-color: rgba(255, 77, 77, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255, 77, 77, 0.3);">
+                                    <span style="width: 8px; height: 8px; background-color: #ff4d4d; border-radius: 50%; margin-right: 6px;"></span>
+                                    <span style="font-size: 0.8rem; color: #e0e0e0;">화재 <strong style="color: #ff4d4d;">100</strong></span>
+                                </div>
+
+                                <!-- 연기 -->
+                                <div style="display: flex; align-items: center; background-color: rgba(253, 126, 20, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(253, 126, 20, 0.3);">
+                                    <span style="width: 8px; height: 8px; background-color: #fd7e14; border-radius: 50%; margin-right: 6px;"></span>
+                                    <span style="font-size: 0.8rem; color: #e0e0e0;">연기 <strong style="color: #fd7e14;">70</strong></span>
+                                </div>
+
+                                <!-- 침입 -->
+                                <div style="display: flex; align-items: center; background-color: rgba(252, 196, 25, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(252, 196, 25, 0.3);">
+                                    <span style="width: 8px; height: 8px; background-color: #fcc419; border-radius: 50%; margin-right: 6px;"></span>
+                                    <span style="font-size: 0.8rem; color: #e0e0e0;">침입 <strong style="color: #fcc419;">50</strong></span>
+                                </div>
+
+                                <!-- 이상행동 -->
+                                <div style="display: flex; align-items: center; background-color: rgba(173, 181, 189, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(173, 181, 189, 0.3);">
+                                    <span style="width: 8px; height: 8px; background-color: #adb5bd; border-radius: 50%; margin-right: 6px;"></span>
+                                    <span style="font-size: 0.8rem; color: #e0e0e0;">이상행동 <strong style="color: #adb5bd;">20</strong></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </div>
-
     <script th:inline="javascript">
-
-        window.onload = function() {
-            const serverStartDate = /*[[${startDate}]]*/ '2025-01-01';
-            const serverEndDate = /*[[${endDate}]]*/ '2025-01-01';
-
-            if (serverStartDate) document.getElementById('startDate').value = serverStartDate;
-            if (serverEndDate) document.getElementById('endDate').value = serverEndDate;
-
-            const diff = new Date(serverEndDate) - new Date(serverStartDate);
-            const days = diff / (1000 * 60 * 60 * 24);
-
-            const btns = document.querySelectorAll('.custom-btn');
-            btns.forEach(b => b.classList.remove('active'));
-
-            if (days === 0) btns[0].classList.add('active'); // 일간
-            else if (days === 7) btns[1].classList.add('active'); // 주간
-            else if (days === 30) btns[2].classList.add('active'); // 월간
-        };
-
-        function refreshCharts() {
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
-            location.href = '/statistics?startDate=' + start + '&endDate=' + end;
-        }
-
-        function setPeriod(days) {
-            const today = new Date();
-            const targetDate = new Date();
-            targetDate.setDate(today.getDate() - days);
-
-            let endStr = today.toISOString().split('T')[0];
-            let startStr = targetDate.toISOString().split('T')[0];
-
-            if (days === 0) startStr = endStr;
-
-            location.href = '/statistics?startDate=' + startStr + '&endDate=' + endStr;
-        }
-
-        // --- 차트 데이터 (IDE 에러 방지 문법 적용) ---
-        const realBarData = /*[[${barData}]]*/ [10, 20, 30];
-        const realPieData = /*[[${pieData}]]*/ [30, 30, 40];
-        const realLineData = /*[[${lineData}]]*/ [0, 0, 0];
-
-        Chart.defaults.color = '#fff';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
-        Chart.defaults.font.family = 'sans-serif';
-
-        new Chart(document.getElementById("myBarChart"), {
-            type: 'bar',
-            data: {
-                labels: ["화재", "연기", "침입", "쓰러짐"],
-                datasets: [{
-                    label: "건수",
-                    backgroundColor: ['#ff4d4d', '#339af0', '#fcc419', '#adb5bd'],
-                    data: realBarData,
-                }],
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: { x: { ticks: { color: 'white' }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: 'white' } } } }
-        });
-
-        // Pie Chart
-        new Chart(document.getElementById("myPieChart"), {
-            type: 'doughnut',
-            data: {
-                labels: ["Camera 1 (교실)", "Camera 2 (복도)", "Camera 3 (창고)"],
-                datasets: [{
-                    data: realPieData,
-                    backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'],
-                    borderColor: '#212529',
-                }],
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'white', boxWidth: 12 } } } }
-        });
-
-        // Line Chart
-        new Chart(document.getElementById("myLineChart"), {
-            type: 'line',
-            data: {
-                labels: Array.from({length: 24}, (_, i) => i + "시"),
-                datasets: [{
-                    label: "위험 감지",
-                    tension: 0.3,
-                    backgroundColor: "rgba(13, 110, 253, 0.2)",
-                    borderColor: "#0d6efd",
-                    pointBackgroundColor: "#0d6efd",
-                    fill: true,
-                    data: realLineData,
-                }],
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: { x: { ticks: { color: 'white' }, grid: { display: false } }, y: { ticks: { color: 'white' } } } }
-        });
-
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-
-            const element = document.querySelector("#pdf-area");
-            const btnPanel = document.querySelector("#control-panel");
-            btnPanel.style.display = 'none';
-
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                backgroundColor: "#1b1d1f",
-                useCORS: true
-            });
-            const imgData = canvas.toDataURL('image/png');
-
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = 210;
-            const pageHeight = 297;
-
-            pdf.setFillColor(33, 37, 41);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-
-            pdf.setTextColor(255, 255, 255);
-
-            pdf.setFontSize(22);
-            pdf.setFont("helvetica", "bold");
-            pdf.text("SMARTECT Insight Report", pageWidth / 2, 20, { align: "center" });
-
-            const dateRange = document.getElementById('startDate').value + " ~ " + document.getElementById('endDate').value;
-            pdf.setFontSize(11);
-            pdf.setFont("helvetica", "normal");
-            pdf.setTextColor(200, 200, 200);
-            pdf.text("Date Range: " + dateRange, pageWidth / 2, 28, { align: "center" });
-
-            const imgHeight = canvas.height * pageWidth / canvas.width;
-            pdf.addImage(imgData, 'PNG', 0, 35, pageWidth, imgHeight);
-
-            pdf.setFontSize(9);
-            pdf.setTextColor(100, 100, 100);
-            const footerText = "Generated by Smartect AI Monitoring System | Confidential";
-            pdf.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
-
-            pdf.save("Smartect_Report.pdf");
-
-            btnPanel.style.display = 'flex';
-        }
-        function downloadExcel() {
-            const wb = XLSX.utils.book_new();
-
-            const reportData = [
-                ["SMARTECT CCTV 분석 리포트"],
-                ["조회 기간", document.getElementById('startDate').value + " ~ " + document.getElementById('endDate').value],
-                [],
-                ["[1] 이벤트 유형별 발생 빈도"],
-                ["이벤트 타입", "발생 건수"],
-                ["화재 (FIRE)", realBarData[0]],
-                ["연기 (SMOKE)", realBarData[1]],
-                ["침입 (ACCESS)", realBarData[2]],
-                ["이상행동 (SUSPICIOUS)", realBarData[3]],
-                [],
-                ["[2] 카메라별 감지 비율"],
-                ["카메라명", "감지 건수"],
-                ["Camera 1 (교실)", realPieData[0]],
-                ["Camera 2 (복도)", realPieData[1]],
-                ["Camera 3 (창고)", realPieData[2]],
-                [],
-                ["[3] 시간대별 위험도 변화 (0시 ~ 23시)"],
-                ["시간", "감지 건수"]
-            ];
-
-            for(let i=0; i<24; i++) {
-                reportData.push([i + "시", realLineData[i]]);
-            }
-
-            const ws = XLSX.utils.aoa_to_sheet(reportData);
-
-            ws['!cols'] = [{ wch: 25 }, { wch: 15 }];
-
-            XLSX.utils.book_append_sheet(wb, ws, "분석결과");
-            XLSX.writeFile(wb, "Smartect_Report.xlsx");
-        }
+        // 서버 데이터를 자바스크립트 전역 변수로 먼저 선언 (HTML 내에 위치해야 함)
+        const realBarData = /*[[${barData}]]*/ [0, 0, 0, 0];
+        const realPieData = /*[[${pieData}]]*/ [0, 0, 0];
+        const realLineData = /*[[${lineData}]]*/ [];
+        const serverStartDate = /*[[${startDate}]]*/ '';
+        const serverEndDate = /*[[${endDate}]]*/ '';
+        const realHeatMapList = /*[[${heatMapData}]]*/ [];
     </script>
+
+    <!-- 그 다음 외부 로직 파일을 불러옴 -->
+    <script th:src="@{/js/statistics.js}"></script>
 </div>
 </html>
