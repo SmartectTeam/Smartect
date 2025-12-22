@@ -76,7 +76,7 @@ body {
     font-size: 11px;
     cursor:pointer;
 }
-..logout-btn:hover{
+.logout-btn:hover{
     border: 1px solid #98989891;
     background-color: #98989891;
 }

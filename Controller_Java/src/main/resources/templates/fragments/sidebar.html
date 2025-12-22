@@ -7,6 +7,11 @@
     <ul class="nav-menu">
 
         <li>
+            <a href="/">
+                <i class="fa-solid fa-home"></i> Main
+            </a>
+        </li>
+        <li>
             <a href="/dashboard"
                th:classappend="${activePage == 'dashboard'} ? 'active'">
                 <i class="fa-solid fa-video"></i> Dashboard
@@ -20,12 +25,6 @@
             </a>
         </li>
 
-<!--        <li>-->
-<!--            <a href="/history"-->
-<!--               th:classappend="${activePage == 'history'} ? 'active'">-->
-<!--                <i class="fa-solid fa-clock-rotate-left"></i> History-->
-<!--            </a>-->
-<!--        </li>-->
 
         <li>
             <a href="/statistics"
@@ -40,6 +39,7 @@
                 <i class="fa-solid fa-gear"></i> Settings
             </a>
         </li>
+
 
     </ul>
 
