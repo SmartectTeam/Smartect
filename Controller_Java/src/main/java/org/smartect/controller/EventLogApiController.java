@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -38,6 +39,11 @@ public class EventLogApiController {
     public ResponseEntity<Void> updateCheck(@PathVariable Long eventNo){
         eventLogService.checkEvent(eventNo);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/events/count/uncheck")
+    public Map<String,Long> getUncheckedCount(){
+        return Map.of("count", eventLogService.getUnCheckedCount());
     }
 
 }

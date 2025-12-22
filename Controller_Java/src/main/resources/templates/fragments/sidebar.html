@@ -1,31 +1,30 @@
 <nav th:fragment="sidebar" class="nav-sidebar">
 
-    <div class="nav-header">
+    <a href="/dashboard" class="nav-header">
         <i class="fa-solid fa-layer-group"></i>&nbsp; SMARTECT
-    </div>
+    </a>
 
     <ul class="nav-menu">
 
         <li>
+            <a href="/">
+                <i class="fa-solid fa-home"></i> Main
+            </a>
+        </li>
+        <li>
             <a href="/dashboard"
                th:classappend="${activePage == 'dashboard'} ? 'active'">
-                <i class="fa-solid fa-chart-line"></i> Dashboard
+                <i class="fa-solid fa-video"></i> Dashboard
             </a>
         </li>
 
         <li>
             <a href="/eventboard"
                th:classappend="${activePage == 'eventboard'} ? 'active'">
-                <i class="fa-solid fa-video"></i> Events
+                <i class="fa-solid fa-clock-rotate-left"></i> Event Log
             </a>
         </li>
 
-        <li>
-            <a href="/history"
-               th:classappend="${activePage == 'history'} ? 'active'">
-                <i class="fa-solid fa-clock-rotate-left"></i> History
-            </a>
-        </li>
 
         <li>
             <a href="/statistics"
@@ -40,6 +39,7 @@
                 <i class="fa-solid fa-gear"></i> Settings
             </a>
         </li>
+
 
     </ul>
 

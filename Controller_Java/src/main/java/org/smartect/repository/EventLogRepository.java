@@ -9,12 +9,14 @@ import java.util.List;
 
 @Repository
 public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> {
-
-    // 최근 로그 조회용 (기존 유지)
+    // 이벤트 목록 발생일자 내림차순
     List<EventLogEntity> findAllByOrderByCreatedAtDesc();
     List<EventLogEntity> findTop5ByCreatedAtBetweenOrderByCreatedAtDesc(java.time.LocalDateTime start, java.time.LocalDateTime end);
 
-    // 1. 바 차트 (이벤트 타입별)
+  
+    // 이벤트 목록 미확인 이벤트 개수
+    long countByCheckedAtIsNull();
+
     @Query(value = "SELECT event_type, COUNT(*) FROM event_log " +
             "WHERE created_at BETWEEN :start AND :end " + // 날짜 조건 추가
             "GROUP BY event_type", nativeQuery = true)

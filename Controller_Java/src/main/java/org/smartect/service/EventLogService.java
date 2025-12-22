@@ -1,9 +1,8 @@
 package org.smartect.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.SystemException;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.smartect.dto.CamDTO;
 import org.smartect.dto.CombinedJsonDTO;
@@ -17,6 +16,7 @@ import static org.smartect.common.formatter.DateTimeFormatters.DEFAULT;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class EventLogService {
@@ -27,6 +27,9 @@ public class EventLogService {
     public EventLogService(EventLogRepository eventLogRepository) {
         this.eventLogRepository = eventLogRepository;
     }
+
+    // 넘어오는 JSON 데이터 확인용
+    private final AtomicBoolean printed = new AtomicBoolean(false);
 
     // 로그 목록 조회 (Select *)
     public List<EventLogDTO> findAll() {
@@ -91,11 +94,19 @@ public class EventLogService {
         System.out.println("MEMO -------------- "+memo);
     }
 
+    // 확인 안된 이벤트 개수 반환
+    public long getUnCheckedCount(){
+        return eventLogRepository.countByCheckedAtIsNull();
+    }
+
     @Async
     public void process(byte[] combined_json) {
         try {
             CombinedJsonDTO combined_data = msgPackMapper.readValue(combined_json, CombinedJsonDTO.class);
-            //System.out.println(combined_data.getAction_json());
+            // 넘어오는 JSON 데이터 확인용
+            System.out.println("===== FIRST PAYLOAD =====");
+            System.out.println(combined_data.getAction_json());
+            System.out.println("=========================");
 
         } catch (Exception e) {
             System.err.println(e.getMessage());

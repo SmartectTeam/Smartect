@@ -1,6 +1,8 @@
 package org.smartect.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.smartect.dto.BoardDTO;
 import org.smartect.dto.EventLogDTO;
 import org.smartect.service.BoardService;
@@ -8,7 +10,9 @@ import org.smartect.service.EventLogService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.List;
 
 @Controller
