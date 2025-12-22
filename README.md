@@ -25,30 +25,28 @@ AI가 실시간으로 감지하고, 이를 서버로 전달하여
 ## 🏗 시스템 아키텍처
 
 IP Camera / Video File
+
 ↓
+
 Python (OpenCV + AI)
+
 ↓ WebSocket
+
 Spring Boot Backend
+
 ↓
+
 MariaDB
+
 ↓
+
 Web Dashboard
 
-
-IP Camera / Video File
-↓
-Python (OpenCV + AI)
-↓ WebSocket
-Spring Boot Backend
-↓
-MariaDB
-↓
-Web Dashboard
 
 ### 역할 분리
 - **Python**: 영상 처리 & AI 분석
 - **Spring Boot**: 이벤트 처리, 저장, 관리
-- **Web UI**: 관리자 확인 및 이력 관리
+- **Web UI**: 관리자 확인 및 이력 관리, 목록 필터링
 
 ---
 
@@ -56,7 +54,7 @@ Web Dashboard
 
 ### Backend
 - Java 21
-- Spring Boot 3.x
+- Spring Boot 3.4.12
 - Spring Security
 - Spring Data JPA
 - WebSocket
@@ -186,3 +184,8 @@ Web Dashboard
 - 이벤트 통계 구현
 - 이벤트 이력 관리 및 알림 구조 설계
 
+---
+
+## PPT
+
+이미지 추가 예정
