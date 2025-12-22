@@ -20,8 +20,8 @@ class AIModels:
         base_dir = os.path.dirname(current_dir)
 
         self.YOLO_PATH = os.path.join(base_dir, 'yolo11n-pose.pt')
-        self.LSTM_PATH = os.path.join(base_dir, 'lstm_model_v0.5.h5')
-        self.JSON_PATH = os.path.join(base_dir, 'lstm_model_v0.5_classes.json')
+        self.LSTM_PATH = os.path.join(base_dir, 'LSTM_model_v0.95.h5')
+        self.JSON_PATH = os.path.join(base_dir, 'LSTM_model_v0.95_classes.json')
         self.load_models()
 
     def load_models(self):

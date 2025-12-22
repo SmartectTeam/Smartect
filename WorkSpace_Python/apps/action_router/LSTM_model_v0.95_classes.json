@@ -1,12 +1,10 @@
 [
     "rotating",
     "walking",
+    "etc",
     "sitting",
-    "sitting_smartphone",
     "standing",
-    "standing_smartphone",
     "punching",
     "pushing",
-    "reaching",
-    "theft"
+    "reaching"
 ]

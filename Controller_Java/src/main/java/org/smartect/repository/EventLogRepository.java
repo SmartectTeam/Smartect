@@ -16,7 +16,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
 
     // 1. 바 차트 (이벤트 타입별)
     @Query(value = "SELECT event_type, COUNT(*) FROM event_log " +
-            "WHERE created_at BETWEEN :start AND :end " +
+            "WHERE created_at BETWEEN :start AND :end " + // 날짜 조건 추가
             "GROUP BY event_type", nativeQuery = true)
     List<Object[]> countByEventType(@Param("start") String start, @Param("end") String end);
 

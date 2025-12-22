@@ -17,7 +17,6 @@ if root_dir not in sys.path:
     sys.path.append(root_dir)
 
 
-# 인자 4개 받도록 변경
 async def camera_post_video(source, detector, pc_id, cam_id):
     pc = PCPath(pc_id)
     url = f"ws://{pc.PC_IP}:8000/ws/input"
@@ -34,6 +33,18 @@ async def camera_post_video(source, detector, pc_id, cam_id):
                     if not ret:
                         print(f"[Endpoint] Source ended for CCTV-{cam_id}")
                         break
+
+                    # =======================================================
+                    # [수정] 이미지를 640px로 미리 줄임
+                    # =======================================================
+                    h, w = frame.shape[:2]
+                    new_w = 640
+                    # 비율 유지하며 높이 계산
+                    new_h = int(h * (new_w / w))
+
+                    # 프레임 자체를 덮어씌움
+                    frame = cv2.resize(frame, (new_w, new_h))
+                    # =======================================================
 
                     result, enc_img = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
 
