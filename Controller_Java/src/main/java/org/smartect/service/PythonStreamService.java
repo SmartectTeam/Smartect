@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -22,16 +21,13 @@ import jakarta.websocket.WebSocketContainer;
 public class PythonStreamService implements CommandLineRunner {
 
     private final WebSocketHandler videoWebSocketHandler;
-    private final EventLogService eventLogService;
     private final String PYTHON_SERVER_URL;
 
     public PythonStreamService(
             WebSocketHandler videoWebSocketHandler,
-            EventLogService eventLogService,
             @Value("localhost") String ip) {
         this.PYTHON_SERVER_URL = String.format("ws://%s:8000/ws/output", ip);
         this.videoWebSocketHandler = videoWebSocketHandler;
-        this.eventLogService = eventLogService;
         System.out.println("설정된 python 서버 url: " + this.PYTHON_SERVER_URL);
     }
 
@@ -61,12 +57,8 @@ public class PythonStreamService implements CommandLineRunner {
                     byte[] combinedData  = new byte[payload.remaining()];
                     payload.get(combinedData);
 
-                    // System.out.println("통합 데이터 수신: " + combinedData.length + " bytes");
                     
                     videoWebSocketHandler.livePostData(combinedData);
-
-                    // 비동기 DB 처리 서비스
-                    eventLogService.process(combinedData);
 
                     
                 } catch (Exception e) {

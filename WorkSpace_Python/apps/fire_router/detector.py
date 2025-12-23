@@ -13,7 +13,7 @@ model = None
 
 from datetime import datetime
 
-from common.schemas import EventJson, EventMap, CombinedJson
+from common.schemas import EventJson, EventMap
 
 
 def frame_detector(image_bytes):

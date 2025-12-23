@@ -43,4 +43,22 @@ class ModelPath:
 
     # weight 경로 (모델 추가 시 이쪽에 경로 추가)
     FIRE_MODEL = os.path.join(BASE_DIR, "weight", "fireModel.pt")
+    YOLO_MODEL = os.path.join(BASE_DIR, "weight", "yolo11n-pose.pt")
+    LSTM_MODEL = os.path.join(BASE_DIR, "weight", "LSTM_model_v0.95.h5")
+    LSTM_MODEL_JSON = os.path.join(BASE_DIR, "weight", "LSTM_model_v0.95.json")
     USE_GPU = True
+
+
+# 설정
+class DataPath:
+    def __init__(self, cam_no):
+        self.BASE_DIR = Path(__file__).resolve().parent.parent
+
+        self.SETTING_PATH = self.BASE_DIR / f"settings/cam_{cam_no}.json"
+        self.PREVIEW_PATH = self.BASE_DIR / f"settings/cam_{cam_no}_preview.json"
+
+
+# 캡쳐
+class CapturePath:
+    cap_path = r"\\220-29\공유폴더\captures"
+
