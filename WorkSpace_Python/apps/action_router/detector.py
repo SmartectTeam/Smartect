@@ -7,10 +7,8 @@
 # 3. 30프레임 시퀀스, 속도/가속도 특징 사용
 """
 
-import cv2
 import numpy as np
 import json
-import os
 import time  # [추가] 시간 측정을 위해 필요
 
 from collections import deque
@@ -59,17 +57,16 @@ class MotionDetector:
 
         self.DANGER_ACTIONS = ['punching', 'pushing']
 
-        self.CAPTURE_DIR = "static/captures"
-        os.makedirs(self.CAPTURE_DIR, exist_ok=True)
-
     def reload_settings(self):
-        if self.settings_path and os.path.exists(self.settings_path):
+        if self.settings_path and self.settings_path.exists():
             try:
-                mod_time = os.path.getmtime(self.settings_path)
+                mod_time = self.settings_path.stat().st_mtime
+
                 if mod_time > self._last_mod_time:
-                    with open(self.settings_path, 'r', encoding='utf-8') as f:
+                    with self.settings_path.open('r', encoding='utf-8') as f:
                         new_settings = json.load(f)
                         self.settings.update(new_settings)
+
                     self._last_mod_time = mod_time
             except Exception as e:
                 print(f"[Detector] Config Error: {e}")
@@ -100,10 +97,7 @@ class MotionDetector:
         if not hasattr(self, 'last_event'): self.last_event = "Safe"
         if not hasattr(self, 'last_detections'): self.last_detections = []
 
-        highest_danger_level = self.last_danger
-        primary_event_type = self.last_event
         detections = self.last_detections
-        screenshot_path = ""
 
         current_time = time.time()
 
@@ -315,8 +309,6 @@ class MotionDetector:
             self.last_event = current_event_main
 
             detections = current_detections
-            highest_danger_level = current_danger_max
-            primary_event_type = current_event_main
 
         # ---------------------------------------------------------------------
         # [C] 결과 패키징
@@ -332,7 +324,7 @@ class MotionDetector:
                     event_type=det['status'],
                     danger_level=det['danger_level'],
                     event_time=current_time_str,
-                    screenshot_path=screenshot_path,
+                    screenshot_path="",
                 ))
                 action_map.append(EventMap(
                     x1=det['box'][0],
