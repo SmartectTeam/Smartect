@@ -45,6 +45,13 @@ public class LogService {
         if (data == null) {
             return;
         }
+        // 단순 확인용 출력 임시 @@@@@@@@@@@@
+        try {
+            System.out.println(objectMapper.writeValueAsString(data));
+        } catch (Exception e) {
+            System.out.println("JSON 출력 실패");
+        }
+
 
         // fire_map이나 fire_json이 비어있으면 저장하지 않음
         boolean hasFireData = (data.getFire_map() != null && !data.getFire_map().isEmpty()) ||
@@ -67,7 +74,7 @@ public class LogService {
             
             // JSON으로 변환
             String jsonString = objectMapper.writeValueAsString(data);
-            
+
             // 타임스탬프와 함께 저장
             try (FileWriter writer = new FileWriter(logFile, true)) {
                 writer.write(String.format("[%s] ", timestamp));

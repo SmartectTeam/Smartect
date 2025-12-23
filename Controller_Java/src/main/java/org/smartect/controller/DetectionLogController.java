@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartect.dto.CombinedJsonDTO;
 import org.smartect.dto.EventJsonDTO;
 import org.smartect.service.EventLogService;
+import org.smartect.service.EventReliabilityService;
 import org.smartect.service.LogService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,65 +19,38 @@ public class DetectionLogController {
 
     private final LogService logService;
     private final EventLogService eventLogService;
+    private final EventReliabilityService reliabilityService;
 
+    // 컨트롤러는 이벤트 수신만을 담당
+    // DB 저장 판단은 Service(+handler)
     @PostMapping("/save")
     public ResponseEntity<String> saveDetectionLog(@RequestBody CombinedJsonDTO data) {
         try {
-            // "Safe" 이벤트 필터링된 데이터 생성 (파일 로그용)
+            // 파일 로그 저장 , SAFE 이벤트 필터링(저장X)
             CombinedJsonDTO filteredData = filterSafeEvents(data);
-            
-            // 파일 로그 저장
             logService.saveDailyDetectionLog(filteredData);
 
-            // DB 로그 저장 (fire_json이 있을 때만, "Safe" 제외)
-            if (data.getFire_json() != null && !data.getFire_json().isEmpty()) {
-                for (EventJsonDTO eventJson : data.getFire_json()) {
-                    // "Safe" 이벤트는 저장하지 않음
-                    if ("Safe".equalsIgnoreCase(eventJson.getEvent_type())) {
-                        continue;
-                    }
-                    try {
-                        eventLogService.saveDetectionLog(
-                                eventJson.getCam_no(),
-                                eventJson.getEvent_type(),
-                                eventJson.getScreenshot_path() != null ? eventJson.getScreenshot_path() : ""
-                        );
-                    } catch (Exception e) {
-                        System.err.println("DB 로그 저장 실패 (cam_no: " + eventJson.getCam_no() +
-                                         ", event_type: " + eventJson.getEvent_type() + "): " + e.getMessage());
-                    }
+            // Service로 JSON 전달
+            // 신뢰도 판단 / 중복방지 -> EventReliabilityService
+            if (data.getFire_json() != null) {
+                for (EventJsonDTO event : data.getFire_json()) {
+                    reliabilityService.process(event);
                 }
             }
 
-            // action_json 저장 (필요한 경우, "Safe" 제외)
-            if (data.getAction_json() != null && !data.getAction_json().isEmpty()) {
-                for (EventJsonDTO eventJson : data.getAction_json()) {
-                    // "Safe" 이벤트는 저장하지 않음
-                    if ("Safe".equalsIgnoreCase(eventJson.getEvent_type())) {
-                        continue;
-                    }
-                    try {
-                        eventLogService.saveDetectionLog(
-                                eventJson.getCam_no(),
-                                eventJson.getEvent_type(),
-                                eventJson.getScreenshot_path() != null ? eventJson.getScreenshot_path() : ""
-                        );
-                    } catch (Exception e) {
-                        System.err.println("DB 로그 저장 실패 (cam_no: " + eventJson.getCam_no() +
-                                         ", event_type: " + eventJson.getEvent_type() + "): " + e.getMessage());
-                    }
+            if (data.getAction_json() != null) {
+                for (EventJsonDTO event : data.getAction_json()) {
+                    reliabilityService.process(event);
                 }
             }
-
-            return ResponseEntity.ok("로그 저장 완료");
+            return ResponseEntity.ok("로그 수신 완료");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("로그 저장 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body("로그 처리 실패: " + e.getMessage());
         }
     }
 
-    /**
-     * "Safe" 이벤트를 필터링한 CombinedJsonDTO 생성
-     */
+    // SAFE 이벤트 필터링 한 CombinedJsonDTO 전달
     private CombinedJsonDTO filterSafeEvents(CombinedJsonDTO data) {
         CombinedJsonDTO filtered = new CombinedJsonDTO();
         filtered.setType(data.getType());

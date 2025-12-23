@@ -57,21 +57,21 @@ public class HomeController {
         return "eventboard";
     }
 
-    @GetMapping("/history")
-    public String history(Model model) {
-        model.addAttribute("activePage", "history");
-        return "history";
-    }
-
-    @GetMapping("/about")
-    public String about() {
-        return "about";
-    }
-
-    @GetMapping("/auth")
-    public String auth() {
-        return "auth";
-    }
+//    @GetMapping("/history")
+//    public String history(Model model) {
+//        model.addAttribute("activePage", "history");
+//        return "history";
+//    }
+//
+//    @GetMapping("/about")
+//    public String about() {
+//        return "about";
+//    }
+//
+//    @GetMapping("/auth")
+//    public String auth() {
+//        return "auth";
+//    }
 
     @GetMapping("/settings")
     public String setting(Model model) {

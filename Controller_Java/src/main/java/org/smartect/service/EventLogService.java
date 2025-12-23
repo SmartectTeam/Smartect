@@ -91,11 +91,11 @@ public class EventLogService {
         entity.updateMemo(memo);
     }
 
-    // 감지 로그 저장 (Insert)
+//    // 감지 로그 저장 (Insert)
     @Transactional
     public EventLogEntity saveDetectionLog(int camNo, String eventType, String screenshotPath) {
         // cam_no로 CamEntity 조회 (FK)
-        CamEntity camEntity = camRepository.findById((long) camNo)
+       CamEntity camEntity = camRepository.findById((long) camNo)
                 .orElseThrow(() -> new IllegalArgumentException("카메라가 존재하지 않습니다. cam_no : " + camNo));
 
         // EventLogEntity 생성 (memo, checkedAt 은 null, createdAt 은 자동)
@@ -103,6 +103,10 @@ public class EventLogService {
 
         // DB 저장
         return eventLogRepository.save(entity);
+    }
+    // 확인 안된 이벤트 개수 반환
+    public long getUnCheckedCount(){
+        return eventLogRepository.countByCheckedAtIsNull();
     }
 }
 
@@ -203,10 +207,7 @@ public class EventLogService {
         System.out.println("MEMO -------------- "+memo);
     }
 
-    // 확인 안된 이벤트 개수 반환
-    public long getUnCheckedCount(){
-        return eventLogRepository.countByCheckedAtIsNull();
-    }
+
 
     @Async
     public void process(byte[] combined_json) {

@@ -1,0 +1,2017 @@
+[2025-12-23 12:11:46] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:11:46",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 246,
+    "y2" : 425,
+    "event_type" : "etc",
+    "confidence" : 0.8313674926757812
+  } ]
+}
+[2025-12-23 12:11:51] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 1,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "smoke",
+    "confidence" : 0.6408092975616455
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "reaching",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:11:51",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 632,
+    "y2" : 480,
+    "event_type" : "reaching",
+    "confidence" : 0.7755224108695984
+  } ]
+}
+[2025-12-23 12:11:57] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 1,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "smoke",
+    "confidence" : 0.6408092975616455
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:11:57",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:11:57",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:11:57",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 213,
+    "y1" : 85,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "etc",
+    "confidence" : 0.9995445609092712
+  }, {
+    "x1" : 240,
+    "y1" : 90,
+    "x2" : 448,
+    "y2" : 367,
+    "event_type" : "etc",
+    "confidence" : 0.9995445609092712
+  }, {
+    "x1" : 58,
+    "y1" : 119,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "etc",
+    "confidence" : 0.9995445609092712
+  } ]
+}
+[2025-12-23 12:12:02] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 1,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "smoke",
+    "confidence" : 0.6408092975616455
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:12:07] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 1,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "smoke",
+    "confidence" : 0.6408092975616455
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:12:16] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 1,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "smoke",
+    "confidence" : 0.6408092975616455
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:12:16",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 144,
+    "y1" : 0,
+    "x2" : 638,
+    "y2" : 248,
+    "event_type" : "etc",
+    "confidence" : 0.9999568462371826
+  } ]
+}
+[2025-12-23 12:12:21] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 1,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "smoke",
+    "confidence" : 0.6408092975616455
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "sitting",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:12:21",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 73,
+    "y1" : 0,
+    "x2" : 122,
+    "y2" : 42,
+    "event_type" : "sitting",
+    "confidence" : 0.9999316930770874
+  } ]
+}
+[2025-12-23 12:13:14] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:13:14",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 103,
+    "y1" : 7,
+    "x2" : 344,
+    "y2" : 180,
+    "event_type" : "etc",
+    "confidence" : 0.9999676942825317
+  } ]
+}
+[2025-12-23 12:13:19] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "fire",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23 12:13:19",
+    "screenshot_path" : "/images/fire_detected.jpg"
+  } ],
+  "fire_map" : [ {
+    "x1" : 55,
+    "y1" : 4,
+    "x2" : 539,
+    "y2" : 295,
+    "event_type" : "fire",
+    "confidence" : 0.8610314130783081
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:13:25] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 55,
+    "y1" : 4,
+    "x2" : 539,
+    "y2" : 295,
+    "event_type" : "fire",
+    "confidence" : 0.8610314130783081
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:13:30] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 55,
+    "y1" : 4,
+    "x2" : 539,
+    "y2" : 295,
+    "event_type" : "fire",
+    "confidence" : 0.8610314130783081
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:13:30",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 611,
+    "y1" : 215,
+    "x2" : 640,
+    "y2" : 372,
+    "event_type" : "etc",
+    "confidence" : 0.9999475479125977
+  } ]
+}
+[2025-12-23 12:13:36] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 21,
+    "y1" : 4,
+    "x2" : 481,
+    "y2" : 254,
+    "event_type" : "fire",
+    "confidence" : 0.8765369653701782
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "sitting",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:13:36",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "sitting",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:13:36",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 319,
+    "y1" : 0,
+    "x2" : 622,
+    "y2" : 366,
+    "event_type" : "sitting",
+    "confidence" : 0.8471852540969849
+  }, {
+    "x1" : 2,
+    "y1" : 0,
+    "x2" : 504,
+    "y2" : 359,
+    "event_type" : "sitting",
+    "confidence" : 0.8471852540969849
+  } ]
+}
+[2025-12-23 12:13:41] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 21,
+    "y1" : 4,
+    "x2" : 481,
+    "y2" : 254,
+    "event_type" : "fire",
+    "confidence" : 0.8765369653701782
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:13:41",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 610,
+    "y1" : 150,
+    "x2" : 640,
+    "y2" : 312,
+    "event_type" : "etc",
+    "confidence" : 0.9996707439422607
+  } ]
+}
+[2025-12-23 12:13:46] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 21,
+    "y1" : 4,
+    "x2" : 481,
+    "y2" : 254,
+    "event_type" : "fire",
+    "confidence" : 0.8765369653701782
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:13:46",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 586,
+    "y1" : 177,
+    "x2" : 640,
+    "y2" : 288,
+    "event_type" : "etc",
+    "confidence" : 0.9687557220458984
+  } ]
+}
+[2025-12-23 12:13:51] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 1,
+    "y1" : 1,
+    "x2" : 352,
+    "y2" : 208,
+    "event_type" : "fire",
+    "confidence" : 0.8642203211784363
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:13:56] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 1,
+    "y1" : 1,
+    "x2" : 352,
+    "y2" : 208,
+    "event_type" : "fire",
+    "confidence" : 0.8642203211784363
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:13:56",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 418,
+    "y1" : 164,
+    "x2" : 530,
+    "y2" : 280,
+    "event_type" : "etc",
+    "confidence" : 0.9999600648880005
+  } ]
+}
+[2025-12-23 12:14:01] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 24,
+    "x2" : 295,
+    "y2" : 253,
+    "event_type" : "fire",
+    "confidence" : 0.8965513706207275
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:01",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 431,
+    "y1" : 198,
+    "x2" : 539,
+    "y2" : 310,
+    "event_type" : "etc",
+    "confidence" : 0.9999678134918213
+  } ]
+}
+[2025-12-23 12:14:06] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 24,
+    "x2" : 295,
+    "y2" : 253,
+    "event_type" : "fire",
+    "confidence" : 0.8965513706207275
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:06",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 545,
+    "y1" : 206,
+    "x2" : 639,
+    "y2" : 314,
+    "event_type" : "etc",
+    "confidence" : 0.9999692440032959
+  } ]
+}
+[2025-12-23 12:14:39] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 24,
+    "x2" : 295,
+    "y2" : 253,
+    "event_type" : "fire",
+    "confidence" : 0.8965513706207275
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:07",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:07",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 505,
+    "y1" : 146,
+    "x2" : 605,
+    "y2" : 256,
+    "event_type" : "etc",
+    "confidence" : 0.9999687671661377
+  }, {
+    "x1" : 613,
+    "y1" : 150,
+    "x2" : 640,
+    "y2" : 278,
+    "event_type" : "etc",
+    "confidence" : 0.9999687671661377
+  } ]
+}
+[2025-12-23 12:14:44] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 106,
+    "y1" : 180,
+    "x2" : 501,
+    "y2" : 413,
+    "event_type" : "fire",
+    "confidence" : 0.8880432844161987
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:44",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 465,
+    "y1" : 278,
+    "x2" : 561,
+    "y2" : 384,
+    "event_type" : "etc",
+    "confidence" : 0.9999650716781616
+  } ]
+}
+[2025-12-23 12:14:49] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 7,
+    "y1" : 146,
+    "x2" : 407,
+    "y2" : 369,
+    "event_type" : "fire",
+    "confidence" : 0.8226467370986938
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:49",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 376,
+    "y1" : 278,
+    "x2" : 474,
+    "y2" : 382,
+    "event_type" : "etc",
+    "confidence" : 0.9999667406082153
+  } ]
+}
+[2025-12-23 12:14:54] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 7,
+    "y1" : 146,
+    "x2" : 407,
+    "y2" : 369,
+    "event_type" : "fire",
+    "confidence" : 0.8226467370986938
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:54",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:54",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 323,
+    "y1" : 317,
+    "x2" : 417,
+    "y2" : 410,
+    "event_type" : "etc",
+    "confidence" : 0.9999681711196899
+  }, {
+    "x1" : 586,
+    "y1" : 208,
+    "x2" : 640,
+    "y2" : 480,
+    "event_type" : "etc",
+    "confidence" : 0.9999681711196899
+  } ]
+}
+[2025-12-23 12:14:59] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 191,
+    "x2" : 235,
+    "y2" : 397,
+    "event_type" : "fire",
+    "confidence" : 0.8824117183685303
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:14:59",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 367,
+    "y1" : 326,
+    "x2" : 460,
+    "y2" : 424,
+    "event_type" : "etc",
+    "confidence" : 0.9258971810340881
+  } ]
+}
+[2025-12-23 12:15:04] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 191,
+    "x2" : 235,
+    "y2" : 397,
+    "event_type" : "fire",
+    "confidence" : 0.8824117183685303
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:15:04",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 499,
+    "y1" : 230,
+    "x2" : 587,
+    "y2" : 331,
+    "event_type" : "etc",
+    "confidence" : 0.9938598871231079
+  } ]
+}
+[2025-12-23 12:15:10] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 90,
+    "y1" : 76,
+    "x2" : 462,
+    "y2" : 347,
+    "event_type" : "fire",
+    "confidence" : 0.8862095475196838
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:15:15] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 90,
+    "y1" : 76,
+    "x2" : 462,
+    "y2" : 347,
+    "event_type" : "fire",
+    "confidence" : 0.8862095475196838
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:15:15",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 3,
+    "y1" : 0,
+    "x2" : 548,
+    "y2" : 440,
+    "event_type" : "etc",
+    "confidence" : 0.9972809553146362
+  } ]
+}
+[2025-12-23 12:15:20] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 42,
+    "y1" : 0,
+    "x2" : 559,
+    "y2" : 280,
+    "event_type" : "fire",
+    "confidence" : 0.8644328713417053
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "walking",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:15:20",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 577,
+    "y1" : 63,
+    "x2" : 640,
+    "y2" : 254,
+    "event_type" : "walking",
+    "confidence" : 0.8075661063194275
+  } ]
+}
+[2025-12-23 12:15:26] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 42,
+    "y1" : 0,
+    "x2" : 559,
+    "y2" : 280,
+    "event_type" : "fire",
+    "confidence" : 0.8644328713417053
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:15:26",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:15:26",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 437,
+    "y1" : 218,
+    "x2" : 539,
+    "y2" : 329,
+    "event_type" : "etc",
+    "confidence" : 0.9969658255577087
+  }, {
+    "x1" : 554,
+    "y1" : 219,
+    "x2" : 630,
+    "y2" : 346,
+    "event_type" : "etc",
+    "confidence" : 0.9969658255577087
+  } ]
+}
+[2025-12-23 12:20:55] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:20:55",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 637,
+    "y2" : 477,
+    "event_type" : "etc",
+    "confidence" : 0.9999517202377319
+  } ]
+}
+[2025-12-23 12:21:07] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "Fall",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:21:07",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 6,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "Fall",
+    "confidence" : 0.0
+  } ]
+}
+[2025-12-23 12:21:12] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "Fall",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:21:12",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 3,
+    "y1" : 6,
+    "x2" : 621,
+    "y2" : 478,
+    "event_type" : "Fall",
+    "confidence" : 0.5205056667327881
+  } ]
+}
+[2025-12-23 12:21:18] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:21:42] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "Fall",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23T12:21:42",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 104,
+    "y1" : 66,
+    "x2" : 281,
+    "y2" : 211,
+    "event_type" : "Fall",
+    "confidence" : 0.0
+  } ]
+}
+[2025-12-23 12:21:48] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:21:55] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:21:55",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 567,
+    "y1" : 108,
+    "x2" : 640,
+    "y2" : 308,
+    "event_type" : "etc",
+    "confidence" : 0.9999264478683472
+  } ]
+}
+[2025-12-23 12:22:00] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:22:08] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:22:08",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 567,
+    "y1" : 111,
+    "x2" : 640,
+    "y2" : 319,
+    "event_type" : "etc",
+    "confidence" : 0.999936580657959
+  } ]
+}
+[2025-12-23 12:22:13] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:22:19] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:22:19",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 567,
+    "y1" : 116,
+    "x2" : 639,
+    "y2" : 308,
+    "event_type" : "etc",
+    "confidence" : 0.999782383441925
+  } ]
+}
+[2025-12-23 12:22:24] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:22:33] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 283,
+    "x2" : 637,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4975569546222687
+  }, {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "smoke",
+    "confidence" : 0.4202405512332916
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:22:33",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 567,
+    "y1" : 72,
+    "x2" : 639,
+    "y2" : 292,
+    "event_type" : "etc",
+    "confidence" : 0.9774691462516785
+  } ]
+}
+[2025-12-23 12:22:38] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:22:44] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:22:44",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 566,
+    "y1" : 96,
+    "x2" : 639,
+    "y2" : 298,
+    "event_type" : "etc",
+    "confidence" : 0.9999520778656006
+  } ]
+}
+[2025-12-23 12:22:49] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:22:55] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:22:55",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 567,
+    "y1" : 73,
+    "x2" : 639,
+    "y2" : 293,
+    "event_type" : "etc",
+    "confidence" : 0.999954104423523
+  } ]
+}
+[2025-12-23 12:23:01] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:23:06] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:23:06",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 566,
+    "y1" : 39,
+    "x2" : 639,
+    "y2" : 300,
+    "event_type" : "etc",
+    "confidence" : 0.9998644590377808
+  } ]
+}
+[2025-12-23 12:23:11] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:23:19] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:23:24] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:23:44] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:23:49] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:24:11] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:24:16] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:24:32] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:24:37] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:25:27] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:25:32] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:27:32] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:27:37] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:28:06] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:28:11] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:28:32] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:28:37] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:28:42] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:28:48] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 172,
+    "y1" : 164,
+    "x2" : 196,
+    "y2" : 188,
+    "event_type" : "smoke",
+    "confidence" : 0.44145476818084717
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:36:18] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:18",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 434,
+    "y2" : 478,
+    "event_type" : "etc",
+    "confidence" : 0.9998140931129456
+  } ]
+}
+[2025-12-23 12:36:24] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:24",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 451,
+    "y2" : 479,
+    "event_type" : "etc",
+    "confidence" : 0.9979535341262817
+  } ]
+}
+[2025-12-23 12:36:29] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:29",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 36,
+    "y1" : 0,
+    "x2" : 583,
+    "y2" : 480,
+    "event_type" : "etc",
+    "confidence" : 0.9999434947967529
+  } ]
+}
+[2025-12-23 12:36:35] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:35",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:35",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:35",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 157,
+    "y1" : 0,
+    "x2" : 623,
+    "y2" : 478,
+    "event_type" : "etc",
+    "confidence" : 0.9999536275863647
+  }, {
+    "x1" : 468,
+    "y1" : 2,
+    "x2" : 639,
+    "y2" : 479,
+    "event_type" : "etc",
+    "confidence" : 0.9999536275863647
+  }, {
+    "x1" : 561,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 480,
+    "event_type" : "etc",
+    "confidence" : 0.9999536275863647
+  } ]
+}
+[2025-12-23 12:36:40] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:40",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 199,
+    "y1" : 64,
+    "x2" : 636,
+    "y2" : 479,
+    "event_type" : "etc",
+    "confidence" : 0.9999617338180542
+  } ]
+}
+[2025-12-23 12:36:45] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:45",
+    "screenshot_path" : ""
+  }, {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:45",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 367,
+    "y1" : 8,
+    "x2" : 639,
+    "y2" : 478,
+    "event_type" : "etc",
+    "confidence" : 0.9999665021896362
+  }, {
+    "x1" : 604,
+    "y1" : 0,
+    "x2" : 640,
+    "y2" : 222,
+    "event_type" : "etc",
+    "confidence" : 0.9999665021896362
+  } ]
+}
+[2025-12-23 12:36:50] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:50",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 556,
+    "y1" : 67,
+    "x2" : 640,
+    "y2" : 478,
+    "event_type" : "etc",
+    "confidence" : 0.9727325439453125
+  } ]
+}
+[2025-12-23 12:36:55] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:36:55",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 179,
+    "y1" : 0,
+    "x2" : 284,
+    "y2" : 139,
+    "event_type" : "etc",
+    "confidence" : 0.9998677968978882
+  } ]
+}
+[2025-12-23 12:37:00] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 67,
+    "y1" : 146,
+    "x2" : 372,
+    "y2" : 403,
+    "event_type" : "fire",
+    "confidence" : 0.7505754232406616
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:05] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 67,
+    "y1" : 146,
+    "x2" : 372,
+    "y2" : 403,
+    "event_type" : "fire",
+    "confidence" : 0.7505754232406616
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:37:05",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 348,
+    "y1" : 292,
+    "x2" : 422,
+    "y2" : 374,
+    "event_type" : "etc",
+    "confidence" : 0.9999639987945557
+  } ]
+}
+[2025-12-23 12:37:10] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 13,
+    "y1" : 0,
+    "x2" : 553,
+    "y2" : 291,
+    "event_type" : "fire",
+    "confidence" : 0.8686062097549438
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:15] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "fire",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23 12:37:15",
+    "screenshot_path" : "/images/fire_detected.jpg"
+  } ],
+  "fire_map" : [ {
+    "x1" : 88,
+    "y1" : 106,
+    "x2" : 563,
+    "y2" : 381,
+    "event_type" : "fire",
+    "confidence" : 0.8735781311988831
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:21] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 88,
+    "y1" : 106,
+    "x2" : 563,
+    "y2" : 381,
+    "event_type" : "fire",
+    "confidence" : 0.8735781311988831
+  } ],
+  "action_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "etc",
+    "danger_level" : 0,
+    "event_time" : "2025-12-23T12:37:21",
+    "screenshot_path" : ""
+  } ],
+  "action_map" : [ {
+    "x1" : 318,
+    "y1" : 26,
+    "x2" : 619,
+    "y2" : 390,
+    "event_type" : "etc",
+    "confidence" : 0.9989814162254333
+  } ]
+}
+[2025-12-23 12:37:26] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 57,
+    "y1" : 25,
+    "x2" : 474,
+    "y2" : 262,
+    "event_type" : "fire",
+    "confidence" : 0.8925096392631531
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:31] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 0,
+    "y1" : 0,
+    "x2" : 639,
+    "y2" : 373,
+    "event_type" : "fire",
+    "confidence" : 0.8604642152786255
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:36] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ {
+    "cam_no" : 1,
+    "event_type" : "fire",
+    "danger_level" : 3,
+    "event_time" : "2025-12-23 12:37:36",
+    "screenshot_path" : "/images/fire_detected.jpg"
+  } ],
+  "fire_map" : [ {
+    "x1" : 147,
+    "y1" : 79,
+    "x2" : 538,
+    "y2" : 278,
+    "event_type" : "fire",
+    "confidence" : 0.8635112643241882
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:41] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 147,
+    "y1" : 79,
+    "x2" : 538,
+    "y2" : 278,
+    "event_type" : "fire",
+    "confidence" : 0.8635112643241882
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
+[2025-12-23 12:37:46] {
+  "type" : "COMBINED",
+  "cam_no" : 1,
+  "img_bytes" : null,
+  "fire_json" : [ ],
+  "fire_map" : [ {
+    "x1" : 147,
+    "y1" : 79,
+    "x2" : 538,
+    "y2" : 278,
+    "event_type" : "fire",
+    "confidence" : 0.8635112643241882
+  } ],
+  "action_json" : [ ],
+  "action_map" : [ ]
+}
