@@ -26,7 +26,7 @@ public class LogService {
         this.objectMapper.registerModule(new JavaTimeModule());
         this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        
+
         // 로그 디렉토리 생성
         try {
             Path logPath = Paths.get(LOG_DIR);
@@ -48,9 +48,9 @@ public class LogService {
 
         // fire_map이나 fire_json이 비어있으면 저장하지 않음
         boolean hasFireData = (data.getFire_map() != null && !data.getFire_map().isEmpty()) ||
-                             (data.getFire_json() != null && !data.getFire_json().isEmpty());
+                (data.getFire_json() != null && !data.getFire_json().isEmpty());
         boolean hasActionData = (data.getAction_map() != null && !data.getAction_map().isEmpty()) ||
-                               (data.getAction_json() != null && !data.getAction_json().isEmpty());
+                (data.getAction_json() != null && !data.getAction_json().isEmpty());
 
         if (!hasFireData && !hasActionData) {
             return; // 감지 데이터가 없으면 저장하지 않음
@@ -64,10 +64,10 @@ public class LogService {
 
             // 타임스탬프 추가
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            
+
             // JSON으로 변환
             String jsonString = objectMapper.writeValueAsString(data);
-            
+
             // 타임스탬프와 함께 저장
             try (FileWriter writer = new FileWriter(logFile, true)) {
                 writer.write(String.format("[%s] ", timestamp));
@@ -79,4 +79,3 @@ public class LogService {
         }
     }
 }
-

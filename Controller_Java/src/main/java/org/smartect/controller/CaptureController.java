@@ -41,21 +41,21 @@ public class CaptureController {
             if (savedPath != null) {
                 // 알람 캡쳐 경로를 DB에 업데이트 (파이썬에서 넘어온 경로와 구분)
                 eventLogService.updateAlertCapturePath(camNo, eventType, savedPath);
-                
+
                 return ResponseEntity.ok(Map.of(
-                    "success", "true",
-                    "path", savedPath
+                        "success", "true",
+                        "path", savedPath
                 ));
             } else {
                 return ResponseEntity.internalServerError().body(Map.of(
-                    "success", "false",
-                    "error", "캡쳐 저장 실패"
+                        "success", "false",
+                        "error", "캡쳐 저장 실패"
                 ));
             }
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of(
-                "success", "false",
-                "error", e.getMessage()
+                    "success", "false",
+                    "error", e.getMessage()
             ));
         }
     }
@@ -69,7 +69,7 @@ public class CaptureController {
         try {
             // 경로가 공유 폴더 경로인 경우
             File imageFile = new File(path);
-            
+
             if (!imageFile.exists()) {
                 // 공유 폴더 접근 실패 시 로컬 경로로 시도
                 Path localPath = Paths.get("captures").resolve(Paths.get(path).getFileName());
@@ -95,4 +95,3 @@ public class CaptureController {
         }
     }
 }
-

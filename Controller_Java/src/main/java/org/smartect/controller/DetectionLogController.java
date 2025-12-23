@@ -24,7 +24,7 @@ public class DetectionLogController {
         try {
             // "Safe" 이벤트 필터링된 데이터 생성 (파일 로그용)
             CombinedJsonDTO filteredData = filterSafeEvents(data);
-            
+
             // 파일 로그 저장
             logService.saveDailyDetectionLog(filteredData);
 
@@ -43,7 +43,7 @@ public class DetectionLogController {
                         );
                     } catch (Exception e) {
                         System.err.println("DB 로그 저장 실패 (cam_no: " + eventJson.getCam_no() +
-                                         ", event_type: " + eventJson.getEvent_type() + "): " + e.getMessage());
+                                ", event_type: " + eventJson.getEvent_type() + "): " + e.getMessage());
                     }
                 }
             }
@@ -63,7 +63,7 @@ public class DetectionLogController {
                         );
                     } catch (Exception e) {
                         System.err.println("DB 로그 저장 실패 (cam_no: " + eventJson.getCam_no() +
-                                         ", event_type: " + eventJson.getEvent_type() + "): " + e.getMessage());
+                                ", event_type: " + eventJson.getEvent_type() + "): " + e.getMessage());
                     }
                 }
             }
@@ -114,37 +114,3 @@ public class DetectionLogController {
         return filtered;
     }
 }
-
-
-/*
-// ========== 원본 코드 (EventLogService 연결 전) ==========
-package org.smartect.controller;
-
-import lombok.RequiredArgsConstructor;
-import org.smartect.dto.CombinedJsonDTO;
-import org.smartect.service.LogService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping("/api/detection-log")
-@RequiredArgsConstructor
-public class DetectionLogController {
-
-    private final LogService logService;
-
-    @PostMapping("/save")
-    public ResponseEntity<String> saveDetectionLog(@RequestBody CombinedJsonDTO data) {
-        try {
-            logService.saveDailyDetectionLog(data);
-            return ResponseEntity.ok("로그 저장 완료");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("로그 저장 실패: " + e.getMessage());
-        }
-    }
-}
-
-*/

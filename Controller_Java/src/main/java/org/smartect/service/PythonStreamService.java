@@ -57,9 +57,7 @@ public class PythonStreamService implements CommandLineRunner {
                     byte[] combinedData  = new byte[payload.remaining()];
                     payload.get(combinedData);
 
-                    
                     videoWebSocketHandler.livePostData(combinedData);
-
                     
                 } catch (Exception e) {
                     System.out.println("핸들링 오류: " + e.getMessage());

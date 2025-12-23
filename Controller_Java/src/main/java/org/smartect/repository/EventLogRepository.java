@@ -12,7 +12,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
     // 이벤트 목록 발생일자 내림차순
     List<EventLogEntity> findAllByOrderByCreatedAtDesc();
     List<EventLogEntity> findTop5ByCreatedAtBetweenOrderByCreatedAtDesc(java.time.LocalDateTime start, java.time.LocalDateTime end);
-    
+
     // 최근 이벤트 로그 조회
     @Query(value = "SELECT e.* FROM event_log e " +
             "INNER JOIN cam c ON e.cam_no = c.cam_no " +
@@ -24,7 +24,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
             "LIMIT 1", nativeQuery = true)
     List<EventLogEntity> findTop1ByCamNoAndEventTypeOrderByCreatedAtDesc(@Param("camNo") Long camNo, @Param("eventType") String eventType);
 
-  
+
     // 이벤트 목록 미확인 이벤트 개수
     long countByCheckedAtIsNull();
 

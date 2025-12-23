@@ -29,13 +29,13 @@ public class EventLogService {
     public List<EventLogDTO> findAll() {
         List<EventLogEntity> entityList = eventLogRepository.findAllByOrderByCreatedAtDesc();
         List<EventLogDTO> dtoList = new ArrayList<>();
-        for (EventLogEntity entity : entityList) {
+        for(EventLogEntity entity : entityList){
             // NULL 확인 notNull -> 포멧 변경, Null -> Null
             // NullPointException 방지
             String checkedAt =
-                    entity.getCheckedAt() != null ?
+                    entity.getCheckedAt()!=null?
                             entity.getCheckedAt().format(DEFAULT)
-                            : null;
+                            :null;
 
             // CamEntity -> CamDTO 변환
             CamDTO camDTO = new CamDTO(
@@ -69,11 +69,11 @@ public class EventLogService {
 
     // 이벤트 확인 : CheckedAt 갱신 (Update)
     @Transactional
-    public void checkEvent(Long eventNo) {
+    public void checkEvent(Long eventNo){
         EventLogEntity entity = eventLogRepository.findById(eventNo)
-                .orElseThrow(() -> new IllegalArgumentException("이벤트가 존재하지 않습니다. eventNo : " + eventNo));
+                .orElseThrow(()-> new IllegalArgumentException("이벤트가 존재하지 않습니다. eventNo : "+eventNo));
         // 이미 확인된 로그는 다시 처리하지 않음
-        if (entity.getCheckedAt() != null) {
+        if(entity.getCheckedAt() != null){
             return;
         }
         entity.updateCheckedAt(LocalDateTime.now());
@@ -81,9 +81,9 @@ public class EventLogService {
 
     // 메모 수정(작성) (Update)
     @Transactional
-    public void updateMemo(Long eventNo, String memo) {
+    public void updateMemo(Long eventNo,String memo){
         EventLogEntity entity = eventLogRepository.findById(eventNo)
-                .orElseThrow(() -> new IllegalArgumentException("이벤트가 존재하지 않습니다. eventNo : " + eventNo));
+                .orElseThrow(()-> new IllegalArgumentException("이벤트가 존재하지 않습니다. eventNo : "+eventNo));
         entity.updateMemo(memo);
     }
 
@@ -114,11 +114,10 @@ public class EventLogService {
 
         List<EventLogEntity> recentLogs = eventLogRepository.findTop1ByCamNoAndEventTypeOrderByCreatedAtDesc(
                 (long) camNo, lowerEventType);
-        
+
         if (!recentLogs.isEmpty()) {
             EventLogEntity recentLog = recentLogs.get(0);
             recentLog.updateScreenshotPath(capturePath);
         }
     }
 }
-
