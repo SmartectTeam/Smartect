@@ -1,5 +1,6 @@
 package org.smartect.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -8,102 +9,126 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
+@RequiredArgsConstructor
 public class CaptureService {
 
-    private static final String SHARED_FOLDER_PATH = "\\\\220-29\\공유폴더\\captures";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmmss");
+    private static final String CAPTURE_BASE_PATH = "\\\\220-29\\공유폴더\\captures";
 
     /**
-     * 알람 발생 시 CCTV 화면 캡쳐 저장
-     * @param imageBytes 이미지 바이트 배열 (Base64 디코딩된)
-     * @param camNo 카메라 번호
-     * @param eventType 이벤트 타입 (fire, smoke 등)
-     * @return 저장된 파일 경로
+     * 원본 프레임에 바운딩 박스를 그려서 캡처 저장
      */
-    public String saveAlertCapture(byte[] imageBytes, int camNo, String eventType) {
+    public String captureWithBoundingBox(
+            byte[] frameBytes,
+            int camNo,
+            String eventType,
+            int x1, int y1, int x2, int y2,
+            double confidence) {
+
         try {
-            // 공유 폴더 경로 확인 및 생성
-            Path sharedPath = Paths.get(SHARED_FOLDER_PATH);
-            if (!Files.exists(sharedPath)) {
-                try {
-                    Files.createDirectories(sharedPath);
-                } catch (IOException e) {
-                    // 공유 폴더 접근 실패 시 로컬 경로로 대체
-                    return saveToLocalPath(imageBytes, camNo, eventType);
-                }
-            }
-
-            // 날짜별 폴더 생성
-            String dateStr = LocalDateTime.now().format(DATE_FORMATTER);
-            Path dateFolder = sharedPath.resolve(dateStr);
-            if (!Files.exists(dateFolder)) {
-                Files.createDirectories(dateFolder);
-            }
-
-            // 파일명 생성: CCTV-XX_이벤트타입_YYYY-MM-DD_HHmmss.jpg
-            String timeStr = LocalDateTime.now().format(TIME_FORMATTER);
-            String fileName = String.format("CCTV-%02d_%s_%s_%s.jpg", camNo, eventType, dateStr, timeStr);
-            File captureFile = dateFolder.resolve(fileName).toFile();
-
-            // 이미지 저장
-            ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
+            // 1. byte[]를 BufferedImage로 변환
+            ByteArrayInputStream bais = new ByteArrayInputStream(frameBytes);
             BufferedImage image = ImageIO.read(bais);
-            if (image != null) {
-                ImageIO.write(image, "jpg", captureFile);
-                return captureFile.getAbsolutePath();
-            } else {
-                // 이미지 파싱 실패 시 원본 바이트 그대로 저장
-                Files.write(captureFile.toPath(), imageBytes);
-                return captureFile.getAbsolutePath();
+
+            if (image == null) {
+                System.err.println("이미지 디코딩 실패");
+                return null;
             }
 
-        } catch (IOException e) {
-            // 공유 폴더 저장 실패 시 로컬 경로로 대체
-            return saveToLocalPath(imageBytes, camNo, eventType);
+            // 2. Graphics2D로 바운딩 박스 그리기
+            Graphics2D g2d = image.createGraphics();
+
+            // 안티앨리어싱 설정
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // 바운딩 박스 색상 설정 (이벤트 타입에 따라)
+            Color boxColor = getColorByEventType(eventType);
+            g2d.setColor(boxColor);
+            g2d.setStroke(new BasicStroke(3));
+
+            // 사각형 그리기
+            int width = x2 - x1;
+            int height = y2 - y1;
+            g2d.drawRect(x1, y1, width, height);
+
+            // 라벨 텍스트 (이벤트 타입 + 신뢰도)
+            String label = String.format("%s (%.2f%%)", eventType, confidence * 100);
+            g2d.setFont(new Font("Arial", Font.BOLD, 16));
+
+            // 텍스트 배경
+            FontMetrics fm = g2d.getFontMetrics();
+            int labelWidth = fm.stringWidth(label);
+            int labelHeight = fm.getHeight();
+            g2d.fillRect(x1, y1 - labelHeight - 5, labelWidth + 10, labelHeight + 5);
+
+            // 텍스트
+            g2d.setColor(Color.WHITE);
+            g2d.drawString(label, x1 + 5, y1 - 5);
+
+            g2d.dispose();
+
+            // 3. 파일로 저장
+            String fileName = generateFileName(camNo, eventType);
+            String fullPath = saveImageToFile(image, fileName);
+
+            return fullPath;
+
+        } catch (Exception e) {
+            System.err.println("캡처 저장 실패: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 
     /**
-     * 공유 폴더 접근 실패 시 로컬 경로에 저장
+     * 이벤트 타입에 따른 색상 반환
      */
-    private String saveToLocalPath(byte[] imageBytes, int camNo, String eventType) {
-        try {
-            String localPath = "captures";
-            Path localDir = Paths.get(localPath);
-            if (!Files.exists(localDir)) {
-                Files.createDirectories(localDir);
-            }
+    private Color getColorByEventType(String eventType) {
+        String lower = eventType.toLowerCase();
 
-            String dateStr = LocalDateTime.now().format(DATE_FORMATTER);
-            Path dateFolder = localDir.resolve(dateStr);
-            if (!Files.exists(dateFolder)) {
-                Files.createDirectories(dateFolder);
-            }
+        if (lower.contains("fire")) return Color.RED;
+        if (lower.contains("smoke")) return Color.ORANGE;
+        if (lower.contains("fall")) return Color.MAGENTA;
+        if (lower.contains("threat")) return Color.RED;
+        if (lower.contains("punching") || lower.contains("pushing")) return Color.YELLOW;
 
-            String timeStr = LocalDateTime.now().format(TIME_FORMATTER);
-            String fileName = String.format("CCTV-%02d_%s_%s_%s.jpg", camNo, eventType, dateStr, timeStr);
-            File captureFile = dateFolder.resolve(fileName).toFile();
+        return Color.GREEN; // 기본값
+    }
 
-            ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
-            BufferedImage image = ImageIO.read(bais);
-            if (image != null) {
-                ImageIO.write(image, "jpg", captureFile);
-            } else {
-                Files.write(captureFile.toPath(), imageBytes);
-            }
+    /**
+     * 파일명 생성
+     */
+    private String generateFileName(int camNo, String eventType) {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
+        return String.format("CAM%02d_%s_%s.jpg",
+                camNo,
+                eventType,
+                now.format(formatter));
+    }
 
-            return captureFile.getAbsolutePath();
-        } catch (IOException e) {
-            System.err.println("캡쳐 저장 실패: " + e.getMessage());
-            return null;
+    /**
+     * 이미지를 파일로 저장
+     */
+    private String saveImageToFile(BufferedImage image, String fileName) throws IOException {
+        // 날짜별 폴더 생성
+        LocalDateTime now = LocalDateTime.now();
+        String dateFolder = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String folderPath = CAPTURE_BASE_PATH + File.separator + dateFolder;
+
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            folder.mkdirs();
         }
+
+        // 파일 저장
+        String fullPath = folderPath + File.separator + fileName;
+        File outputFile = new File(fullPath);
+        ImageIO.write(image, "jpg", outputFile);
+
+        return fullPath;
     }
 }

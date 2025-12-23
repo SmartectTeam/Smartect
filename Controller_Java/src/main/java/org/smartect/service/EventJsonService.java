@@ -2,9 +2,11 @@ package org.smartect.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.smartect.dto.CombinedJsonDTO;
 import org.smartect.dto.EventJsonDTO;
+import org.smartect.dto.EventMapDTO;
 import org.smartect.entity.CamEntity;
 import org.smartect.entity.EventLogEntity;
 import org.smartect.repository.EventLogRepository;
@@ -19,13 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
+@RequiredArgsConstructor
 public class EventJsonService {
 
     private final ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
     private final Map<String, LocalDateTime> lastEventTime = new ConcurrentHashMap<>();
+    private final CaptureService captureService;
 
     @Autowired
     private EventLogRepository eventLogRepository;
@@ -46,8 +49,6 @@ public class EventJsonService {
             "fire"
     );
 
-    // 넘어오는 JSON 데이터 확인용
-    private final AtomicBoolean printed = new AtomicBoolean(false);
 
     @Async
     public void process(byte[] combined_json) {
@@ -56,17 +57,23 @@ public class EventJsonService {
 
             // action 이벤트
             List<EventJsonDTO> actionEvents = combined_data.getAction_json();
+            List<EventMapDTO> actionMaps = combined_data.getAction_map();
             if (actionEvents != null) {
-                for (EventJsonDTO event : actionEvents) {
-                    processEvent(event);
+                for (int i = 0; i < actionEvents.size(); i++) {
+                    EventJsonDTO event = actionEvents.get(i);
+                    EventMapDTO map = (actionMaps != null && i < actionMaps.size()) ? actionMaps.get(i) : null;
+                    processEvent(event, map, combined_data.getImg_bytes());
                 }
             }
 
             // fire 이벤트
             List<EventJsonDTO> fireEvents = combined_data.getFire_json();
+            List<EventMapDTO> fireMaps = combined_data.getFire_map();
             if (fireEvents != null) {
-                for (EventJsonDTO event : fireEvents) {
-                    processEvent(event);
+                for (int i = 0; i < fireEvents.size(); i++) {
+                    EventJsonDTO event = fireEvents.get(i);
+                    EventMapDTO map = (fireMaps != null && i < fireMaps.size()) ? fireMaps.get(i) : null;
+                    processEvent(event, map, combined_data.getImg_bytes());
                 }
             }
 
@@ -78,7 +85,7 @@ public class EventJsonService {
     }
 
     // 이벤트 처리
-    private void processEvent(EventJsonDTO event) {
+    private void processEvent(EventJsonDTO event, EventMapDTO map, byte[] Img_bytes) {
         String eventType = event.getEvent_type();
 
         // 필터링
@@ -86,11 +93,28 @@ public class EventJsonService {
             return;
         }
 
-        // ?
-
         // 쿨다운
         if (!shouldSaveEvent(event.getCam_no(), eventType)) {
             return;
+        }
+
+        // 스크린 샷
+        String screenshotPath = null;
+        if (Img_bytes != null && map != null) {
+            try {
+                screenshotPath = captureService.captureWithBoundingBox(
+                        Img_bytes,
+                        event.getCam_no(),
+                        eventType,
+                        map.getX1(),
+                        map.getY1(),
+                        map.getX2(),
+                        map.getY2(),
+                        map.getConfidence()
+                );
+            } catch (Exception e) {
+                System.err.println("스크린샷 캡처 실패: " + e.getMessage());
+            }
         }
 
         // DB
@@ -99,6 +123,10 @@ public class EventJsonService {
                 eventType,
                 event.getScreenshot_path()
         );
+
+        System.out.println("이벤트 저장 완료: cam_no=" + event.getCam_no() +
+                ", type=" + eventType +
+                ", screenshot=" + screenshotPath);
     }
 
     private boolean isAllowedEventType(String eventType) {
