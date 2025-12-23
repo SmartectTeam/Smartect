@@ -17,21 +17,21 @@ from common.config import DataPath
 
 
 # [CCTV-01] 파일 반복
-CAM_ID_1 = 0
-# VIDEO_PATH_1 = r"\\220-29\공유폴더\demoVideo\video\fire_test.mp4"
+#CAM_ID_1 = 0
+VIDEO_PATH_1 = r"F:\teamProject\video\test.mp4"
 CONFIG_FILE_1 = DataPath(1).SETTING_PATH
 
 # [CCTV-02] 파일 반복
 # CAM_ID_2 = "HSYCAM"
-VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
+VIDEO_PATH_2 = r"F:\teamProject\video\test1.mp4"
 CONFIG_FILE_2 = DataPath(2).SETTING_PATH
 
 # [CCTV-03] 파일 반복
-VIDEO_PATH_3 = r"\\220-29\공유폴더\model\시연영상\safe\sitting\20251206_131323.mp4"
+VIDEO_PATH_3 = r"F:\teamProject\video\fire_test.mp4"
 CONFIG_FILE_3 = DataPath(3).SETTING_PATH
 
 # [CCTV-04] 파일 반복
-VIDEO_PATH_4 = r"\\220-29\공유폴더\model\시연영상\threat\punching\20251207_182145.mp4"
+VIDEO_PATH_4 = r"F:\teamProject\video\7. veryDangerTest.mp4"
 CONFIG_FILE_4 = DataPath(4).SETTING_PATH
 
 
@@ -44,8 +44,8 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-1(live)")
     detector1 = MotionDetector(settings_path=CONFIG_FILE_1)
     detector1.models = shared_models
-    source1 = WebcamStream(CAM_ID_1)
-    # source1 = FileLoofStream(VIDEO_PATH_1)
+    # source1 = WebcamStream(CAM_ID_1)
+    source1 = FileLoofStream(VIDEO_PATH_1)
 
     # CCTV 02
     print(">>>[Setup] CCTV-2(live)")
@@ -68,9 +68,9 @@ async def main(pc_id):
     print(">>> [System] Streams Started.")
     await asyncio.gather(
         camera_post_video(source1, detector1, pc_id, 1),
-        # camera_post_video(source2, detector2, pc_id, 2),
-        # camera_post_video(source3, detector3, pc_id, 3),
-        # camera_post_video(source4, detector4, pc_id, 4)
+        camera_post_video(source2, detector2, pc_id, 2),
+        camera_post_video(source3, detector3, pc_id, 3),
+        camera_post_video(source4, detector4, pc_id, 4)
     )
 
 PC_ID = "HSYPC"

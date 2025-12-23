@@ -4,8 +4,14 @@
         <span id="alarmCount" class="alarm-badge" style="display:none;"></span>
     </a>
     <div class="user-profile">
-        <span th:text="${#authentication.name} + ' 님'"></span>
-        <span th:text="'[ '+${#strings.replace(#authentication.authorities.iterator().next().authority, 'ROLE_', '')}+' ]'"></span>
+
+
+<!--        <span th:text="${#authentication.name} + ' 님'"></span>-->
+        <span>관리자(DB없음)</span>
+
+<!--        <span th:text="'[ '+${#strings.replace(#authentication.authorities.iterator().next().authority, 'ROLE_', '')}+' ]'"></span>-->
+        <span>ADMIN</span>
+
 
         <form th:action="@{/logout}" method="post">
             <button class="logout-btn" type="submit">로그아웃</button>
