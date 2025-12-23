@@ -92,81 +92,12 @@ function addAlert(cctvName, detectionType) {
     }
 
     updateAlertCount();
-
-    // 새로운 알람 발생 시 캡쳐
-    captureAlertScreen(cctvName, detectionType);
 }
 
 function updateAlertCount() {
     const count = activeAlerts.size;
     const subLabel = document.querySelector(".alert-section .sub-label");
     if (subLabel) subLabel.textContent = `고위험 알람 (${count})`;
-}
-
-// 알람 발생 시 CCTV 화면 캡쳐 (박스 포함)
-function captureAlertScreen(cctvName, detectionType) {
-    const camNo = parseInt(cctvName.replace("CCTV-", "").replace("0", "")) || parseInt(cctvName.replace("CCTV-", ""));
-    const config = CAM_CONFIG[camNo];
-    
-    if (!config) {
-        console.warn(`CCTV 설정을 찾을 수 없음: ${cctvName}`);
-        return;
-    }
-
-    const imgElement = document.getElementById(config.imgId);
-    const canvas = document.getElementById(config.canvasId);
-
-    if (!imgElement || !canvas || !imgElement.complete) {
-        console.warn(`이미지를 찾을 수 없음: ${cctvName}`);
-        return;
-    }
-
-    // 이미지와 Canvas를 합치기
-    const captureCanvas = document.createElement("canvas");
-    const captureCtx = captureCanvas.getContext("2d");
-
-    captureCanvas.width = imgElement.naturalWidth || imgElement.width;
-    captureCanvas.height = imgElement.naturalHeight || imgElement.height;
-
-    // 이미지 그리기
-    captureCtx.drawImage(imgElement, 0, 0, captureCanvas.width, captureCanvas.height);
-
-    // 박스 그리기 (스케일 조정)
-    const scaleX = captureCanvas.width / (canvas.width || imgElement.offsetWidth);
-    const scaleY = captureCanvas.height / (canvas.height || imgElement.offsetHeight);
-
-    const canvasCtx = canvas.getContext("2d");
-    if (canvas.width > 0 && canvas.height > 0) {
-        // 스케일 조정
-        captureCtx.save();
-        captureCtx.scale(scaleX, scaleY);
-        captureCtx.drawImage(canvas, 0, 0);
-        captureCtx.restore();
-    }
-
-    const imageBase64 = captureCanvas.toDataURL("image/jpeg", 0.9);
-
-    fetch('/api/capture/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            image: imageBase64,
-            camNo: camNo,
-            eventType: detectionType
-        })
-    }).then(response => response.json())
-      .then(data => {
-          if (data.success) {
-              console.log(`캡쳐 저장 완료: ${data.path}`);
-          } else {
-              console.error(`캡쳐 저장 실패: ${data.error}`);
-          }
-      })
-      .catch(error => {
-          console.error(`캡쳐 전송 실패:`, error);
-      });
 }
 
 // 감지 상태 확인 및 알림/로그 처리
@@ -425,71 +356,6 @@ function initMultiCameraStream(socketUrl) {
     return socket;
 }
 
-// 로그 전송 제어
-const logThrottleMap = {}; // { camNo: { lastSent: timestamp, lastData: string } }
-const LOG_THROTTLE_INTERVAL = 5000; // 5초마다 한 번만 저장
-
-// 로그 전송 함수 (서버로 전송)
-function sendDetectionLogToServer(data) {
-    // fire_map이나 fire_json이 비어있으면 전송하지 않음
-    const hasFireData = (data.fire_map && data.fire_map.length > 0) ||
-                       (data.fire_json && data.fire_json.length > 0);
-    const hasActionData = (data.action_map && data.action_map.length > 0) ||
-                         (data.action_json && data.action_json.length > 0);
-
-    if (!hasFireData && !hasActionData) {
-        return; // 감지 데이터가 없으면 전송하지 않음
-    }
-
-    const camNo = data.cam_no;
-    const now = Date.now();
-
-    // img_bytes는 전송하지 않음
-    const logData = {
-        type: data.type || "COMBINED",
-        cam_no: camNo,
-        fire_json: data.fire_json || [],
-        fire_map: data.fire_map || [],
-        action_json: data.action_json || [],
-        action_map: data.action_map || []
-    };
-
-    const dataString = JSON.stringify(logData);
-
-    // 중복 체크
-    if (!logThrottleMap[camNo]) {
-        logThrottleMap[camNo] = { lastSent: 0, lastData: "" };
-    }
-
-    const throttleInfo = logThrottleMap[camNo];
-    const timeSinceLastSent = now - throttleInfo.lastSent;
-
-    // 같은 데이터면 저장하지 않음
-    if (dataString === throttleInfo.lastData) {
-        return;
-    }
-
-    // 5초 이내에 전송했으면 스킵
-    if (timeSinceLastSent < LOG_THROTTLE_INTERVAL) {
-        return;
-    }
-
-    // 전송 및 기록 업데이트
-    throttleInfo.lastSent = now;
-    throttleInfo.lastData = dataString;
-
-    // 비동기로 서버에 전송
-    fetch('/api/detection-log/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(logData)
-    }).catch(error => {
-        console.error('로그 전송 실패:', error);
-    });
-}
-
 function updateDisplay(data, imgElement, canvas, ctx, statusElement, camNo) {
     console.log(`[updateDisplay] CCTV-${camNo} 호출됨, fire_map:`, data.fire_map ? data.fire_map.length : 0, "개");
     
@@ -512,9 +378,6 @@ function updateDisplay(data, imgElement, canvas, ctx, statusElement, camNo) {
     // 알림 및 로그 처리
     const cctvName = `CCTV-0${camNo}`;
     checkAndProcessAlerts(data, cctvName);
-
-    // 서버로 로그 전송
-    sendDetectionLogToServer(data);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

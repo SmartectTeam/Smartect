@@ -187,23 +187,10 @@
 
         /* ================= 상세 ================= */
         function showDetail(e) {
-        // 캡쳐 이미지 경로 처리
-        let imageSrc = "/images/no_image.png";
-        
-        if (e.screenshotPath && e.screenshotPath.trim() !== "") {
-            const path = e.screenshotPath.trim();
-            // 공유 폴더 경로인 경우 (\\로 시작하거나 UNC 경로)
-            if (path.startsWith("\\\\") || path.startsWith("//") || path.startsWith("captures/")) {
-                // API를 통해 이미지 제공
-                imageSrc = `/api/capture/image?path=${encodeURIComponent(path)}`;
-            } else if (path.startsWith("/images/")) {
-                // 기존 정적 리소스 경로
-                imageSrc = path;
-            } else {
-                // 그 외의 경우도 API를 통해 시도
-                imageSrc = `/api/capture/image?path=${encodeURIComponent(path)}`;
-            }
-        }
+        // 캡쳐 이미지 없을 시 no_image 보여줌
+        const imageSrc =
+        e.screenshotPath && e.screenshotPath.trim() !== ""
+            ? e.screenshotPath : "/images/no_image.png";
 
             document.getElementById("detailBox").innerHTML = `
                 <div class="detail-card">

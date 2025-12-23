@@ -11,4 +11,3 @@ public class EventMapDTO {
     private String event_type;
     private double confidence;
 }
-
