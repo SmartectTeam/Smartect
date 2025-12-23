@@ -54,7 +54,7 @@ def fire_model_video(model, frame, threshold_map, cam_no):
                         event_type="fire",
                         danger_level=3,
                         event_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        screenshot_path="/images/fire_detected.jpg"
+                        screenshot_path=""
                     ))
 
                 elif class_name == "smoke":
@@ -63,7 +63,7 @@ def fire_model_video(model, frame, threshold_map, cam_no):
                         event_type="smoke",
                         danger_level=3,
                         event_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        screenshot_path="/images/fire_detected.jpg"
+                        screenshot_path=""
                     ))
 
     return fire_json, fire_map
