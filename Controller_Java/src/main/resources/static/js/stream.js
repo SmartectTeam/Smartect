@@ -92,12 +92,81 @@ function addAlert(cctvName, detectionType) {
     }
 
     updateAlertCount();
+
+    // 새로운 알람 발생 시 캡쳐
+    captureAlertScreen(cctvName, detectionType);
 }
 
 function updateAlertCount() {
     const count = activeAlerts.size;
     const subLabel = document.querySelector(".alert-section .sub-label");
     if (subLabel) subLabel.textContent = `고위험 알람 (${count})`;
+}
+
+// 알람 발생 시 CCTV 화면 캡쳐 (박스 포함)
+function captureAlertScreen(cctvName, detectionType) {
+    const camNo = parseInt(cctvName.replace("CCTV-", "").replace("0", "")) || parseInt(cctvName.replace("CCTV-", ""));
+    const config = CAM_CONFIG[camNo];
+    
+    if (!config) {
+        console.warn(`CCTV 설정을 찾을 수 없음: ${cctvName}`);
+        return;
+    }
+
+    const imgElement = document.getElementById(config.imgId);
+    const canvas = document.getElementById(config.canvasId);
+
+    if (!imgElement || !canvas || !imgElement.complete) {
+        console.warn(`이미지를 찾을 수 없음: ${cctvName}`);
+        return;
+    }
+
+    // 이미지와 Canvas를 합치기
+    const captureCanvas = document.createElement("canvas");
+    const captureCtx = captureCanvas.getContext("2d");
+
+    captureCanvas.width = imgElement.naturalWidth || imgElement.width;
+    captureCanvas.height = imgElement.naturalHeight || imgElement.height;
+
+    // 이미지 그리기
+    captureCtx.drawImage(imgElement, 0, 0, captureCanvas.width, captureCanvas.height);
+
+    // 박스 그리기 (스케일 조정)
+    const scaleX = captureCanvas.width / (canvas.width || imgElement.offsetWidth);
+    const scaleY = captureCanvas.height / (canvas.height || imgElement.offsetHeight);
+
+    const canvasCtx = canvas.getContext("2d");
+    if (canvas.width > 0 && canvas.height > 0) {
+        // 스케일 조정
+        captureCtx.save();
+        captureCtx.scale(scaleX, scaleY);
+        captureCtx.drawImage(canvas, 0, 0);
+        captureCtx.restore();
+    }
+
+    const imageBase64 = captureCanvas.toDataURL("image/jpeg", 0.9);
+
+    fetch('/api/capture/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            image: imageBase64,
+            camNo: camNo,
+            eventType: detectionType
+        })
+    }).then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              console.log(`캡쳐 저장 완료: ${data.path}`);
+          } else {
+              console.error(`캡쳐 저장 실패: ${data.error}`);
+          }
+      })
+      .catch(error => {
+          console.error(`캡쳐 전송 실패:`, error);
+      });
 }
 
 // 감지 상태 확인 및 알림/로그 처리
@@ -280,30 +349,29 @@ function initMultiCameraStream(socketUrl) {
 
             if (!imgElement) return;
 
-            // fire_map 데이터 처리: 새 데이터가 있으면 캐시 업데이트, 없으면 캐시된 데이터 사용
+            // 새 데이터가 있으면 캐시 업데이트, 없으면 캐시된 데이터 사용
             if (data.fire_map && Array.isArray(data.fire_map)) {
                 if (data.fire_map.length > 0) {
-                    // 새 감지 데이터가 있으면 캐시 업데이트
+                    // 캐시 업데이트
                     lastFireMapCache[camNo] = data.fire_map;
                 } else {
-                    // 빈 배열이면 캐시 유지 (이전 감지가 계속 표시되도록)
+                    // 캐시 유지
                     data.fire_map = lastFireMapCache[camNo];
                 }
             } else if (lastFireMapCache[camNo]) {
-                // fire_map 필드가 없거나 null이면 캐시된 데이터 사용
                 data.fire_map = lastFireMapCache[camNo];
             }
 
-            // 마지막 데이터 저장 (이미지 로드 후에도 사용)
+            // 마지막 데이터 저장
             lastDataCache[camNo] = data;
 
-            // fire_map이 있으면 이미지 로드와 관계없이 즉시 박스 그리기
+            // fire_map이 있을 때 박스 그리기
             if (data.fire_map && data.fire_map.length > 0) {
                 requestAnimationFrame(() => {
                     updateDisplay(data, imgElement, canvas, ctx, statusElement, camNo);
                 });
             } else if (data.fire_map && data.fire_map.length === 0) {
-                // 빈 배열이면 박스 제거
+                // 빈 배열일 때 박스 제거
                 requestAnimationFrame(() => {
                     if (canvas && ctx && canvas.width > 0 && canvas.height > 0) {
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -318,12 +386,11 @@ function initMultiCameraStream(socketUrl) {
             if (data.img_bytes) {
                 const blob = new Blob([data.img_bytes], { type: "image/jpeg" });
 
-                // 메모리 누수 방지: 기존 URL 해제
                 if (imgElement.src && imgElement.src.startsWith("blob:")) {
                     URL.revokeObjectURL(imgElement.src);
                 }
 
-                // onload 이벤트 핸들러 - 이미지 로드 후에도 마지막 데이터로 업데이트
+                // 마지막 데이터로 업데이트
                 imgElement.onload = function() {
                     const lastData = lastDataCache[camNo];
                     if (lastData) {
@@ -335,7 +402,6 @@ function initMultiCameraStream(socketUrl) {
 
                 imgElement.src = URL.createObjectURL(blob);
 
-                // 이미지가 이미 로드된 경우 즉시 처리 (setTimeout 제거)
                 if (imgElement.complete && imgElement.naturalWidth > 0) {
                     const lastData = lastDataCache[camNo];
                     if (lastData) {
@@ -359,7 +425,7 @@ function initMultiCameraStream(socketUrl) {
     return socket;
 }
 
-// 로그 전송 제어 (스로틀링 및 중복 방지)
+// 로그 전송 제어
 const logThrottleMap = {}; // { camNo: { lastSent: timestamp, lastData: string } }
 const LOG_THROTTLE_INTERVAL = 5000; // 5초마다 한 번만 저장
 
@@ -378,7 +444,7 @@ function sendDetectionLogToServer(data) {
     const camNo = data.cam_no;
     const now = Date.now();
 
-    // img_bytes는 전송하지 않음 (용량이 크므로)
+    // img_bytes는 전송하지 않음
     const logData = {
         type: data.type || "COMBINED",
         cam_no: camNo,
@@ -388,10 +454,9 @@ function sendDetectionLogToServer(data) {
         action_map: data.action_map || []
     };
 
-    // 데이터를 문자열로 변환하여 중복 체크
     const dataString = JSON.stringify(logData);
 
-    // 스로틀링 및 중복 체크
+    // 중복 체크
     if (!logThrottleMap[camNo]) {
         logThrottleMap[camNo] = { lastSent: 0, lastData: "" };
     }
@@ -404,7 +469,7 @@ function sendDetectionLogToServer(data) {
         return;
     }
 
-    // 스로틀링: 5초 이내에 전송했으면 스킵
+    // 5초 이내에 전송했으면 스킵
     if (timeSinceLastSent < LOG_THROTTLE_INTERVAL) {
         return;
     }
@@ -413,7 +478,7 @@ function sendDetectionLogToServer(data) {
     throttleInfo.lastSent = now;
     throttleInfo.lastData = dataString;
 
-    // 비동기로 서버에 전송 (await 없이 fire-and-forget)
+    // 비동기로 서버에 전송
     fetch('/api/detection-log/save', {
         method: 'POST',
         headers: {

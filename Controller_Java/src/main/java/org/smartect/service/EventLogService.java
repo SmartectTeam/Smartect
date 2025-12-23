@@ -104,6 +104,26 @@ public class EventLogService {
         // DB 저장
         return eventLogRepository.save(entity);
     }
+
+    // 확인 안된 이벤트 개수 반환
+    public long getUnCheckedCount() {
+        return eventLogRepository.countByCheckedAtIsNull();
+    }
+
+    // 알람 발생 시 캡쳐한 경로를 DB에 업데이트
+    @Transactional
+    public void updateAlertCapturePath(int camNo, String eventType, String capturePath) {
+
+        String lowerEventType = eventType.toLowerCase();
+
+        List<EventLogEntity> recentLogs = eventLogRepository.findTop1ByCamNoAndEventTypeOrderByCreatedAtDesc(
+                (long) camNo, lowerEventType);
+        
+        if (!recentLogs.isEmpty()) {
+            EventLogEntity recentLog = recentLogs.get(0);
+            recentLog.updateScreenshotPath(capturePath);
+        }
+    }
 }
 
 
