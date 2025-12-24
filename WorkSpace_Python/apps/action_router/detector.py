@@ -57,7 +57,21 @@ class MotionDetector:
                 if mod_time > self._last_mod_time:
                     with self.settings_path.open('r', encoding='utf-8') as f:
                         new_settings = json.load(f)
+
+                        # [추가됨] 모드가 변경되었는지 확인
+                        old_mode = self.settings.get('detection_mode')
+                        new_mode = new_settings.get('detection_mode')
+
+                        # 설정 업데이트
                         self.settings.update(new_settings)
+
+                        # [추가됨] 모드가 바뀌었다면 메모리 초기화 (이전 데이터 삭제)
+                        if old_mode != new_mode:
+                            print(f">>> [System] Mode Changed: {old_mode} -> {new_mode}. Resetting states.")
+                            self.track_states.clear()  # 객체 추적 정보/버퍼 초기화
+                            self.last_detections = []  # 화면에 표시되는 박스 초기화
+                            self.last_danger = 0  # 위험도 초기화
+                            self.last_event = "Safe"  # 이벤트 상태 초기화
 
                     self._last_mod_time = mod_time
             except Exception as e:
@@ -128,7 +142,9 @@ class MotionDetector:
                             'cooldown': 0,
                             'label': 'Safe',
                             'score': 0.0,
-                            'missing_count': 0
+                            'missing_count': 0,
+                            'trigger_count': 0  # <--- ★ [추가] 연속 감지 카운터
+
                         }
                     state = self.track_states[track_id]
                     state['missing_count'] = 0
@@ -162,6 +178,7 @@ class MotionDetector:
                                 if wx > 0 and wy > 0 and wy < limit_y:
                                     valid_wrists.append((wx, wy))
 
+                            zone_res = None
                             if valid_wrists:
                                 reach_ratio = self.settings.get('reach_ratio', 0.85)
                                 dynamic_warning_px = torso_height * reach_ratio
@@ -189,6 +206,26 @@ class MotionDetector:
                                     current_status = "Warning"
                                     danger_lvl = 1
 
+                    # =========================================================
+                    # ★ [추가] 튀는 데이터 방지 (지속성 검사)
+                    # =========================================================
+                    # 1. 이번 프레임이 위험한가?
+                    is_dangerous_now = (current_status != "Safe") or (danger_lvl > 0)
+
+                    # 2. 연속 카운트 증가/초기화
+                    if is_dangerous_now:
+                        state['trigger_count'] += 1
+                    else:
+                        # 안전하면 즉시 카운트 초기화 (혹은 천천히 줄여도 됨)
+                        state['trigger_count'] = 0
+
+                    # 3. "3프레임(약 0.3초)" 연속 감지 안됐으면 무시 (숫자 조절 가능)
+                    # (Lock이 걸린 상태면 무시하지 않음)
+                    if state['trigger_count'] < 3 and state['cooldown'] == 0:
+                        current_status = "Safe"
+                        danger_lvl = 0
+                    # =========================================================
+
                     # (3) AI 데이터 준비 (데이터 수집은 ai 또는 mix 모드일 때만)
                     if current_mode in ['ai', 'mix']:
                         anchor = get_stable_anchor(filled_kp, kps[:, 2])
@@ -204,6 +241,9 @@ class MotionDetector:
                     else:
                         # 알고리즘 모드면 버퍼를 비우거나 채우지 않음 (선택사항, 여기선 유지)
                         pass
+
+
+
 
                     # 결과 임시 저장
                     bx1, by1, bx2, by2 = map(int, box[:4])
