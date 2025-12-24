@@ -64,34 +64,36 @@ public class CaptureController {
      * 공유 폴더의 캡쳐 이미지를 웹에서 접근할 수 있도록 제공
      * 경로 예: /api/capture/image?path=\\220-29\공유폴더\captures\2024-01-15\CCTV-01_fire_2024-01-15_143022.jpg
      */
-    @GetMapping("/image")
-    public ResponseEntity<Resource> getCaptureImage(@RequestParam String path) {
-        try {
-            // 경로가 공유 폴더 경로인 경우
-            File imageFile = new File(path);
-
-            if (!imageFile.exists()) {
-                // 공유 폴더 접근 실패 시 로컬 경로로 시도
-                Path localPath = Paths.get("captures").resolve(Paths.get(path).getFileName());
-                imageFile = localPath.toFile();
-            }
-
-            if (!imageFile.exists() || !imageFile.isFile()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Resource resource = new FileSystemResource(imageFile);
-            String contentType = Files.probeContentType(imageFile.toPath());
-            if (contentType == null) {
-                contentType = "image/jpeg"; // 기본값
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + imageFile.getName() + "\"")
-                    .body(resource);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+    // 프론트에 실제 경로 노출 X  + error_image로 Exception 처리하는 방식으로 변경
+    // EventLogApiController
+//    @GetMapping("/image")
+//    public ResponseEntity<Resource> getCaptureImage(@RequestParam String path) {
+//        try {
+//            // 경로가 공유 폴더 경로인 경우
+//            File imageFile = new File(path);
+//
+//            if (!imageFile.exists()) {
+//                // 공유 폴더 접근 실패 시 로컬 경로로 시도
+//                Path localPath = Paths.get("captures").resolve(Paths.get(path).getFileName());
+//                imageFile = localPath.toFile();
+//            }
+//
+//            if (!imageFile.exists() || !imageFile.isFile()) {
+//                return ResponseEntity.notFound().build();
+//            }
+//
+//            Resource resource = new FileSystemResource(imageFile);
+//            String contentType = Files.probeContentType(imageFile.toPath());
+//            if (contentType == null) {
+//                contentType = "image/jpeg"; // 기본값
+//            }
+//
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.parseMediaType(contentType))
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + imageFile.getName() + "\"")
+//                    .body(resource);
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError().build();
+//        }
+//    }
 }

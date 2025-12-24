@@ -187,8 +187,9 @@
 
         /* ================= 상세 ================= */
         function showDetail(e) {
-        // 캡쳐 이미지 경로 처리
-        let imageSrc = "/images/no_image.png";
+        // 캡쳐 이미지 경로 처리 - 효성씨 버전
+        /* let imageSrc = "/images/no_image.png";
+
         
         if (e.screenshotPath && e.screenshotPath.trim() !== "") {
             const path = e.screenshotPath.trim();
@@ -204,6 +205,9 @@
                 imageSrc = `/api/capture/image?path=${encodeURIComponent(path)}`;
             }
         }
+        */
+        // 이미지 경로 처리 서버에서만 처리 - 지은 버전
+        const imageSrc = `/api/events/image/${e.id}`;
 
             document.getElementById("detailBox").innerHTML = `
                 <div class="detail-card">
