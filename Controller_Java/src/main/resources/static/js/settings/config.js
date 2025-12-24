@@ -4,7 +4,7 @@
  */
 
 // ⭐ 포트를 동적으로 가져오기 (현재 접속한 포트 사용)
-const BACKEND_HOST = '192.168.0.177';
+const BACKEND_HOST = '192.168.0.166';
 const BACKEND_PORT = '8000';
 
 export const CONSTANTS = {
