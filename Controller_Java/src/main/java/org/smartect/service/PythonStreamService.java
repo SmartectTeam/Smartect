@@ -27,7 +27,7 @@ public class PythonStreamService implements CommandLineRunner {
     public PythonStreamService(
             WebSocketHandler videoWebSocketHandler,
             EventJsonService eventJsonService,
-            @Value("localhost") String ip) {
+            @Value("192.168.0.166") String ip) {
         this.PYTHON_SERVER_URL = String.format("ws://%s:8000/ws/output", ip);
         this.videoWebSocketHandler = videoWebSocketHandler;
         this.eventJsonService = eventJsonService;

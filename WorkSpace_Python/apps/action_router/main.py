@@ -22,12 +22,12 @@ CAM_ID_1 = 0
 CONFIG_FILE_1 = DataPath(1).SETTING_PATH
 
 # [CCTV-02] 파일 반복
-# CAM_ID_2 = "HSYCAM"
-VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
+CAM_ID_2 = 1
+# VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
 CONFIG_FILE_2 = DataPath(2).SETTING_PATH
 
 # [CCTV-03] 파일 반복
-VIDEO_PATH_3 = r"\\220-29\공유폴더\model\시연영상\safe\sitting\20251206_131323.mp4"
+VIDEO_PATH_3 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
 CONFIG_FILE_3 = DataPath(3).SETTING_PATH
 
 # [CCTV-04] 파일 반복
@@ -51,7 +51,8 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-2(live)")
     detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
     detector2.models = shared_models
-    source2 = FileLoofStream(VIDEO_PATH_2)
+    source2 = WebcamStream(CAM_ID_2)
+    # source2 = FileLoofStream(VIDEO_PATH_2)
 
     # CCTV 03
     print(">>>[Setup] CCTV-3(live)")
@@ -68,9 +69,9 @@ async def main(pc_id):
     print(">>> [System] Streams Started.")
     await asyncio.gather(
         camera_post_video(source1, detector1, pc_id, 1),
-        # camera_post_video(source2, detector2, pc_id, 2),
-        # camera_post_video(source3, detector3, pc_id, 3),
-        # camera_post_video(source4, detector4, pc_id, 4)
+        camera_post_video(source2, detector2, pc_id, 2),
+        camera_post_video(source3, detector3, pc_id, 3),
+        camera_post_video(source4, detector4, pc_id, 4)
     )
 
 PC_ID = "HSYPC"
