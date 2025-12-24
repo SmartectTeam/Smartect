@@ -96,10 +96,12 @@ public class EventJsonService {
     private void processEvent(EventJsonDTO event, EventMapDTO map, byte[] Img_bytes) {
         String eventType = event.getEvent_type();
 
+// 필터링
         if (!isAllowedEventType(eventType)) {
             return;
         }
 
+// 쿨다운
         if (!shouldSaveEvent(event.getCam_no(), eventType)) {
             return;
         }
