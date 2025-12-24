@@ -3,16 +3,21 @@
  * 전역 상태 및 상수 관리
  */
 
-export const CONSTANTS = {
-    WS_URL: `ws://${window.location.hostname}:8000/ws/output`,
-    API_GET: `http://${window.location.hostname}:8000/settings/get`,
-    API_UPDATE: `http://${window.location.hostname}:8000/settings/update`,
+// ⭐ 포트를 동적으로 가져오기 (현재 접속한 포트 사용)
+const BACKEND_HOST = '192.168.0.177';
+const BACKEND_PORT = '8000';
 
-    // [추가]
-    API_PREVIEW: `http://${window.location.hostname}:8000/settings/preview`,
-    API_DISCARD: `http://${window.location.hostname}:8000/settings/discard`
+export const CONSTANTS = {
+    WS_URL: `ws://${BACKEND_HOST}:${BACKEND_PORT}/ws/output`,
+    API_GET: `http://${BACKEND_HOST}:${BACKEND_PORT}/settings/get`,
+    API_UPDATE: `http://${BACKEND_HOST}:${BACKEND_PORT}/settings/update`,
+    API_PREVIEW: `http://${BACKEND_HOST}:${BACKEND_PORT}/settings/preview`,
+    API_DISCARD: `http://${BACKEND_HOST}:${BACKEND_PORT}/settings/discard`
 };
 
+console.log("[CONSTANTS] Backend:", `${BACKEND_HOST}:${BACKEND_PORT}`);
+console.log("[CONSTANTS] Frontend:", `${window.location.hostname}:${window.location.port}`);
+console.log("[CONSTANTS] API_GET:", CONSTANTS.API_GET);
 
 export const STATE = {
     currentCamId: 1,
@@ -69,7 +74,6 @@ export const STATE = {
         "punching":         { text: "폭행",    color: "#FF0000" }, // 빨강
         "pushing":          { text: "밀침",    color: "#FF0000" }, // 빨강
         "reaching":         { text: "손뻗음(침입)",  color: "#FF0000" },
-
 
         // [안전/일상 그룹] - 색상을 초록이나 파랑 계열로 해서 구분
         "walking":          { text: "걷기",    color: "#00FF00" }, // 초록
