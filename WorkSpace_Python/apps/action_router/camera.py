@@ -3,11 +3,11 @@
 # ipcam - mqtt api 활용
 # 모스키토 환경설정 변경 "C:\Program Files\mosquitto\mosquitto.conf"
 import cv2
-from common.config import PhoneCamPath
+from common.config import CamPath
 
 
 def cam_connect(cam_id):
-    cp = PhoneCamPath(cam_id)
+    cp = CamPath(cam_id)
 
     port = cp.WEBCAM_PORT if cp.WEBCAM_PORT else "554"
     
@@ -22,7 +22,7 @@ def cam_connect(cam_id):
         "/cam/realmonitor",    # 일부 카메라
         "/",                   # 루트 경로
     ]
-    
+
     # 인증 정보에 따른 URL
     def make_url(path):
         if not cp.WEBCAM_ID or cp.WEBCAM_ID == "":
@@ -54,24 +54,6 @@ def cam_connect(cam_id):
 
     exit(1)
 
-
-def phone_connect(cam_id):
-    cp = PhoneCamPath(cam_id)
-
-    if cp.WEBCAM_ID == "":
-        url = f"http://{cp.WEBCAM_IP}:{cp.WEBCAM_PORT}/video"
-    else:
-        url = f"http://{cp.WEBCAM_ID}:{cp.WEBCAM_PW}@{cp.WEBCAM_IP}:{cp.WEBCAM_PORT}/video"
-    print(f"Webcam 연결중 : {url}")
-
-    cap = cv2.VideoCapture(url)
-
-    if not cap.isOpened():
-        print("카메라를 열 수 없습니다.")
-        exit()
-
-    return cap
-
 def snap_cam_connect(video_path):
     cap = cv2.VideoCapture(video_path)
 
@@ -100,7 +82,7 @@ class WebcamStream:
         if isinstance(source, int):
             self.cap = snap_cam_connect(source)
         else:
-            self.cap = phone_connect(source)
+            self.cap = cam_connect(source)
 
     def read(self):
         return self.cap.read()

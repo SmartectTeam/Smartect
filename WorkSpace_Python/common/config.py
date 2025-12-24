@@ -10,7 +10,7 @@ class LoggingMiddleware:# BaseHTTPMiddleware
 
 
 # camera cam ip 정보 .env 파일에서 환경변수 가져오는 class
-class PhoneCamPath:
+class CamPath:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     env_path = BASE_DIR / "property.env"
