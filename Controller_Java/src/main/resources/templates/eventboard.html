@@ -9,7 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/eventboard.css}">
     <!--Sweet Alert 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
-    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css"/>
 </head>
 
 <div layout:fragment="content">
@@ -38,8 +38,7 @@
                     <div class="chip-group" data-filter="type">
                         <button class="chip-btn active" data-value="ALL">ALL</button>
                         <button class="chip-btn" data-value="FIRE">FIRE</button>
-                        <button class="chip-btn" data-value="ACCESS">ACCESS</button>
-                        <button class="chip-btn" data-value="SUSPICIOUS">SUSPICIOUS</button>
+                        <button class="chip-btn" data-value="OTHERS">OTHERS</button>
                     </div>
                 </div>
 
@@ -132,12 +131,17 @@
             const now = new Date();
 
             const filtered = events.filter(e => {
-                const matchType = filters.type === 'ALL' || e.type === filters.type;
+            // 이벤트 유형별 필터
+                const matchType =
+                    filters.type === 'ALL' ||
+                    (filters.type === 'FIRE' && e.type === 'fire') ||
+                    (filters.type === 'OTHERS' && e.type !== 'fire');
+            // 이벤트 확인 여부 필터
                 const matchChecked =
                     filters.checked === 'ALL' ||
                     (filters.checked === 'CHECKED' && e.checkedAt) ||
                     (filters.checked === 'UNCHECKED' && !e.checkedAt);
-
+            // 이벤트 발생 시점 필터
                 let matchPeriod = true;
                 if (filters.period !== 'ALL') {
                     const diff = (now - new Date(e.createdAt)) / 86400000;
