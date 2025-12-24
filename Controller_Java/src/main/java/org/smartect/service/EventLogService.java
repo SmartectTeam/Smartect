@@ -61,6 +61,12 @@ public class EventLogService {
         return dtoList;
     }
 
+    // 이미지 반환용 (Entity 사용)
+    public EventLogEntity findById(Long eventNo){
+        EventLogEntity entity = eventLogRepository.findById(eventNo)
+                .orElseThrow(() -> new RuntimeException("이벤트가 존재하지 않습니다."));
+        return entity;
+    }
 
     // JPA 영속성 컨텍스트 + 더티체킹
     // findById() 호출시에 Entity가 persistent(영속상태)가 된다.
