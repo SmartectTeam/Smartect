@@ -6,15 +6,10 @@ import os
 import msgpack
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from pydantic import BaseModel
-from typing import List, Dict, Any
-
-
 from apps.fire_router.services import ImageProcessor
+from common.schemas import SettingsRequest
+from common.config import DataPath
 
-# 경로 설정 (액션라우터가 보는 settings 폴더와 같은 곳을 바라보게 함)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-SETTINGS_DIR = os.path.abspath(os.path.join(current_dir, "../action_router/settings"))
 
 router = APIRouter()
 service = ImageProcessor()
@@ -22,31 +17,11 @@ service = ImageProcessor()
 # =================================================================
 # 웹에서 오는 설정 받기
 # =================================================================
-# 프론트에서 저장할때 오는 데이터
-class SettingsRequest(BaseModel):
-    cam_id: int
-    detection_mode: str = "mix"
-    fall_check: bool
-    zone_check: bool
-    ai_check: bool
-    fall_ratio: float
-    reach_ratio: float
-    hip_ratio: float
-    ai_threshold: float
-    lock_duration: int
-    zones: List[Dict[str, Any]]
-
-    # 보기설정
-    vis_alert: bool
-    vis_bbox: bool
-    vis_skeleton: bool
-    vis_text: bool
 
 # 셋팅 파일 생성
 @router.post("/settings/update")
 async def update_settings(data: SettingsRequest):
-    os.makedirs(SETTINGS_DIR, exist_ok=True)
-    file_path = os.path.join(SETTINGS_DIR, f"cam_{data.cam_id}.json")
+    file_path = DataPath(data.cam_id).SETTING_PATH
 
     try:
         with open(file_path, "w", encoding='utf-8') as f:
@@ -59,7 +34,7 @@ async def update_settings(data: SettingsRequest):
 # 설정 불러오기
 @router.get("/settings/get")
 async def get_settings(cam_id: int):
-    file_path = os.path.join(SETTINGS_DIR, f"cam_{cam_id}.json")
+    file_path = DataPath(cam_id).SETTING_PATH
 
     if not os.path.exists(file_path):
         return {}
@@ -71,8 +46,7 @@ async def get_settings(cam_id: int):
 # 미리보기 저장 (임시 파일 생성)
 @router.post("/settings/preview")
 async def preview_settings(data: SettingsRequest):
-    os.makedirs(SETTINGS_DIR, exist_ok=True)
-    file_path = os.path.join(SETTINGS_DIR, f"cam_{data.cam_id}_preview.json")
+    file_path = DataPath(data.cam_id).PREVIEW_PATH
     try:
         with open(file_path, "w", encoding='utf-8') as f:
             json.dump(data.dict(), f, indent=4, ensure_ascii=False)
@@ -85,7 +59,7 @@ async def preview_settings(data: SettingsRequest):
 @router.post("/settings/discard")
 async def discard_preview(data: SettingsRequest):
     # data에는 cam_id만 있어도 됨
-    file_path = os.path.join(SETTINGS_DIR, f"cam_{data.cam_id}_preview.json")
+    file_path = DataPath(data.cam_id).PREVIEW_PATH
     try:
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -98,9 +72,8 @@ async def discard_preview(data: SettingsRequest):
 # 기존 저장 함수 (저장 후 임시 파일 삭제)
 @router.post("/settings/update")
 async def update_settings(data: SettingsRequest):
-    os.makedirs(SETTINGS_DIR, exist_ok=True)
-    file_path = os.path.join(SETTINGS_DIR, f"cam_{data.cam_id}.json")
-    preview_path = os.path.join(SETTINGS_DIR, f"cam_{data.cam_id}_preview.json")  # [추가됨]
+    file_path = DataPath(data.cam_id).SETTING_PATH
+    preview_path = DataPath(data.cam_id).PREVIEW_PATH # [추가됨]
 
     try:
         # 원본 저장
@@ -147,7 +120,7 @@ async def input_api(websocket: WebSocket):
         while True:
             payload = await websocket.receive_bytes()
 
-            data_dict = msgpack.unpackb(payload, raw=False)
+            data_dict = msgpack.unpackb(payload, raw=False, use_list=False)
 
             cam_no = data_dict['cam_no']
 
@@ -167,7 +140,7 @@ async def input_api(websocket: WebSocket):
                 data_dict['fire_json'] = fire_json_dicts
                 data_dict['fire_map'] = fire_map_dicts
 
-                final_payload = msgpack.packb(data_dict)
+                final_payload = msgpack.packb(data_dict, use_bin_type=True)
 
             if connected_viewers:
                 await broadcast_to_viewers(final_payload)

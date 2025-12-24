@@ -13,4 +13,3 @@ public class CombinedJsonDTO {
     private List<EventJsonDTO> action_json;
     private List<EventMapDTO> action_map;
 }
-

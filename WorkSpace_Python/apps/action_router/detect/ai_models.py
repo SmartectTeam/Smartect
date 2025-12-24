@@ -5,6 +5,8 @@ from ultralytics import YOLO
 import os
 import json
 
+from common.config import ModelPath
+
 class AIModels:
     def __init__(self):
         # GPU 자동 감지
@@ -15,13 +17,9 @@ class AIModels:
         self.lstm_model = None
         self.class_names = []
 
-        # 파일 경로
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        base_dir = os.path.dirname(current_dir)
-
-        self.YOLO_PATH = os.path.join(base_dir, 'yolo11n-pose.pt')
-        self.LSTM_PATH = os.path.join(base_dir, 'LSTM_model_v0.95.h5')
-        self.JSON_PATH = os.path.join(base_dir, 'LSTM_model_v0.95_classes.json')
+        self.YOLO_PATH = ModelPath.YOLO_MODEL
+        self.LSTM_PATH = ModelPath.LSTM_MODEL
+        self.JSON_PATH = ModelPath.LSTM_MODEL_JSON
         self.load_models()
 
     def load_models(self):
@@ -52,5 +50,3 @@ class AIModels:
     def predict_lstm(self, input_data):
         if not self.lstm_model: return None
         return self.lstm_model.predict(input_data, verbose=0)[0]
-
-

@@ -9,37 +9,30 @@ root_dir = os.path.abspath(os.path.join(current_dir, "../.."))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-# 설정 파일 경로(app/action_router/settings/)
-SETTINGS_DIR = os.path.join(current_dir, "settings")
-os.makedirs(SETTINGS_DIR, exist_ok=True)
-
 from apps.action_router.endpoints import camera_post_video
 from apps.action_router.camera import WebcamStream, FileLoofStream
 from apps.action_router.detector import  MotionDetector
 from apps.action_router.detect.ai_models import AIModels
-
-
+from common.config import DataPath
 
 
 # [CCTV-01] 파일 반복
 CAM_ID_1 = 0
-CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
-# VIDEO_PATH_1 = r"C:\video\test.mp4"
-# CONFIG_FILE_1 = os.path.join(SETTINGS_DIR, "cam_1.json")
+# VIDEO_PATH_1 = r"\\220-29\공유폴더\demoVideo\video\fire_test.mp4"
+CONFIG_FILE_1 = DataPath(1).SETTING_PATH
 
 # [CCTV-02] 파일 반복
 # CAM_ID_2 = "HSYCAM"
-# CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
-VIDEO_PATH_2 = r"C:\Users\hsy\Desktop\old.mp4"
-CONFIG_FILE_2 = os.path.join(SETTINGS_DIR, "cam_2.json")
+VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
+CONFIG_FILE_2 = DataPath(2).SETTING_PATH
 
-# [CCTV-03] 실시간 카메라
-VIDEO_PATH_3 = r"C:\Users\hsy\Desktop\old.mp4"
-CONFIG_FILE_3 = os.path.join(SETTINGS_DIR, "cam_3.json")
+# [CCTV-03] 파일 반복
+VIDEO_PATH_3 = r"\\220-29\공유폴더\model\시연영상\safe\sitting\20251206_131323.mp4"
+CONFIG_FILE_3 = DataPath(3).SETTING_PATH
 
 # [CCTV-04] 파일 반복
-VIDEO_PATH_4 = r"C:\Users\hsy\Desktop\old.mp4"
-CONFIG_FILE_4 = os.path.join(SETTINGS_DIR, "cam_4.json")
+VIDEO_PATH_4 = r"\\220-29\공유폴더\model\시연영상\threat\punching\20251207_182145.mp4"
+CONFIG_FILE_4 = DataPath(4).SETTING_PATH
 
 
 async def main(pc_id):
@@ -58,7 +51,6 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-2(live)")
     detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
     detector2.models = shared_models
-    # source2 = WebcamStream(CAM_ID_2)
     source2 = FileLoofStream(VIDEO_PATH_2)
 
     # CCTV 03
@@ -76,9 +68,9 @@ async def main(pc_id):
     print(">>> [System] Streams Started.")
     await asyncio.gather(
         camera_post_video(source1, detector1, pc_id, 1),
-        camera_post_video(source2, detector2, pc_id, 2),
-        camera_post_video(source3, detector3, pc_id, 3),
-        camera_post_video(source4, detector4, pc_id, 4)
+        # camera_post_video(source2, detector2, pc_id, 2),
+        # camera_post_video(source3, detector3, pc_id, 3),
+        # camera_post_video(source4, detector4, pc_id, 4)
     )
 
 PC_ID = "HSYPC"

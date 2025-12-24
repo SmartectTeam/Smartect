@@ -1,5 +1,3 @@
-
-// ========== 원본 코드 (saveDetectionLog 메서드 추가 전) ==========
 package org.smartect.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,27 +9,21 @@ import org.smartect.dto.CombinedJsonDTO;
 import org.smartect.dto.EventLogDTO;
 import org.smartect.entity.EventLogEntity;
 import org.smartect.repository.EventLogRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import static org.smartect.common.formatter.DateTimeFormatters.DEFAULT;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class EventLogService {
 
     private final EventLogRepository eventLogRepository;
-    private final ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
 
     public EventLogService(EventLogRepository eventLogRepository) {
         this.eventLogRepository = eventLogRepository;
     }
-
-    // 넘어오는 JSON 데이터 확인용
-    private final AtomicBoolean printed = new AtomicBoolean(false);
 
     // 로그 목록 조회 (Select *)
     public List<EventLogDTO> findAll() {
@@ -69,6 +61,12 @@ public class EventLogService {
         return dtoList;
     }
 
+    // 이미지 반환용 (Entity 사용)
+    public EventLogEntity findById(Long eventNo){
+        EventLogEntity entity = eventLogRepository.findById(eventNo)
+                .orElseThrow(() -> new RuntimeException("이벤트가 존재하지 않습니다."));
+        return entity;
+    }
 
     // JPA 영속성 컨텍스트 + 더티체킹
     // findById() 호출시에 Entity가 persistent(영속상태)가 된다.
@@ -101,20 +99,4 @@ public class EventLogService {
         return eventLogRepository.countByCheckedAtIsNull();
     }
 
-    @Async
-    public void process(byte[] combined_json) {
-        try {
-            CombinedJsonDTO combined_data = msgPackMapper.readValue(combined_json, CombinedJsonDTO.class);
-            // 넘어오는 JSON 데이터 확인용
-            System.out.println("===== FIRST PAYLOAD =====");
-            System.out.println(combined_data.getAction_json());
-            System.out.println("=========================");
-
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
-
-    }
-
 }
-
