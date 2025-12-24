@@ -13,9 +13,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1/dist/chartjs-chart-matrix.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/statistics.css}">
 </head>
-
 <div layout:fragment="content">
     <div class="container-fluid px-4" id="pdf-area">
+        <!-- PDF 헤더 (생략 - 기존과 동일) -->
         <div id="pdf-only-header" style="display: none; margin-bottom: 30px; padding-top: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <!-- 왼쪽: 리포트 제목 & 기간 -->
@@ -49,6 +49,7 @@
             </div>
         </header>
 
+        <!-- 컨트롤 바 (조회 및 다운로드) -->
         <div class="control-bar" id="control-panel">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div class="custom-btn-group">
@@ -75,6 +76,7 @@
             </div>
         </div>
 
+        <!-- KPI 카드 -->
         <div class="row-grid">
             <div class="kpi-card">
                 <div class="kpi-title">총 감지 건수</div>
@@ -98,7 +100,8 @@
             </div>
         </div>
 
-        <div id="ai-insight-box" class="card mb-4" style="background-color: #2d3135; border: 1px solid #555;">
+        <!-- AI Insight -->
+        <div id="ai-insight-box" class="card mb-4">
             <div class="card-body">
                 <h5 style="color: #6495ED; font-weight: bold; margin-bottom: 15px;">
                     <i class="fas fa-robot"></i> AI 요약 및 핵심 인사이트
@@ -108,6 +111,7 @@
             </div>
         </div>
 
+        <!-- 차트 영역 -->
         <div class="chart-row">
             <div class="chart-col">
                 <div class="card">
@@ -138,6 +142,7 @@
             </div>
         </div>
 
+        <!-- 로그 테이블 (배지 및 위험도 텍스트 수정됨) -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -154,56 +159,31 @@
                             </tr>
                             </thead>
                             <tbody id="log-table-body">
-                            <!-- 서버에서 가져온 최근 로그 5개를 반복 출력하는 부분 -->
                             <tr th:each="log : ${recentLogs}">
-                                <!-- 1. 발생 시각 -->
                                 <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-
-                                <!-- 2. 감지 카메라 -->
                                 <td th:text="'Camera ' + ${log.camEntity.camNo} + ' (' + ${log.camEntity.location} + ')'"></td>
-
-                                <!-- 3. 바로 여기입니다! (이벤트 유형) -->
                                 <td>
                                     <th:block th:switch="${log.eventType.toUpperCase()}">
-                                        <!-- 화재 (FIRE) -->
-                                        <span th:case="'FIRE'" class="evt-badge badge-fire">
-                    <i class="fas fa-exclamation-triangle"></i> FIRE
-                </span>
-
-                                        <!-- 연기 (SMOKE) -->
-                                        <span th:case="'SMOKE'" class="evt-badge badge-smoke">
-                    <i class="fas fa-cloud"></i> SMOKE
-                </span>
-
-                                        <!-- 침입 (ACCESS / INTRUSION) -->
-                                        <span th:case="'ACCESS'" class="evt-badge badge-access">
-                    <i class="fas fa-user-secret"></i> INTRUSION
-                </span>
-
-                                        <!-- 안전 (SAFE) -->
-                                        <span th:case="'SAFE'" class="evt-badge badge-safe">
-                    <i class="fas fa-check-circle"></i> SECURE
-                </span>
-
-                                        <!-- 기타 -->
-                                        <span th:case="*" class="evt-badge badge-normal">
-                    <i class="fas fa-info-circle"></i> [[${log.eventType.toUpperCase()}]]
-                </span>
+                                        <span th:case="'FIRE'" class="evt-badge badge-fire"><i class="fas fa-fire"></i> FIRE</span>
+                                        <span th:case="'SMOKE'" class="evt-badge badge-smoke"><i class="fas fa-smog"></i> SMOKE</span>
+                                        <span th:case="'PUNCHING'" class="evt-badge badge-access"><i class="fas fa-fist-raised"></i> PUNCHING</span>
+                                        <span th:case="'PUSHING'" class="evt-badge" style="background:rgba(116,143,252,0.2); color:#748ffc; border:1px solid #748ffc;"><i class="fas fa-hands-helping"></i> PUSHING</span>
+                                        <span th:case="'REACHING'" class="evt-badge badge-safe"><i class="fas fa-hand-paper"></i> REACHING</span>
+                                        <span th:case="'TOUCH'" class="evt-badge badge-normal"><i class="fas fa-fingerprint"></i> TOUCH</span>
+                                        <span th:case="*" class="evt-badge badge-normal">[[${log.eventType.toUpperCase()}]]</span>
                                     </th:block>
                                 </td>
-
-                                <!-- 4. 위험도 -->
                                 <td>
                                     <th:block th:switch="${log.eventType.toUpperCase()}">
                                         <span th:case="'FIRE'" style="color: #ff4d4d; font-weight: bold;">매우 높음</span>
                                         <span th:case="'SMOKE'" style="color: #fd7e14; font-weight: bold;">높음</span>
-                                        <span th:case="'ACCESS'" style="color: #fcc419; font-weight: bold;">중간</span>
-                                        <span th:case="'SAFE'" style="color: #20c997;">안전</span>
+                                        <span th:case="'PUNCHING'" style="color: #fcc419; font-weight: bold;">높음</span>
+                                        <span th:case="'PUSHING'" style="color: #748ffc; font-weight: bold;">중간</span>
+                                        <span th:case="'REACHING'" style="color: #20c997;">낮음</span>
+                                        <span th:case="'TOUCH'" style="color: #adb5bd;">매우 낮음</span>
                                         <span th:case="*" style="color: #adb5bd;">보통</span>
                                     </th:block>
                                 </td>
-
-                                <!-- 5. 상태 -->
                                 <td>
                                     <span th:if="${log.checkedAt != null}" class="badge bg-success">처리 완료</span>
                                     <span th:if="${log.checkedAt == null}" class="badge bg-warning text-dark">미처리</span>
@@ -216,80 +196,54 @@
             </div>
         </div>
 
+        <!-- 히트맵 (범례 수정됨) -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-th mr-1"></i> 요일/시간별 위험도 히트맵 (Heatmap)
-                    </div>
+                    <div class="card-header"><i class="fas fa-th mr-1"></i> 요일/시간별 위험도 히트맵 (Heatmap)</div>
                     <div class="card-body">
-                        <!-- 1. 차트 영역 -->
-                        <div style="height: 350px; width: 100%;">
-                            <canvas id="myHeatMap"></canvas>
-                        </div>
+                        <div style="height: 350px; width: 100%;"><canvas id="myHeatMap"></canvas></div>
 
-                        <!-- [수정됨] 발표용 고정 범례 (상시 표시) -->
+                        <!-- 6개 항목 점수 기준 범례 -->
                         <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-
-                            <!-- 왼쪽: 시각적 강도 (그라데이션) -->
                             <div style="display: flex; align-items: center;">
                                 <span style="font-size: 0.85rem; color: #adb5bd; margin-right: 10px; font-weight: bold;">위험 강도</span>
                                 <span style="font-size: 0.8rem; color: #888; margin-right: 8px;">Low</span>
-                                <div style="width: 120px; height: 12px;
-                                            background: linear-gradient(90deg, rgba(255, 77, 77, 0.15) 0%, rgba(255, 77, 77, 1) 100%);
-                                            border-radius: 6px; margin-right: 8px; border: 1px solid #555;">
-                                </div>
-                                <span style="font-size: 0.8rem; color: #ff6b6b;">High (Max)</span>
+                                <div style="width: 120px; height: 12px; background: linear-gradient(90deg, rgba(255, 77, 77, 0.15) 0%, rgba(255, 77, 77, 1) 100%); border-radius: 6px; margin-right: 8px; border: 1px solid #555;"></div>
+                                <span style="font-size: 0.8rem; color: #ff6b6b;">High</span>
                             </div>
 
-                            <!-- 오른쪽: 점수 산정 기준 (배지 형태) -->
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <span style="font-size: 0.85rem; color: #adb5bd; font-weight: bold; margin-right: 5px;">채점 기준:</span>
-
-                                <!-- 화재 -->
-                                <div style="display: flex; align-items: center; background-color: rgba(255, 77, 77, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255, 77, 77, 0.3);">
-                                    <span style="width: 8px; height: 8px; background-color: #ff4d4d; border-radius: 50%; margin-right: 6px;"></span>
-                                    <span style="font-size: 0.8rem; color: #e0e0e0;">화재 <strong style="color: #ff4d4d;">100</strong></span>
-                                </div>
-
-                                <!-- 연기 -->
-                                <div style="display: flex; align-items: center; background-color: rgba(253, 126, 20, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(253, 126, 20, 0.3);">
-                                    <span style="width: 8px; height: 8px; background-color: #fd7e14; border-radius: 50%; margin-right: 6px;"></span>
-                                    <span style="font-size: 0.8rem; color: #e0e0e0;">연기 <strong style="color: #fd7e14;">70</strong></span>
-                                </div>
-
-                                <!-- 침입 -->
-                                <div style="display: flex; align-items: center; background-color: rgba(252, 196, 25, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(252, 196, 25, 0.3);">
-                                    <span style="width: 8px; height: 8px; background-color: #fcc419; border-radius: 50%; margin-right: 6px;"></span>
-                                    <span style="font-size: 0.8rem; color: #e0e0e0;">침입 <strong style="color: #fcc419;">50</strong></span>
-                                </div>
-
-                                <!-- 이상행동 -->
-                                <div style="display: flex; align-items: center; background-color: rgba(173, 181, 189, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(173, 181, 189, 0.3);">
-                                    <span style="width: 8px; height: 8px; background-color: #adb5bd; border-radius: 50%; margin-right: 6px;"></span>
-                                    <span style="font-size: 0.8rem; color: #e0e0e0;">이상행동 <strong style="color: #adb5bd;">20</strong></span>
-                                </div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span style="font-size: 0.85rem; color: #adb5bd; font-weight: bold;">기준:</span>
+                                <div class="badge-item"><span class="dot" style="background:#ff4d4d;"></span> 화재 100</div>
+                                <div class="badge-item"><span class="dot" style="background:#fd7e14;"></span> 연기 70</div>
+                                <div class="badge-item"><span class="dot" style="background:#fcc419;"></span> 펀칭 60</div>
+                                <div class="badge-item"><span class="dot" style="background:#748ffc;"></span> 푸싱 40</div>
+                                <div class="badge-item"><span class="dot" style="background:#20c997;"></span> 리칭 20</div>
+                                <div class="badge-item"><span class="dot" style="background:#adb5bd;"></span> 터치 10</div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
-
     </div>
+
+    <!-- 범례용 추가 스타일 -->
+    <style>
+        .badge-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #ddd; border: 1px solid rgba(255,255,255,0.1); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    </style>
+
     <script th:inline="javascript">
-        // 서버 데이터를 자바스크립트 전역 변수로 먼저 선언 (HTML 내에 위치해야 함)
-        const realBarData = /*[[${barData}]]*/ [0, 0, 0, 0];
+        const realBarData = /*[[${barData}]]*/ [0, 0, 0, 0, 0, 0];
         const realPieData = /*[[${pieData}]]*/ [0, 0, 0];
         const realLineData = /*[[${lineData}]]*/ [];
         const serverStartDate = /*[[${startDate}]]*/ '';
         const serverEndDate = /*[[${endDate}]]*/ '';
         const realHeatMapList = /*[[${heatMapData}]]*/ [];
+        const dbCamLabels = /*[[${camLabels}]]*/ ["카메라1", "카메라2", "카메라3", "카메라4"];
     </script>
-
-    <!-- 그 다음 외부 로직 파일을 불러옴 -->
     <script th:src="@{/js/statistics.js}"></script>
 </div>
 </html>

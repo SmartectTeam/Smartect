@@ -49,8 +49,11 @@ public class StatisticsController {
 
         model.addAttribute("recentLogs", chartData.get("recentLogs"));
 
+        model.addAttribute("camLabels", chartData.get("camLabels"));
+
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+
 
         return "statistics";
     }
