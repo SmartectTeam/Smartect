@@ -21,13 +21,16 @@ import jakarta.websocket.WebSocketContainer;
 public class PythonStreamService implements CommandLineRunner {
 
     private final WebSocketHandler videoWebSocketHandler;
+    private final EventJsonService eventJsonService;
     private final String PYTHON_SERVER_URL;
 
     public PythonStreamService(
             WebSocketHandler videoWebSocketHandler,
+            EventJsonService eventJsonService,
             @Value("localhost") String ip) {
         this.PYTHON_SERVER_URL = String.format("ws://%s:8000/ws/output", ip);
         this.videoWebSocketHandler = videoWebSocketHandler;
+        this.eventJsonService = eventJsonService;
         System.out.println("설정된 python 서버 url: " + this.PYTHON_SERVER_URL);
     }
 
@@ -57,8 +60,13 @@ public class PythonStreamService implements CommandLineRunner {
                     byte[] combinedData  = new byte[payload.remaining()];
                     payload.get(combinedData);
 
+                    // System.out.println("통합 데이터 수신: " + combinedData.length + " bytes");
+
                     videoWebSocketHandler.livePostData(combinedData);
-                    
+
+                    // 비동기 Json 처리 서비스
+                    eventJsonService.process(combinedData);
+
                 } catch (Exception e) {
                     System.out.println("핸들링 오류: " + e.getMessage());
                 }

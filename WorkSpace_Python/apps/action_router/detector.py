@@ -1,16 +1,8 @@
 # apps/action_router/detector.py
-"""
-# 모든 판단 , 이미지 저장, 데이터생성 여기서 다 함
-# 수정사항:
-# 1. 0.1초(10FPS) 단위 시간 동기화 적용
-# 2. 감지 누락 시 Zero Padding 적용 (데이터 끊김 방지)
-# 3. 30프레임 시퀀스, 속도/가속도 특징 사용
-"""
 
 import numpy as np
 import json
-import time  # [추가] 시간 측정을 위해 필요
-
+import time
 from collections import deque
 from datetime import datetime
 
@@ -37,7 +29,7 @@ class MotionDetector:
             "reach_ratio": 0.85
         }
 
-        # [수정 1] 프레임 카운트 방식 제거 -> 시간 기반 설정 추가
+        # 시간 기반 설정
         self.last_sampling_time = 0
         self.target_interval = 0.1  # 10 FPS (0.1초 간격)
 
@@ -65,7 +57,21 @@ class MotionDetector:
                 if mod_time > self._last_mod_time:
                     with self.settings_path.open('r', encoding='utf-8') as f:
                         new_settings = json.load(f)
+
+                        # [추가됨] 모드가 변경되었는지 확인
+                        old_mode = self.settings.get('detection_mode')
+                        new_mode = new_settings.get('detection_mode')
+
+                        # 설정 업데이트
                         self.settings.update(new_settings)
+
+                        # [추가됨] 모드가 바뀌었다면 메모리 초기화 (이전 데이터 삭제)
+                        if old_mode != new_mode:
+                            print(f">>> [System] Mode Changed: {old_mode} -> {new_mode}. Resetting states.")
+                            self.track_states.clear()  # 객체 추적 정보/버퍼 초기화
+                            self.last_detections = []  # 화면에 표시되는 박스 초기화
+                            self.last_danger = 0  # 위험도 초기화
+                            self.last_event = "Safe"  # 이벤트 상태 초기화
 
                     self._last_mod_time = mod_time
             except Exception as e:
@@ -89,7 +95,6 @@ class MotionDetector:
 
         if self.models is None: self.models = ai_models.AIModels()
 
-        # [주의] Resize는 건드리지 않음 (endpoints.py에서 640px로 처리되어 옴)
         h, w = frame.shape[:2]
 
         # 안전장치
@@ -102,12 +107,12 @@ class MotionDetector:
         current_time = time.time()
 
         # ---------------------------------------------------------------------
-        # [핵심 수정 1] 시간 기반 샘플링 (0.1초 마다 실행)
+        # 시간 기반 샘플링 (0.1초 마다 실행)
         # ---------------------------------------------------------------------
         if current_time - self.last_sampling_time >= self.target_interval:
             self.last_sampling_time = current_time
 
-            # YOLO 추론
+            # YOLO 추론 (좌표 확보를 위해 항상 실행됨)
             results = self.models.predict_yolo(frame)
 
             current_detections = []
@@ -116,6 +121,9 @@ class MotionDetector:
 
             # 이번 프레임에서 감지된 ID 목록
             active_ids_this_frame = set()
+
+            # 현재 모드 가져오기 ('mix', 'algorithm', 'ai')
+            current_mode = self.settings.get('detection_mode', 'mix')
 
             # --- [A] 감지된 객체 처리 ---
             if results and results[0].boxes is not None:
@@ -134,12 +142,12 @@ class MotionDetector:
                             'cooldown': 0,
                             'label': 'Safe',
                             'score': 0.0,
-                            'missing_count': 0  # [추가] 사라진 기간 카운트
+                            'missing_count': 0,
+                            'trigger_count': 0  # <--- ★ [추가] 연속 감지 카운터
+
                         }
                     state = self.track_states[track_id]
-                    state['missing_count'] = 0  # 감지되었으므로 카운트 초기화
-
-                    mode = self.settings.get('detection_mode', 'mix')
+                    state['missing_count'] = 0
 
                     # 포즈 보정
                     filled_kp = fill_missing_keypoints(kps[:, :2], kps[:, 2], state['last_pose'])
@@ -148,8 +156,8 @@ class MotionDetector:
                     current_status = "Safe"
                     danger_lvl = 0
 
-                    # (1) & (2) 알고리즘 감지
-                    if mode in ['algorithm', 'mix']:
+                    # (1) & (2) 알고리즘 감지 (algorithm 또는 mix 모드일 때만)
+                    if current_mode in ['algorithm', 'mix']:
                         if self.settings['fall_check']:
                             if algorithm.check_fall(box, self.settings.get('fall_ratio', 1.2)):
                                 current_status = "Fall"
@@ -170,6 +178,7 @@ class MotionDetector:
                                 if wx > 0 and wy > 0 and wy < limit_y:
                                     valid_wrists.append((wx, wy))
 
+                            zone_res = None
                             if valid_wrists:
                                 reach_ratio = self.settings.get('reach_ratio', 0.85)
                                 dynamic_warning_px = torso_height * reach_ratio
@@ -179,11 +188,15 @@ class MotionDetector:
                                     if isinstance(z, list):
                                         formatted_zones.append({'points': z, 'active': True, 'scale': 1.0})
                                     else:
-                                        if 'scale' not in z: z['scale'] = 1.0
-                                        formatted_zones.append(z)
+                                        z_copy = z.copy()
 
-                                zone_res = algorithm.check_zone(valid_wrists, formatted_zones, w, h,
-                                                                warning_px=dynamic_warning_px)
+                                        if 'scale' not in z_copy:
+                                            z_copy['scale'] = 1.0
+
+                                        formatted_zones.append(z_copy)
+
+                                    zone_res = algorithm.check_zone(valid_wrists, formatted_zones, w, h,
+                                                                    warning_px=dynamic_warning_px)
 
                                 if zone_res == "Danger":
                                     current_status = "THREAT(Zone)"
@@ -193,8 +206,28 @@ class MotionDetector:
                                     current_status = "Warning"
                                     danger_lvl = 1
 
-                    # (3) AI 데이터 준비 (정규화 및 버퍼 추가)
-                    if mode in ['ai', 'mix']:
+                    # =========================================================
+                    # ★ [추가] 튀는 데이터 방지 (지속성 검사)
+                    # =========================================================
+                    # 1. 이번 프레임이 위험한가?
+                    is_dangerous_now = (current_status != "Safe") or (danger_lvl > 0)
+
+                    # 2. 연속 카운트 증가/초기화
+                    if is_dangerous_now:
+                        state['trigger_count'] += 1
+                    else:
+                        # 안전하면 즉시 카운트 초기화 (혹은 천천히 줄여도 됨)
+                        state['trigger_count'] = 0
+
+                    # 3. "3프레임(약 0.3초)" 연속 감지 안됐으면 무시 (숫자 조절 가능)
+                    # (Lock이 걸린 상태면 무시하지 않음)
+                    if state['trigger_count'] < 3 and state['cooldown'] == 0:
+                        current_status = "Safe"
+                        danger_lvl = 0
+                    # =========================================================
+
+                    # (3) AI 데이터 준비 (데이터 수집은 ai 또는 mix 모드일 때만)
+                    if current_mode in ['ai', 'mix']:
                         anchor = get_stable_anchor(filled_kp, kps[:, 2])
                         if anchor is None:
                             anchor = np.array([(box[0] + box[2]) / 2, (box[1] + box[3]) / 2])
@@ -203,13 +236,18 @@ class MotionDetector:
                         scale_factor = max(box_h, 1.0)
                         norm_kp = (filled_kp - anchor) / scale_factor
 
-                        # [데이터 추가] 정상 데이터 추가
+                        # 정상 데이터 추가
                         state['buffer'].append(norm_kp.flatten())
+                    else:
+                        # 알고리즘 모드면 버퍼를 비우거나 채우지 않음 (선택사항, 여기선 유지)
+                        pass
 
-                    # 결과 임시 저장 (AI 예측은 버퍼 체크 후 일괄 처리)
+
+
+
+                    # 결과 임시 저장
                     bx1, by1, bx2, by2 = map(int, box[:4])
 
-                    # 아직 AI 예측 전이므로 이전 상태나 Safe 유지
                     current_detections.append({
                         "id": track_id,
                         "label": state.get('label', 'Safe'),
@@ -217,7 +255,7 @@ class MotionDetector:
                         "score": state.get('score', 0.0),
                         "danger_level": danger_lvl,
                         "box": [bx1, by1, bx2, by2],
-                        "ptr_state": state  # 참조용
+                        "ptr_state": state
                     })
 
                     if danger_lvl > current_danger_max:
@@ -225,19 +263,16 @@ class MotionDetector:
                         current_event_main = current_status
 
             # --- [B] 놓친 객체 처리 (Zero Padding) ---
-            # [핵심 수정 2] 감지되지 않은 ID에 대해 Zero Data를 넣어 끊김 방지
             for track_id in list(self.track_states.keys()):
                 if track_id not in active_ids_this_frame:
                     state = self.track_states[track_id]
-                    mode = self.settings.get('detection_mode', 'mix')
 
-                    if mode in ['ai', 'mix']:
-                        # [데이터 추가] 0으로 채운 데이터 추가 (속도/가속도 튐 방지)
+                    # AI나 Mix 모드일 때만 빈 데이터를 채움
+                    if current_mode in ['ai', 'mix']:
                         state['buffer'].append(np.zeros(34))
 
                     state['missing_count'] += 1
 
-                    # 30프레임(약 3초) 이상 사라지면 추적 삭제
                     if state['missing_count'] > 30:
                         del self.track_states[track_id]
 
@@ -245,8 +280,8 @@ class MotionDetector:
             for det in current_detections:
                 state = det['ptr_state']
 
-                # 버퍼가 30개 찼는지 확인
-                if len(state['buffer']) == self.seq_length:
+                # [중요 수정] 모드가 'ai' 또는 'mix'일 때만 LSTM 예측 수행
+                if current_mode in ['ai', 'mix'] and len(state['buffer']) == self.seq_length:
                     input_data = self._prepare_lstm_features(state['buffer'])
                     probs = self.models.predict_lstm(input_data)
 
@@ -258,25 +293,16 @@ class MotionDetector:
                         state['label'] = raw_label
                         state['score'] = score
 
-                        # 결과 업데이트
                         det['label'] = raw_label
                         det['score'] = score
 
                         ai_th = self.settings.get('ai_threshold', 0.7)
                         if score > ai_th:
-                            # 상태 덮어쓰기 (Safe -> Punching 등)
-                            # 단, 알고리즘으로 이미 위험(Fall, Zone) 판정이 났으면 유지 고려
-                            # 여기서는 AI 라벨을 우선시하되 위험도 체크
-
                             is_danger = False
                             if raw_label in self.DANGER_ACTIONS: is_danger = True
                             if raw_label == 'theft' and self.settings['theft_check']:
                                 is_danger = True
                             elif raw_label == 'reaching':
-                                # Reaching은 구역체크가 필요하지만,
-                                # 여기서 좌표 다시 꺼내기 복잡하므로
-                                # 위쪽 알고리즘 단계의 zone_res 결과를 활용하는게 좋음.
-                                # 이미 위에서 current_status가 THREAT(Zone)이면 건들지 않음
                                 if det['status'] == 'THREAT(Zone)':
                                     is_danger = True
                                     raw_label = "reaching(Zone)"
@@ -288,22 +314,20 @@ class MotionDetector:
                                 det['danger_level'] = 2
                                 state['cooldown'] = self.settings['lock_duration']
 
-                # 쿨다운 적용
+                # 쿨다운 적용 (AI 예측 여부와 상관없이 동작해야 함)
                 if state['cooldown'] > 0:
                     state['cooldown'] -= 1
                     if det['danger_level'] < 2:
                         det['status'] = "THREAT(Locked)"
                         det['danger_level'] = 2
 
-                # 최고 위험도 재갱신 (AI 결과 반영 후)
+                # 최고 위험도 재갱신
                 if det['danger_level'] > current_danger_max:
                     current_danger_max = det['danger_level']
                     current_event_main = det['status']
 
-                # 참조 객체 제거 (JSON 직렬화 위해)
                 del det['ptr_state']
 
-            # 백업
             self.last_detections = current_detections
             self.last_danger = current_danger_max
             self.last_event = current_event_main
@@ -319,6 +343,11 @@ class MotionDetector:
 
         if detections:
             for det in detections:
+
+                # [중요] Unknown 상태는 전송하지 않고 건너뜀
+                if det['status'] == "Unknown":
+                    continue
+
                 action_json.append(EventJson(
                     cam_no=cam_id,
                     event_type=det['status'],

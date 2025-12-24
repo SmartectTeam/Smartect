@@ -1,12 +1,11 @@
+
 package org.smartect.service;
 
 import jakarta.transaction.Transactional;
 import org.smartect.dto.CamDTO;
 import org.smartect.dto.EventLogDTO;
 import org.smartect.entity.EventLogEntity;
-import org.smartect.entity.CamEntity;
 import org.smartect.repository.EventLogRepository;
-import org.smartect.repository.CamRepository;
 import org.springframework.stereotype.Service;
 import static org.smartect.common.formatter.DateTimeFormatters.DEFAULT;
 
@@ -18,11 +17,9 @@ import java.util.List;
 public class EventLogService {
 
     private final EventLogRepository eventLogRepository;
-    private final CamRepository camRepository;
 
-    public EventLogService(EventLogRepository eventLogRepository, CamRepository camRepository) {
+    public EventLogService(EventLogRepository eventLogRepository) {
         this.eventLogRepository = eventLogRepository;
-        this.camRepository = camRepository;
     }
 
     // 로그 목록 조회 (Select *)
@@ -91,39 +88,12 @@ public class EventLogService {
         EventLogEntity entity = eventLogRepository.findById(eventNo)
                 .orElseThrow(()-> new IllegalArgumentException("이벤트가 존재하지 않습니다. eventNo : "+eventNo));
         entity.updateMemo(memo);
-    }
-
-    // 감지 로그 저장 (Insert)
-    @Transactional
-    public EventLogEntity saveDetectionLog(int camNo, String eventType, String screenshotPath) {
-        // cam_no로 CamEntity 조회 (FK)
-        CamEntity camEntity = camRepository.findById((long) camNo)
-                .orElseThrow(() -> new IllegalArgumentException("카메라가 존재하지 않습니다. cam_no : " + camNo));
-
-        // EventLogEntity 생성 (memo, checkedAt 은 null, createdAt 은 자동)
-        EventLogEntity entity = EventLogEntity.create(camEntity, eventType, screenshotPath);
-
-        // DB 저장
-        return eventLogRepository.save(entity);
+        System.out.println("MEMO -------------- "+memo);
     }
 
     // 확인 안된 이벤트 개수 반환
-    public long getUnCheckedCount() {
+    public long getUnCheckedCount(){
         return eventLogRepository.countByCheckedAtIsNull();
     }
 
-    // 알람 발생 시 캡쳐한 경로를 DB에 업데이트
-    @Transactional
-    public void updateAlertCapturePath(int camNo, String eventType, String capturePath) {
-
-        String lowerEventType = eventType.toLowerCase();
-
-        List<EventLogEntity> recentLogs = eventLogRepository.findTop1ByCamNoAndEventTypeOrderByCreatedAtDesc(
-                (long) camNo, lowerEventType);
-
-        if (!recentLogs.isEmpty()) {
-            EventLogEntity recentLog = recentLogs.get(0);
-            recentLog.updateScreenshotPath(capturePath);
-        }
-    }
 }

@@ -120,7 +120,7 @@ async def input_api(websocket: WebSocket):
         while True:
             payload = await websocket.receive_bytes()
 
-            data_dict = msgpack.unpackb(payload, raw=False)
+            data_dict = msgpack.unpackb(payload, raw=False, use_list=False)
 
             cam_no = data_dict['cam_no']
 
@@ -140,7 +140,7 @@ async def input_api(websocket: WebSocket):
                 data_dict['fire_json'] = fire_json_dicts
                 data_dict['fire_map'] = fire_map_dicts
 
-                final_payload = msgpack.packb(data_dict)
+                final_payload = msgpack.packb(data_dict, use_bin_type=True)
 
             if connected_viewers:
                 await broadcast_to_viewers(final_payload)
