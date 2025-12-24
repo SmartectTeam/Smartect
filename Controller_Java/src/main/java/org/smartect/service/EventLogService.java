@@ -1,8 +1,11 @@
-
 package org.smartect.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.smartect.dto.CamDTO;
+import org.smartect.dto.CombinedJsonDTO;
 import org.smartect.dto.EventLogDTO;
 import org.smartect.entity.EventLogEntity;
 import org.smartect.repository.EventLogRepository;

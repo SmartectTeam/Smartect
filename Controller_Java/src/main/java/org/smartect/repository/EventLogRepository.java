@@ -9,57 +9,51 @@ import java.util.List;
 
 @Repository
 public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> {
-    // 이벤트 목록 발생일자 내림차순
+    // 1. 주요 6개 이벤트 중 최근 5개만 필터링 (UNKNOWN 제외)
+
     List<EventLogEntity> findAllByOrderByCreatedAtDesc();
-    List<EventLogEntity> findTop5ByCreatedAtBetweenOrderByCreatedAtDesc(java.time.LocalDateTime start, java.time.LocalDateTime end);
-
-
-    // 이벤트 목록 미확인 이벤트 개수
     long countByCheckedAtIsNull();
+    @Query(value = "SELECT * FROM event_log " +
+            "WHERE UPPER(event_type) IN ('FIRE', 'SMOKE', 'PUNCHING', 'PUSHING', 'REACHING', 'TOUCH') " +
+            "ORDER BY created_at DESC LIMIT 5", nativeQuery = true)
+    List<EventLogEntity> findRecentTop5MajorEvents();
 
-    @Query(value = "SELECT event_type, COUNT(*) FROM event_log " +
-            "WHERE created_at BETWEEN :start AND :end " + // 날짜 조건 추가
-            "GROUP BY event_type", nativeQuery = true)
+    // 2. 바 차트용 유형별 카운트 (대소문자 무시)
+    @Query(value = "SELECT UPPER(TRIM(event_type)), COUNT(*) FROM event_log " +
+            "WHERE created_at BETWEEN :start AND :end " +
+            "GROUP BY UPPER(TRIM(event_type))", nativeQuery = true)
     List<Object[]> countByEventType(@Param("start") String start, @Param("end") String end);
 
-    // 2. 파이 차트 (카메라별)
     @Query(value = "SELECT cam_no, COUNT(*) FROM event_log " +
             "WHERE created_at BETWEEN :start AND :end " +
             "GROUP BY cam_no", nativeQuery = true)
     List<Object[]> countByCamNo(@Param("start") String start, @Param("end") String end);
 
-    // 3. 라인 차트 (시간대별)
-    @Query(value = "SELECT " +
-            "  HOUR(created_at) as h, " +
-            "  SUM(CASE " +
-            "    WHEN event_type = 'FIRE' THEN 100 " +
-            "    WHEN event_type = 'SMOKE' THEN 70 " +
-            "    WHEN event_type = 'ACCESS' THEN 50 " +
-            "    WHEN event_type = 'SUSPICIOUS' THEN 20 " +
-            "    ELSE 10 " +
-            "  END) as score " +
-            "FROM event_log " +
-            "WHERE created_at BETWEEN :start AND :end " +
+    // 4. 라인 차트용 시간대별 위험 점수
+    @Query(value = "SELECT HOUR(created_at) as h, " +
+            "SUM(CASE " +
+            "  WHEN UPPER(event_type) = 'FIRE' THEN 100 " +
+            "  WHEN UPPER(event_type) = 'SMOKE' THEN 70 " +
+            "  WHEN UPPER(event_type) = 'PUNCHING' THEN 60 " +
+            "  WHEN UPPER(event_type) = 'PUSHING' THEN 40 " +
+            "  WHEN UPPER(event_type) = 'REACHING' THEN 20 " +
+            "  WHEN UPPER(event_type) = 'TOUCH' THEN 10 " +
+            "  ELSE 5 END) as score " +
+            "FROM event_log WHERE created_at BETWEEN :start AND :end " +
             "GROUP BY h ORDER BY h", nativeQuery = true)
     List<Object[]> countByHour(@Param("start") String start, @Param("end") String end);
 
-    // ---------------------------------------------------------
-    // 4. 히트맵 (요일 + 시간대별)
-    // 결과: [요일숫자(1~7), 시간(0~23), 카운트]
-    // 참고: MySQL DAYOFWEEK()는 1=일요일, 2=월요일, ... 7=토요일 반환
-    // ---------------------------------------------------------
-    @Query(value = "SELECT " +
-            "  DAYOFWEEK(created_at) as d, " +
-            "  HOUR(created_at) as h, " +
-            "  SUM(CASE " +
-            "    WHEN event_type = 'FIRE' THEN 100 " +       // 화재는 1건만 터져도 100점
-            "    WHEN event_type = 'SMOKE' THEN 70 " +       // 연기는 70점
-            "    WHEN event_type = 'ACCESS' THEN 50 " +      // 침입은 50점
-            "    WHEN event_type = 'SUSPICIOUS' THEN 20 " +  // 이상행동은 20점
-            "    ELSE 10 " +                                 // 그 외는 10점
-            "  END) as score " +
-            "FROM event_log " +
-            "WHERE created_at BETWEEN :start AND :end " +
+    // 5. 히트맵용 요일/시간별 점수
+    @Query(value = "SELECT DAYOFWEEK(created_at) as d, HOUR(created_at) as h, " +
+            "SUM(CASE " +
+            "  WHEN UPPER(event_type) = 'FIRE' THEN 100 " +
+            "  WHEN UPPER(event_type) = 'SMOKE' THEN 70 " +
+            "  WHEN UPPER(event_type) = 'PUNCHING' THEN 60 " +
+            "  WHEN UPPER(event_type) = 'PUSHING' THEN 40 " +
+            "  WHEN UPPER(event_type) = 'REACHING' THEN 20 " +
+            "  WHEN UPPER(event_type) = 'TOUCH' THEN 10 " +
+            "  ELSE 5 END) as score " +
+            "FROM event_log WHERE created_at BETWEEN :start AND :end " +
             "GROUP BY d, h", nativeQuery = true)
     List<Object[]> countByDayAndHour(@Param("start") String start, @Param("end") String end);
 }
