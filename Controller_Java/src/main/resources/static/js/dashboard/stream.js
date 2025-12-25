@@ -155,7 +155,7 @@ function updateDisplay(data, imgElement, canvas, ctx, statusElement, camNo) {
         addDetectionLog(cctvName, allDetections);
     }
 
-    sendDetectionLogToServer(data);
+    // sendDetectionLogToServer(data); // 서버에서 이미 저장하므로 불필요
 }
 
 // ========== WebSocket ==========

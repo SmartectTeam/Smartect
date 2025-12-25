@@ -1,11 +1,23 @@
 // ========== 알림 시스템 ==========
 const alertListContainer = document.getElementById("alert-list-container");
-const detectionStartTimes = {};
+const detectionStartTimes = {};  // 시간 기반 추적
+const detectionFrameCounts = {};  // 프레임 기반 추적
+const lastDetectionTime = {};  // 마지막 감지 시간
 const activeAlerts = new Map();
-const ALERT_DURATION_THRESHOLD = 5000;
 const MAX_ALERTS = 7;
+const DETECTION_TIMEOUT = 3000;  // 3초간 감지 없으면 초기화
 
-// 이벤트 설정
+// 이벤트별 감지 조건 설정
+const EVENT_DETECTION_CONFIG = {
+    punching: { type: 'instant', threshold: 1 },      // 즉시
+    pushing: { type: 'instant', threshold: 1 },       // 즉시
+    fall: { type: 'time', threshold: 5000 },          // 5초
+    threat: { type: 'time', threshold: 2000 },        // 2초
+    smoke: { type: 'frame', threshold: 5 },           // 5프레임
+    fire: { type: 'frame', threshold: 5 }             // 5프레임
+};
+
+// 이벤트 UI 설정
 const EVENT_CONFIG = {
     fire: { icon: "fa-solid fa-fire", text: "화재 감지", color: "#ff0000" },
     smoke: { icon: "fa-solid fa-smog", text: "연기 감지", color: "#ff8c00" },
@@ -59,7 +71,6 @@ function addAlert(cctvName, detectionType) {
     }
 
     updateAlertCount();
-    captureAlertScreen(cctvName, detectionType);
 }
 
 function updateAlertCount() {
@@ -68,107 +79,100 @@ function updateAlertCount() {
     if (subLabel) subLabel.textContent = `고위험 알람 (${count})`;
 }
 
-function captureAlertScreen(cctvName, detectionType) {
-    const camNo = parseInt(cctvName.replace("CCTV-", "").replace(/^0+/, "")) || parseInt(cctvName.replace("CCTV-", ""));
-    const config = CAM_CONFIG[camNo];
+function shouldTriggerAlert(cctvName, eventType) {
+    const config = EVENT_DETECTION_CONFIG[eventType.toLowerCase()];
+    if (!config) return false;
 
-    if (!config) return;
+    const key = `${cctvName}_${eventType}`;
+    const now = Date.now();
 
-    const imgElement = document.getElementById(config.imgId);
-    const canvas = document.getElementById(config.canvasId);
+    // 마지막 감지 시간 업데이트
+    lastDetectionTime[key] = now;
 
-    if (!imgElement || !canvas || !imgElement.complete) return;
+    if (config.type === 'instant') {
+        // 즉시 알림 (punching, pushing)
+        return true;
+    }
+    else if (config.type === 'time') {
+        // 시간 기반 (fall: 5초, threat: 2초)
+        if (!detectionStartTimes[key]) {
+            detectionStartTimes[key] = now;
+            return false;
+        }
 
-    const captureCanvas = document.createElement("canvas");
-    const captureCtx = captureCanvas.getContext("2d");
+        const duration = now - detectionStartTimes[key];
+        if (duration >= config.threshold) {
+            return true;
+        }
+        return false;
+    }
+    else if (config.type === 'frame') {
+        // 프레임 기반 (smoke: 5프레임, fire: 5프레임)
+        if (!detectionFrameCounts[key]) {
+            detectionFrameCounts[key] = 1;
+        } else {
+            detectionFrameCounts[key]++;
+        }
 
-    captureCanvas.width = canvas.width;
-    captureCanvas.height = canvas.height;
-
-    captureCtx.drawImage(imgElement, 0, 0, captureCanvas.width, captureCanvas.height);
-
-    if (canvas.width > 0 && canvas.height > 0) {
-        captureCtx.drawImage(canvas, 0, 0);
+        if (detectionFrameCounts[key] >= config.threshold) {
+            return true;
+        }
+        return false;
     }
 
-    const imageBase64 = captureCanvas.toDataURL("image/jpeg", 0.9);
+    return false;
+}
 
-    fetch('/api/capture/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            image: imageBase64,
-            camNo: camNo,
-            eventType: detectionType
-        })
-    }).catch(error => console.error('캡쳐 전송 실패:', error));
+function cleanupStaleDetections() {
+    const now = Date.now();
+
+    // 3초간 감지 없는 이벤트는 초기화
+    Object.keys(lastDetectionTime).forEach(key => {
+        const lastTime = lastDetectionTime[key];
+        if (now - lastTime > DETECTION_TIMEOUT) {
+            delete detectionStartTimes[key];
+            delete detectionFrameCounts[key];
+            delete lastDetectionTime[key];
+        }
+    });
 }
 
 function checkAndProcessAlerts(jsonData, cctvName) {
     const fireMap = extractFireMap(jsonData);
     const actionMap = extractActionMap(jsonData);
 
+    // 오래된 감지 정보 정리
+    cleanupStaleDetections();
+
+    // 현재 프레임에서 감지된 모든 이벤트 타입
+    const currentDetectedTypes = new Set();
+
     // fire 처리
-    if (!fireMap || fireMap.length === 0) {
-        const fireKey = `${cctvName}_fire`;
-        const smokeKey = `${cctvName}_smoke`;
-        if (detectionStartTimes[fireKey]) delete detectionStartTimes[fireKey];
-        if (detectionStartTimes[smokeKey]) delete detectionStartTimes[smokeKey];
-    } else {
-        const detectedTypes = new Set();
+    if (fireMap && fireMap.length > 0) {
         fireMap.forEach(box => {
-            const boxClass = box.class || box.event_type;
-            if (boxClass === "fire" || boxClass === "smoke") detectedTypes.add(boxClass);
-        });
-
-        const now = Date.now();
-
-        ["fire", "smoke"].forEach(type => {
-            const key = `${cctvName}_${type}`;
-            if (detectedTypes.has(type)) {
-                if (!detectionStartTimes[key]) {
-                    detectionStartTimes[key] = now;
-                } else {
-                    const duration = now - detectionStartTimes[key];
-                    if (duration >= ALERT_DURATION_THRESHOLD) addAlert(cctvName, type);
-                }
-            } else if (detectionStartTimes[key]) {
-                delete detectionStartTimes[key];
+            const eventType = box.class || box.event_type;
+            if (eventType === "fire" || eventType === "smoke") {
+                currentDetectedTypes.add(eventType);
             }
         });
     }
 
     // action 처리
     if (actionMap && actionMap.length > 0) {
-        const detectedActions = new Set();
         actionMap.forEach(box => {
             const eventType = box.event_type || box.class;
             if (eventType && isAllowedEventType(eventType)) {
-                detectedActions.add(eventType);
-            }
-        });
-
-        const now = Date.now();
-
-        detectedActions.forEach(type => {
-            const key = `${cctvName}_${type}`;
-            if (!detectionStartTimes[key]) {
-                detectionStartTimes[key] = now;
-            } else {
-                const duration = now - detectionStartTimes[key];
-                if (duration >= ALERT_DURATION_THRESHOLD) addAlert(cctvName, type);
-            }
-        });
-
-        Object.keys(detectionStartTimes).forEach(key => {
-            if (key.startsWith(cctvName)) {
-                const type = key.replace(`${cctvName}_`, "");
-                if (ALLOWED_EVENT_TYPES.has(type) && type !== "fire" && type !== "smoke") {
-                    if (!detectedActions.has(type)) {
-                        delete detectionStartTimes[key];
-                    }
-                }
+                currentDetectedTypes.add(eventType);
             }
         });
     }
+
+    // 감지된 이벤트만 처리
+    currentDetectedTypes.forEach(eventType => {
+        if (shouldTriggerAlert(cctvName, eventType)) {
+            addAlert(cctvName, eventType);
+            // 알림 생성 후 추적 초기화 (중복 방지)
+            resetDetectionTracking(cctvName, eventType);
+        }
+    });
 }
