@@ -18,6 +18,8 @@ service = ImageProcessor()
 # 웹에서 오는 설정 받기
 # =================================================================
 
+connected_cameras = {}
+
 # 셋팅 파일 생성
 @router.post("/settings/update")
 async def update_settings(data: SettingsRequest):
@@ -112,6 +114,7 @@ async def input_api(websocket: WebSocket):
     await websocket.accept()
     print("PC1 접속")
 
+    cam_no = None
     frame_count = 0
     skip_frame = 40
     threshold_map = {'fire': 0.70, 'smoke': 0.30}
@@ -123,6 +126,14 @@ async def input_api(websocket: WebSocket):
             data_dict = msgpack.unpackb(payload, raw=False, use_list=False)
 
             cam_no = data_dict['cam_no']
+
+            # 설정 연결 코드(캠 등록)
+            if cam_no not in connected_cameras:
+                connected_cameras[cam_no] = websocket
+                print(f"Camera {cam_no} registered")
+
+                # 설정 전송
+                await send_latest_settings_to_cam(cam_no, websocket)
 
             frame_count += 1
 
@@ -147,6 +158,28 @@ async def input_api(websocket: WebSocket):
 
     except WebSocketDisconnect:
         print("PC1 접속 끊김")
+        # 설정 연결 해제 코드
+        if cam_no and cam_no in connected_cameras:
+            del connected_cameras[cam_no]
+            print(f"Camera {cam_no} unregistered")
+
+
+async def send_latest_settings_to_cam(cam_id: int, websocket: WebSocket):
+    """캠 연결 시 저장된 설정을 전송"""
+    try:
+        file_path = DataPath(cam_id).SETTING_PATH
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding='utf-8') as f:
+                settings = json.load(f)
+
+            message = {
+                "type": "settings_update",
+                "data": settings
+            }
+            await websocket.send_text(json.dumps(message))
+            print(f"Sent latest settings to Camera {cam_id}")
+    except Exception as e:
+        print(f"Failed to send settings to Camera {cam_id}: {e}")
 
 
 async def broadcast_to_viewers(message: bytes):
