@@ -94,11 +94,16 @@ class WebcamStream:
     """
     실시간 카메라용 클래스
     - cam_id가 0, 1 같은 숫자면: snap_cam_connect(로컬캠) 사용
+    - cam_id가 "RTSP:"로 시작하면: cam_connect(RTSP 포트 554) 사용
     - cam_id가 문자열(ID)이면: phone_connect(IP캠) 사용
     """
     def __init__(self, source):
         if isinstance(source, int):
             self.cap = snap_cam_connect(source)
+        elif isinstance(source, str) and source.startswith("RTSP:"):
+            # RTSP 포트 554 사용 (예: "RTSP:CCTV03")
+            cam_id = source.replace("RTSP:", "")
+            self.cap = cam_connect(cam_id)
         else:
             self.cap = phone_connect(source)
 
