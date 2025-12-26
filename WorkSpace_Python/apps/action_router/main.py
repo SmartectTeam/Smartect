@@ -17,13 +17,13 @@ from common.config import DataPath
 
 
 # [CCTV-01] 실시간 cctv
-VIDEO_PATH_1 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
-# CAM_ID_1 = 0
+# VIDEO_PATH_1 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
+CAM_ID_1 = 0
 CONFIG_FILE_1 = DataPath(1).SETTING_PATH
 
 # [CCTV-02] 실시간 cctv
-VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
-# CAM_ID_2 = "AHSCAM"
+# VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
+CAM_ID_2 = "AHSCAM"
 CONFIG_FILE_2 = DataPath(2).SETTING_PATH
 
 # [CCTV-03] 파일 반복
@@ -44,15 +44,15 @@ async def main(pc_id):
     print(">>>[Setup] CCTV-1(live)")
     detector1 = MotionDetector(settings_path=CONFIG_FILE_1)
     detector1.models = shared_models
-    # source1 = WebcamStream(CAM_ID_1)
-    source1 = FileLoofStream(VIDEO_PATH_1)
+    source1 = WebcamStream(CAM_ID_1)
+    # source1 = FileLoofStream(VIDEO_PATH_1)
 
     # CCTV 02
     print(">>>[Setup] CCTV-2(live)")
     detector2 = MotionDetector(settings_path=CONFIG_FILE_2)
     detector2.models = shared_models
-    # source2 = WebcamStream(CAM_ID_2)
-    source2 = FileLoofStream(VIDEO_PATH_2)
+    source2 = WebcamStream(CAM_ID_2)
+    # source2 = FileLoofStream(VIDEO_PATH_2)
 
     # CCTV 03
     print(">>>[Setup] CCTV-3(file)")
