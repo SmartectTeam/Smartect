@@ -251,8 +251,10 @@ function connectWebSocket() {
                 console.log("🔥 AI Detection:", data.action_map);
             }
 
-            if(data.cam_no === STATE.currentCamId) View.drawFrame(data);
-        } catch(err) {}
+            if(Number(data.cam_no) === Number(STATE.currentCamId)) {
+                View.drawFrame(data);
+            }
+        } catch(err) {console.error("❌ Message processing error:", err);}
     };
     ws.onclose = () => {
         setTimeout(connectWebSocket, 3000);

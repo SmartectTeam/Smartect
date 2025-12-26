@@ -153,14 +153,14 @@ async def send_latest_settings_to_cam(cam_id: int, websocket: WebSocket):
 
 
 async def broadcast_to_viewers(message: bytes):
-    # 리스트 복사본 사용 필수
-    for viewer in list(connected_viewers):
-        try:
-            # create_task로 던져서 다른 클라이언트가 느려도 영향을 안 받게 함
-            asyncio.create_task(viewer.send_bytes(message))
-        except:
-            if viewer in connected_viewers:
-                connected_viewers.remove(viewer)
+    if not connected_viewers:
+        return
+
+    tasks = []
+    for viewer in connected_viewers:
+        tasks.append(safe_send(viewer, message))
+
+    await asyncio.gather(*tasks)
 
 
 # 개별 전송 및 에러 처리 함수

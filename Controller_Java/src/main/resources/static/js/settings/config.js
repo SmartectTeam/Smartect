@@ -6,6 +6,8 @@
 // ⭐ 포트를 동적으로 가져오기 (현재 접속한 포트 사용)
 const BACKEND_HOST = '192.168.0.166';
 const BACKEND_PORT = '8000';
+const WEB_HOST = '192.168.0.4';
+const WEB_PORT = '8080';
 
 export const CONSTANTS = {
     WS_URL: `ws://${BACKEND_HOST}:${BACKEND_PORT}/ws/output`,
@@ -16,7 +18,7 @@ export const CONSTANTS = {
 };
 
 console.log("[CONSTANTS] Backend:", `${BACKEND_HOST}:${BACKEND_PORT}`);
-console.log("[CONSTANTS] Frontend:", `${window.location.hostname}:${window.location.port}`);
+console.log("[CONSTANTS] Frontend:", `${WEB_HOST}:${WEB_PORT}`);
 console.log("[CONSTANTS] API_GET:", CONSTANTS.API_GET);
 
 export const STATE = {
