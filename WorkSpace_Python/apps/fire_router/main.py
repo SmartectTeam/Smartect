@@ -24,6 +24,8 @@ app = FastAPI()
 origins = [
     "http://localhost:8080",    # 타임리프 서버 주소
     "http://127.0.0.1:8080",
+    "http://192.168.0.164:8080",
+    "http://192.168.0.166:8080",
 ]
 
 app.add_middleware(
