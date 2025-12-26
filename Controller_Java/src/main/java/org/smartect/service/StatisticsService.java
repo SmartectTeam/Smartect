@@ -41,7 +41,9 @@ public class StatisticsService {
             else if ("PUNCHING".equals(type)) punching = count;
             else if ("PUSHING".equals(type)) pushing = count;
             else if ("REACHING".equals(type)) reaching = count;
-            else if ("TOUCH".equals(type)) touch = count;
+            else if ("TOUCH".equals(type) || "THREAT(ZONE)".equals(type)) {
+                touch += count;
+            }
         }
         // 프론트엔드 라벨 순서와 매칭: 화재, 연기, 펀칭, 푸싱, 리칭, 터치
         data.put("barData", Arrays.asList(fire, smoke, punching, pushing, reaching, touch));

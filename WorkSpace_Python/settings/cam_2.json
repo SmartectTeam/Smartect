@@ -1,14 +1,14 @@
 {
     "cam_id": 2,
-    "detection_mode": "mix",
+    "detection_mode": "algorithm",
     "fall_check": true,
     "zone_check": true,
     "ai_check": true,
-    "fall_ratio": 1.2,
+    "fall_ratio": 2.0,
     "reach_ratio": 0.75,
     "hip_ratio": 0.5,
     "ai_threshold": 0.7,
-    "lock_duration": 30,
+    "lock_duration": 1,
     "zones": [
         {
             "points": [

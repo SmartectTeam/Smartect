@@ -1,15 +1,37 @@
 {
     "cam_id": 3,
-    "detection_mode": "mix",
+    "detection_mode": "algorithm",
     "fall_check": true,
     "zone_check": true,
     "ai_check": true,
-    "fall_ratio": 1.2,
+    "fall_ratio": 1.5,
     "reach_ratio": 0.75,
     "hip_ratio": 0.5,
     "ai_threshold": 0.7,
-    "lock_duration": 30,
-    "zones": [],
+    "lock_duration": 1,
+    "zones": [
+        {
+            "points": [
+                [
+                    0.3566775244299674,
+                    0.14824797843665768
+                ],
+                [
+                    0.35912052117263843,
+                    0.32345013477088946
+                ],
+                [
+                    0.30944625407166126,
+                    0.34097035040431267
+                ],
+                [
+                    0.30130293159609123,
+                    0.16711590296495957
+                ]
+            ],
+            "scale": 1.5
+        }
+    ],
     "vis_alert": true,
     "vis_bbox": true,
     "vis_skeleton": false,

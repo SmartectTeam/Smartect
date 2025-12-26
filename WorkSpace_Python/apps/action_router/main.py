@@ -23,15 +23,15 @@ CONFIG_FILE_1 = DataPath(1).SETTING_PATH
 
 # [CCTV-02] 실시간 cctv
 # VIDEO_PATH_2 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
-CAM_ID_2 = "AHSCAM"
+CAM_ID_2 = 1
 CONFIG_FILE_2 = DataPath(2).SETTING_PATH
 
 # [CCTV-03] 파일 반복
-VIDEO_PATH_3 = r"\\220-29\공유폴더\demoVideo\video\test.mp4"
+VIDEO_PATH_3 = r"\\220-29\공유폴더\demoVideo\video\touch.mp4"
 CONFIG_FILE_3 = DataPath(3).SETTING_PATH
 
 # [CCTV-04] 파일 반복
-VIDEO_PATH_4 = r"\\220-29\공유폴더\model\시연영상\threat\punching\20251207_182145.mp4"
+VIDEO_PATH_4 = r"\\220-29\공유폴더\demoVideo\video\dangertest.mp4"
 CONFIG_FILE_4 = DataPath(4).SETTING_PATH
 
 

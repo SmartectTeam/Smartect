@@ -14,7 +14,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
     List<EventLogEntity> findAllByOrderByCreatedAtDesc();
     long countByCheckedAtIsNull();
     @Query(value = "SELECT * FROM event_log " +
-            "WHERE UPPER(event_type) IN ('FIRE', 'SMOKE', 'PUNCHING', 'PUSHING', 'REACHING', 'TOUCH') " +
+            "WHERE UPPER(event_type) IN ('FIRE', 'SMOKE', 'PUNCHING', 'PUSHING', 'REACHING', 'TOUCH', 'THREAT(ZONE)') " +
             "ORDER BY created_at DESC LIMIT 5", nativeQuery = true)
     List<EventLogEntity> findRecentTop5MajorEvents();
 
@@ -37,7 +37,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
             "  WHEN UPPER(event_type) = 'PUNCHING' THEN 60 " +
             "  WHEN UPPER(event_type) = 'PUSHING' THEN 40 " +
             "  WHEN UPPER(event_type) = 'REACHING' THEN 20 " +
-            "  WHEN UPPER(event_type) = 'TOUCH' THEN 10 " +
+            "  WHEN UPPER(event_type) IN('TOUCH', 'THREAT(ZONE)') THEN 10 " +
             "  ELSE 5 END) as score " +
             "FROM event_log WHERE created_at BETWEEN :start AND :end " +
             "GROUP BY h ORDER BY h", nativeQuery = true)
@@ -51,7 +51,7 @@ public interface EventLogRepository extends JpaRepository<EventLogEntity, Long> 
             "  WHEN UPPER(event_type) = 'PUNCHING' THEN 60 " +
             "  WHEN UPPER(event_type) = 'PUSHING' THEN 40 " +
             "  WHEN UPPER(event_type) = 'REACHING' THEN 20 " +
-            "  WHEN UPPER(event_type) = 'TOUCH' THEN 10 " +
+            "  WHEN UPPER(event_type) IN('TOUCH', 'THREAT(ZONE)') THEN 10 " +
             "  ELSE 5 END) as score " +
             "FROM event_log WHERE created_at BETWEEN :start AND :end " +
             "GROUP BY d, h", nativeQuery = true)
