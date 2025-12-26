@@ -260,6 +260,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 300);
         });
 
-        initMultiCameraStream("ws://localhost:8080/ws/video");
+        initMultiCameraStream("ws://192.168.0.164:8080/ws/video");
     }
 });
