@@ -25,12 +25,10 @@ public class EventJsonService {
 
     private final ObjectMapper msgPackMapper = new ObjectMapper(new MessagePackFactory());
     private final CaptureService captureService;
+    private final EventLogService eventLogService;
 
     @Autowired
     private EventLogRepository eventLogRepository;
-
-    @Autowired
-    private CamRepository camRepository;
 
     // ========== 이벤트 감지 추적 ==========
     private final Map<String, LocalDateTime> detectionStartTimes = new ConcurrentHashMap<>();
@@ -75,6 +73,7 @@ public class EventJsonService {
         try {
             CombinedJsonDTO combined_data = msgPackMapper.readValue(combined_json, CombinedJsonDTO.class);
             byte[] img_bytes = combined_data.getImg_bytes();
+            System.out.println(combined_data.getCam_no());
 
             // 오래된 감지 정보 정리
             cleanupStaleDetections();
@@ -82,6 +81,9 @@ public class EventJsonService {
             // action 이벤트 처리
             List<EventJsonDTO> actionEvents = combined_data.getAction_json();
             List<EventMapDTO> actionMaps = combined_data.getAction_map();
+            System.out.println("[ACTION] events=" + (actionEvents != null ? actionEvents.size() : 0)
+                    + ", maps=" + (actionMaps != null ? actionMaps.size() : 0));
+
             if (actionEvents != null) {
                 for (EventJsonDTO event : actionEvents) {
                     EventMapDTO matchedMap = findMatchingMap(event.getEvent_type(), actionMaps);
@@ -92,6 +94,8 @@ public class EventJsonService {
             // fire 이벤트 처리
             List<EventJsonDTO> fireEvents = combined_data.getFire_json();
             List<EventMapDTO> fireMaps = combined_data.getFire_map();
+            System.out.println("[FIRE] events=" + (fireEvents != null ? fireEvents.size() : 0)
+                    + ", maps=" + (fireMaps != null ? fireMaps.size() : 0));
             if (fireEvents != null) {
                 for (EventJsonDTO event : fireEvents) {
                     EventMapDTO matchedMap = findMatchingMap(event.getEvent_type(), fireMaps);
@@ -149,7 +153,7 @@ public class EventJsonService {
                 }
             }
 
-            saveDetectionLog(event.getCam_no(), eventType, screenshotPath);
+            eventLogService.saveDetectionLog(event.getCam_no(), eventType, screenshotPath);
 
             // 저장 후 추적 초기화
             resetDetectionTracking(event.getCam_no(), eventType);
@@ -210,7 +214,7 @@ public class EventJsonService {
                 // 프레임 기반
                 Integer count = detectionFrameCounts.getOrDefault(key, 0);
                 count++;
-                detectionFrameCounts.put(key, count);
+                detectionFrameCounts.compute(key, (k, v) -> (v == null) ? 1 : v + 1);
 
                 if (count >= config.threshold) {
                     return true;
@@ -262,12 +266,4 @@ public class EventJsonService {
         lastDetectionTime.remove(key);
     }
 
-    @Transactional
-    public EventLogEntity saveDetectionLog(int camNo, String eventType, String screenshotPath) {
-        CamEntity camEntity = camRepository.findById((long) camNo)
-                .orElseThrow(() -> new IllegalArgumentException("카메라가 존재하지 않습니다. cam_no : " + camNo));
-
-        EventLogEntity entity = EventLogEntity.create(camEntity, eventType, screenshotPath);
-        return eventLogRepository.save(entity);
-    }
 }

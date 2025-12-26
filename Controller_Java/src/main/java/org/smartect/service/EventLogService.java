@@ -7,8 +7,11 @@ import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.smartect.dto.CamDTO;
 import org.smartect.dto.CombinedJsonDTO;
 import org.smartect.dto.EventLogDTO;
+import org.smartect.entity.CamEntity;
 import org.smartect.entity.EventLogEntity;
+import org.smartect.repository.CamRepository;
 import org.smartect.repository.EventLogRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import static org.smartect.common.formatter.DateTimeFormatters.DEFAULT;
 
@@ -20,6 +23,9 @@ import java.util.List;
 public class EventLogService {
 
     private final EventLogRepository eventLogRepository;
+
+    @Autowired
+    private CamRepository camRepository;
 
     public EventLogService(EventLogRepository eventLogRepository) {
         this.eventLogRepository = eventLogRepository;
@@ -92,6 +98,15 @@ public class EventLogService {
                 .orElseThrow(()-> new IllegalArgumentException("이벤트가 존재하지 않습니다. eventNo : "+eventNo));
         entity.updateMemo(memo);
         System.out.println("MEMO -------------- "+memo);
+    }
+
+    @Transactional
+    public EventLogEntity saveDetectionLog(int camNo, String eventType, String screenshotPath) {
+        CamEntity camEntity = camRepository.findById((long) camNo)
+                .orElseThrow(() -> new IllegalArgumentException("카메라가 존재하지 않습니다. cam_no : " + camNo));
+
+        EventLogEntity entity = EventLogEntity.create(camEntity, eventType, screenshotPath);
+        return eventLogRepository.save(entity);
     }
 
     // 확인 안된 이벤트 개수 반환
