@@ -82,6 +82,7 @@ async def camera_post_video(source, detector, pc_id, cam_id):
             source.release()
 
 
+# [추가] 메인서버로부터 설정 수신 함수
 async def receive_settings_from_main(websocket, detector, cam_id):
     """메인서버로부터 설정값 수신 및 적용"""
     try:
@@ -113,10 +114,21 @@ async def receive_settings_from_main(websocket, detector, cam_id):
         print(f"[Camera-{cam_id}] Error receiving settings: {e}")
 
 
-# [추가] 설정 적용 함수
 def apply_settings_to_detector(detector, settings: dict, cam_id: int, preview: bool = False):
-    """MotionDetector에 설정값 적용"""
+    """MotionDetector에 설정값 적용 및 파일 저장"""
     try:
+        # [추가] JSON 파일 저장
+        if preview:
+            # 미리보기는 임시 파일에 저장
+            file_path = DataPath(cam_id).PREVIEW_PATH
+        else:
+            # 확정 설정은 메인 파일에 저장
+            file_path = DataPath(cam_id).SETTING_PATH
+
+        # 파일 저장
+        with open(file_path, "w", encoding='utf-8') as f:
+            json.dump(settings, f, indent=4, ensure_ascii=False)
+
         # detector의 설정 업데이트
         detector.detection_mode = settings.get("detection_mode", "mix")
         detector.fall_check = settings.get("fall_check", True)
@@ -138,7 +150,8 @@ def apply_settings_to_detector(detector, settings: dict, cam_id: int, preview: b
         detector.vis_text = settings.get("vis_text", True)
 
         mode_text = "PREVIEW" if preview else "APPLIED"
-        print(f"[Camera-{cam_id}] Settings {mode_text}: mode={detector.detection_mode}, zones={len(detector.zones)}")
+        print(f"[Camera-{cam_id}] Settings {mode_text} and saved to {file_path}")
+        print(f"[Camera-{cam_id}] mode={detector.detection_mode}, zones={len(detector.zones)}")
 
     except Exception as e:
         print(f"[Camera-{cam_id}] Failed to apply settings: {e}")
@@ -146,13 +159,20 @@ def apply_settings_to_detector(detector, settings: dict, cam_id: int, preview: b
 
 # [추가] 원래 설정 복원 함수
 def restore_original_settings(detector, cam_id: int):
-    """저장된 설정 파일에서 원래 설정 로드"""
+    """저장된 설정 파일에서 원래 설정 로드 + 미리보기 파일 삭제"""
     try:
+        # 1. 미리보기 파일 삭제
+        preview_path = DataPath(cam_id).PREVIEW_PATH
+        if os.path.exists(preview_path):
+            os.remove(preview_path)
+            print(f"[Camera-{cam_id}] Preview file removed")
+
+        # 2. 원본 설정 로드
         config_path = DataPath(cam_id).SETTING_PATH
         if os.path.exists(config_path):
             with open(config_path, 'r', encoding='utf-8') as f:
                 settings = json.load(f)
-            apply_settings_to_detector(detector, settings, cam_id)
+            apply_settings_to_detector(detector, settings, cam_id, preview=False)
             print(f"[Camera-{cam_id}] Original settings restored")
         else:
             print(f"[Camera-{cam_id}] No settings file found, using defaults")

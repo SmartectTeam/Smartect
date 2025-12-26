@@ -1,10 +1,10 @@
 {
     "cam_id": 1,
-    "detection_mode": "mix",
-    "fall_check": true,
+    "detection_mode": "algorithm",
+    "fall_check": false,
     "zone_check": true,
     "ai_check": true,
-    "fall_ratio": 1.0,
+    "fall_ratio": 2.0,
     "reach_ratio": 0.75,
     "hip_ratio": 0.5,
     "ai_threshold": 0.7,
@@ -53,7 +53,7 @@
             "scale": 1.5
         }
     ],
-    "vis_alert": true,
+    "vis_alert": false,
     "vis_bbox": true,
     "vis_skeleton": false,
     "vis_text": true
