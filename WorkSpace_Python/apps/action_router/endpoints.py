@@ -85,33 +85,42 @@ async def camera_post_video(source, detector, pc_id, cam_id):
 # [추가] 메인서버로부터 설정 수신 함수
 async def receive_settings_from_main(websocket, detector, cam_id):
     """메인서버로부터 설정값 수신 및 적용"""
+    print(f"[Camera-{cam_id}] Settings receiver started")
     try:
         while True:
             message = await websocket.recv()
 
-            # 텍스트 메시지인지 확인 (설정은 JSON 텍스트)
-            if isinstance(message, str):
-                data = json.loads(message)
+            # [변경] msgpack 바이너리 메시지 처리
+            if isinstance(message, bytes):
+                try:
+                    data = msgpack.unpackb(message, raw=False, use_list=False)
 
-                if data["type"] == "settings_update":
-                    # 확정 설정 적용
-                    print(f"[Camera-{cam_id}] Settings updated")
-                    apply_settings_to_detector(detector, data["data"], cam_id)
+                    # 'type' 키가 있으면 설정 메시지
+                    if isinstance(data, dict) and "type" in data:
+                        print(f"[Camera-{cam_id}] Received: {data['type']}")
 
-                elif data["type"] == "settings_preview":
-                    # 미리보기 적용
-                    print(f"[Camera-{cam_id}] ⚠️ Preview mode")
-                    apply_settings_to_detector(detector, data["data"], cam_id, preview=True)
+                        if data["type"] == "settings_update":
+                            print(f"✅ [Camera-{cam_id}] Settings updated")
+                            apply_settings_to_detector(detector, data["data"], cam_id)
 
-                elif data["type"] == "settings_discard":
-                    # 원래 설정으로 복원
-                    print(f"[Camera-{cam_id}] Settings discarded, restoring...")
-                    restore_original_settings(detector, cam_id)
+                        elif data["type"] == "settings_preview":
+                            print(f"⚠️ [Camera-{cam_id}] Preview mode")
+                            apply_settings_to_detector(detector, data["data"], cam_id, preview=True)
+
+                        elif data["type"] == "settings_discard":
+                            print(f"🔄 [Camera-{cam_id}] Settings discarded")
+                            restore_original_settings(detector, cam_id)
+
+                except Exception as unpack_error:
+                    # 영상 데이터는 msgpack 언팩 실패 → 무시
+                    pass
 
     except websockets.exceptions.ConnectionClosed:
         print(f"[Camera-{cam_id}] Settings receiver closed")
     except Exception as e:
-        print(f"[Camera-{cam_id}] Error receiving settings: {e}")
+        print(f"❌ [Camera-{cam_id}] Error receiving settings: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def apply_settings_to_detector(detector, settings: dict, cam_id: int, preview: bool = False):

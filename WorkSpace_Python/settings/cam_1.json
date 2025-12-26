@@ -1,6 +1,6 @@
 {
     "cam_id": 1,
-    "detection_mode": "algorithm",
+    "detection_mode": "mix",
     "fall_check": false,
     "zone_check": true,
     "ai_check": true,
@@ -8,7 +8,7 @@
     "reach_ratio": 0.75,
     "hip_ratio": 0.5,
     "ai_threshold": 0.7,
-    "lock_duration": 30,
+    "lock_duration": 1,
     "zones": [
         {
             "points": [

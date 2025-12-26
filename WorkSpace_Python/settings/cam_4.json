@@ -1,7 +1,7 @@
 {
     "cam_id": 4,
     "detection_mode": "mix",
-    "fall_check": true,
+    "fall_check": false,
     "zone_check": true,
     "ai_check": true,
     "fall_ratio": 1.2,
@@ -29,7 +29,7 @@
                     0.23450134770889486
                 ]
             ],
-            "scale": 1.5
+            "scale": 3
         }
     ],
     "vis_alert": true,
