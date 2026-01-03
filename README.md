@@ -2,8 +2,16 @@
 ### AI 기반 실시간 CCTV 위험 감지 및 이벤트 관리 시스템
 
 ---
+## 🔗 바로가기
 
-## 📌 프로젝트 소개
+- [📌 프로젝트 소개](#-프로젝트-소개)
+- [🏗 시스템 아키텍처](#-시스템-아키텍처)
+- [🔑 주요 기능](#-주요-기능)
+- [🎬 시연](#-시연)
+- [🚀 PPT](#-ppt)
+---
+
+# 📌 프로젝트 소개
 **SmarTect**는 전시관,박물관과 같은 실내 공간에서 위험행동과 화재 상황을 감지하는 웹 기반 관제 시스템입니다.
 
 기존 CCTV의 *사후 확인 중심 구조*를 개선하여  
@@ -230,8 +238,8 @@
 
 ---
 
-### 📈 통계 대시보드
-![통계 대시보드](https://github.com/user-attachments/assets/c316306c-5a60-475e-958b-77cf0b471588)
+### 📈 통계 화면
+![통계 화면](https://github.com/user-attachments/assets/c316306c-5a60-475e-958b-77cf0b471588)
 
 > 이벤트 데이터를 기반으로 기간별 통계와 시각화 자료를 제공합니다.
 
@@ -240,10 +248,27 @@ PDF와 Excel 형식으로 추출할 수 있습니다.
 
 ---
 
-### ✅ 마무리 · 로그아웃
+### ✅ 마무리 · 게시판
 ![마무리](https://github.com/user-attachments/assets/4974c710-7003-4899-990c-df96861745a4)
 
 > 로그아웃 시 메인 화면으로 이동하며, 게시판을 통해 피드백을 남길 수 있습니다.
+
+---
+
+## 🎥 시연 영상 (mp4)
+
+> GIF로는 표현하기 어려운 실제 동작 시연 영상입니다.  
+> 자세한 동작 확인이 필요하신 경우 참고해 주세요.
+
+- 🔹 [🏠 메인 화면 · 로그인](https://github.com/user-attachments/assets/9d456374-c6cd-4117-ad6c-a93a0ef2b647)
+- 🔹 [📊대시보드](https://github.com/user-attachments/assets/fef95eba-5efa-4824-9619-24058ff2e5b3)
+- 🔹 [🎯 감지 설정 (보호 구역 지정)](https://github.com/user-attachments/assets/1bc1b249-706c-4062-bd3e-4f74be1b3175)
+- 🔹 [👁️ 대시보드 · 객체 탐지](https://github.com/user-attachments/assets/3dd35aa7-4c14-4f1a-893b-225e1c1529b7)
+- 🔹 [📋 이벤트 로그 관리](https://github.com/user-attachments/assets/44538572-08a5-4d68-bd82-cf472e626375)
+- 🔹 [🧠 행동 감지 모델 시연](https://github.com/user-attachments/assets/b1ee1e1d-34ff-44c0-966d-aea075d3fc5e)
+- 🔹 [📈 통계 화면](https://github.com/user-attachments/assets/56c11811-3a86-433b-8b56-3d83c42be64d)
+- 🔹 [✅ 마무리 · 게시판](https://github.com/user-attachments/assets/0834a7a2-3b75-4cdd-a1c1-565e7285ad47)
+
 
 ---
 
