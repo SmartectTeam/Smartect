@@ -24,23 +24,7 @@ AI가 실시간으로 감지하고, 이를 서버로 전달하여
 
 ## 🏗 시스템 아키텍처
 
-IP Camera / Video File
-
-↓
-
-Python (OpenCV + AI)
-
-↓ WebSocket
-
-Spring Boot Backend
-
-↓
-
-MariaDB
-
-↓
-
-Web Dashboard
+![Image](https://github.com/user-attachments/assets/bb09b0db-390c-4e66-a91b-e3d40abf7e12)
 
 
 ### 역할 분리
@@ -185,6 +169,90 @@ Web Dashboard
 - 이벤트 이력 관리 및 알림 구조 설계
 
 ---
+## 🎬 시연
+
+### 🏠 메인 화면 · 로그인
+![메인 및 로그인](https://github.com/user-attachments/assets/49d3956f-5f87-4651-bba4-84db7af000ce)
+
+> SmarTect는 전시관,박물관과 같은 실내 공간에서 위험행동과 화재 상황을 감지하는 웹 기반 관제 시스템입니다.
+
+> 메인 및 로그인 화면을 제외한 모든 페이지는
+인증된 사용자만 접근할 수 있도록 제한했습니다.
+
+
+---
+
+### 📊 대시보드
+![대시보드](https://github.com/user-attachments/assets/62494bef-f601-4761-963d-30dfd4527438)
+
+> 전체 CCTV 화면과 이벤트 발생 현황을 한눈에 확인할 수 있는 메인 대시보드입니다.
+
+> CCTV 화면을 클릭하면
+해당 카메라의 이벤트 상황을 확대하여 볼 수 있습니다.
+
+
+---
+
+### 🎯 감지 설정 (보호 구역 지정)
+![감지 설정](https://github.com/user-attachments/assets/175b98c0-efc5-4b2d-b3a5-18f7f97fdef0)
+
+> 설정 페이지에서 보호가 필요한 작품이나 구역을
+직접 지정할 수 있습니다.
+
+>노란 영역은 경고,
+빨간 영역은 위험 단계로 판단합니다.
+
+
+---
+
+### 👁️ 대시보드 · 객체 탐지
+![객체 탐지](https://github.com/user-attachments/assets/842dd348-517a-4cc1-84f8-eca3c553be1c)
+
+> AI 객체 감지 결과가 실시간으로 대시보드에 반영되는 모습을 확인할 수 있습니다.
+
+> 감지된 이벤트는 저장 로직으로 필터링되어 스크린샷과 함께 DB에 저장됩니다.
+
+---
+
+### 📋 이벤트 로그 관리
+![이벤트 로그](https://github.com/user-attachments/assets/af5de400-61f5-4149-969a-32ee2fead1fb)
+
+> 이벤트 상세 화면에서는
+상황 스크린샷과 정보를 함께 확인할 수 있습니다.
+
+> 관리자는 메모를 남기고
+확인 처리를 통해 중복 대응을 방지할 수 있습니다.
+
+---
+
+### 🧠 행동 감지 모델 시연
+![행동 감지 모델](https://github.com/user-attachments/assets/2298b7be-5924-4679-a1a4-52f3f60cc602)
+
+> 기존 행동 인식 모델을 실시간 환경에 적용할 경우
+추론 성능 저하가 발생하는 이슈가 확인되었습니다.
+
+> 따라서 경량화된 모델을 제작하여 행동 인식 결과를 출력하는 영상을 추가로 시연합니다.
+
+---
+
+### 📈 통계 대시보드
+![통계 대시보드](https://github.com/user-attachments/assets/c316306c-5a60-475e-958b-77cf0b471588)
+
+> 이벤트 데이터를 기반으로 기간별 통계와 시각화 자료를 제공합니다.
+
+> 통계 데이터는
+PDF와 Excel 형식으로 추출할 수 있습니다.
+
+---
+
+### ✅ 마무리 · 로그아웃
+![마무리](https://github.com/user-attachments/assets/4974c710-7003-4899-990c-df96861745a4)
+
+> 로그아웃 시 메인 화면으로 이동하며, 게시판을 통해 피드백을 남길 수 있습니다.
+
+---
+
+
 
 ## PPT
 
