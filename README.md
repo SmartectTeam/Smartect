@@ -4,43 +4,48 @@
 ---
 
 ## 📌 프로젝트 소개
-**SmarTect**는 CCTV 영상에서 발생하는 위험 상황을  
-AI가 실시간으로 감지하고, 이를 서버로 전달하여  
-관리자가 웹에서 즉시 확인·관리할 수 있도록 만든 시스템입니다.
+**SmarTect**는 전시관,박물관과 같은 실내 공간에서 위험행동과 화재 상황을 감지하는 웹 기반 관제 시스템입니다.
 
 기존 CCTV의 *사후 확인 중심 구조*를 개선하여  
 **자동 감지 + 실시간 로그 관리**를 목표로 개발했습니다.
 
 ---
 
-## 🎯 기획 배경
-- CCTV는 대부분 사후 확인 용도
-- 사람이 직접 모니터링해야 하는 한계
-- 위험 이벤트가 체계적으로 기록되지 않음
+## 🎯 기획 의도
+기존 CCTV 시스템의 한계
+- 사후 대응 중심  → 실시간 대응의 어려움
+- 특정 이벤트 검색 → 과도한 시간 소요
+- 수동 모니터링 → 인력 비효율
 
-👉 **AI 기반 자동 감지 + 웹 관리 시스템**으로 문제 해결
+👉 SmarTect는
+**AI 기반 자동 감지** + **웹 관리 시스템**을 통해
+사후 대응 구조를 **실시간 대응 체계**로 전환하는 것을 목표로 합니다.
 
 ---
 
-## 🏗 시스템 아키텍처
+# 🏗 시스템 아키텍처
 
 ![Image](https://github.com/user-attachments/assets/bb09b0db-390c-4e66-a91b-e3d40abf7e12)
+> CCTV로부터 영상 데이터를 수신
 
+> Python 기반 AI 서버에서 위험 상황 분석
+
+> 이벤트 데이터(추론 결과, 영상)를 웹 서버로 전달 및 DB 저장
+
+> 관리자 웹 화면에서 실시간 모니터링 및 이력 관리
 
 ### 역할 분리
-- **Python**: 영상 처리 & AI 분석
-- **Spring Boot**: 이벤트 처리, 저장, 관리
-- **Web UI**: 관리자 확인 및 이력 관리, 목록 필터링
+- **Python**: 영상 처리 및 추론
+- **Spring Boot**: 이벤트 처리(필터링), DB 저장, 비즈니스 로직 처리
+- **Web UI**: 관리자 대시보드, 이벤트 로그 관리, 통계 시각화, 추론 설정
 
 ---
 
-## 🛠 기술 스택
+# 🛠 기술 스택
 
 ### Backend
 - Java 21
 - Spring Boot 3.4.12
-- Spring Security
-- Spring Data JPA
 - WebSocket
 - MariaDB
 
@@ -48,68 +53,58 @@ AI가 실시간으로 감지하고, 이를 서버로 전달하여
 - Python
 - OpenCV
 - YOLO 기반 객체 감지
-- WebSocket Client
 
 ### Frontend
 - Thymeleaf
-- Vanilla JavaScript
-- SweetAlert
-- FontAwesome
+- JavaScript
 
 ---
 
-## 🔑 주요 기능
+# 🔑 주요 기능
 
 ### 1️⃣ 실시간 영상 분석
-- IP Camera / 영상 파일 연결
+- 로컬 카메라 / IP Camera / 영상 파일 연결
 - 프레임 단위 영상 처리
-- AI 모델을 통한 위험 상황 감지
+- AI 모델을 통한 위험 상황 감지 (Fire / Action)
 
 ---
 
 ### 2️⃣ 이벤트 중복 방지 정책
-- 프레임마다 동일 이벤트 발생 문제 해결
-- **n초 이상 지속된 이벤트만 유효 이벤트로 판단**
+- 프레임 단위 감지로 인한 이벤트 중복 저장 문제 해결
+- **지속되는 이벤트만 유효 이벤트로 판단**
 - 스크린샷은 **이벤트당 1회만 저장**
 
-👉 로그 폭증 방지 + 신뢰도 높은 이벤트 기록
+👉 로그 폭증 방지 + 이벤트 기록 신뢰도 향상
 
 ---
 
 ### 3️⃣ 실시간 이벤트 전달
 - Python → Spring Boot **WebSocket 통신**
-- JSON 기반 이벤트 Payload 전송
-- 비동기 처리로 서버 부하 최소화
+- JSON + MessagePack기반 이벤트 데이터 전송
+- 비동기 처리로 실시간 스트림 지연 최소화
 
 ---
 
-### 4️⃣ 이벤트 로그 관리
-- 이벤트 유형 / 발생 시각 / 위험도 저장
-- 스크린샷 경로 저장
-- 확인 여부(checkedAt) 관리
+### 4️⃣ 이벤트 로그 저장
+- 이벤트 유형 / 발생 시각 저장
+- 스크린샷 저장, 경로 저장
 
 ---
 
-### 5️⃣ 관리자 인증 (Spring Security)
+### 5️⃣ 관리자 로그인 (Spring Security)
 - DB 기반 로그인
-- CustomUserDetails 구현
-- ROLE 기반 권한 관리
+- Spring Security 기반 인증·인가 처리
+- 관리자 권한 중심 접근 제어
 
 ---
 
-### 6️⃣ Event Board (관리자 화면)
+### 6️⃣ Event Log
 - 이벤트 목록 조회
 - 필터링 (유형 / 기간 / 확인 상태)
 - 이벤트 상세 보기
 - 메모 작성 및 수정
-- 확인 완료 처리
-
----
-
-### 7️⃣ 스크린샷 처리 UX
-- 스크린샷이 존재하면 이미지 표시
-- 없을 경우 `no_image.png` 자동 표시
-- UI 에러 없이 안정적인 화면 구성
+- 확인 여부(checkedAt) 기반 상태 관리
+- 스크린샷이 없을 경우 `no_image.png` 자동 표시
 
 ---
 
@@ -169,7 +164,7 @@ AI가 실시간으로 감지하고, 이를 서버로 전달하여
 - 이벤트 이력 관리 및 알림 구조 설계
 
 ---
-## 🎬 시연
+# 🎬 시연
 
 ### 🏠 메인 화면 · 로그인
 ![메인 및 로그인](https://github.com/user-attachments/assets/49d3956f-5f87-4651-bba4-84db7af000ce)
@@ -252,38 +247,24 @@ PDF와 Excel 형식으로 추출할 수 있습니다.
 
 ---
 
+# 🚀 PPT
 
-
-## PPT
-
-![Image](https://github.com/user-attachments/assets/7cc107d6-f43b-4f93-97e7-c66087a246c2)
-![Image](https://github.com/user-attachments/assets/ce6c1609-c5b4-4d6e-a887-ba57f88e9d4e)
-![Image](https://github.com/user-attachments/assets/1b0ba57f-fef6-4e36-b9d4-62102234433d)
-![Image](https://github.com/user-attachments/assets/4e9756b9-cf2a-4c97-9d3f-3702f3af34eb)
-![Image](https://github.com/user-attachments/assets/b3917182-fd68-4395-94fc-7d7877fa5fdd)
-![Image](https://github.com/user-attachments/assets/f90ba2fb-0404-4730-8eb1-9f4ad6782006)
-![Image](https://github.com/user-attachments/assets/5feb195d-2f0d-43d2-89fe-60679a27d8e3)
-![Image](https://github.com/user-attachments/assets/82527254-c9fe-40c0-bd29-26f75fe4ef68)
-![Image](https://github.com/user-attachments/assets/7e3e37f2-f2f6-4259-bdd5-3b043966adb0)
-![Image](https://github.com/user-attachments/assets/ff4ab465-5d92-49e2-afb8-a94205f8ae87)
-![Image](https://github.com/user-attachments/assets/8e92eeab-5ffa-4ec2-9bca-53a5547c89f0)
-![Image](https://github.com/user-attachments/assets/43406297-da57-4214-b007-f64093e2a4a3)
-![Image](https://github.com/user-attachments/assets/23d86015-8d7b-47ca-ab29-624b5029e001)
-![Image](https://github.com/user-attachments/assets/d6a704d4-43ec-4465-8ae6-a0bff675bb66)
-![Image](https://github.com/user-attachments/assets/e2ef4584-d592-4b09-b450-8cf1b16fef62)
-![Image](https://github.com/user-attachments/assets/a44ef727-b4a3-4d2b-8561-fdd95410e9e1)
-![Image](https://github.com/user-attachments/assets/381e9f66-b395-485a-8bde-2a8af10577a4)
-![Image](https://github.com/user-attachments/assets/9e90347a-d319-4778-a554-dae6fc24ea15)
-![Image](https://github.com/user-attachments/assets/8170ee17-1d31-46fe-8ea7-bc45f2a6a1cd)
-![Image](https://github.com/user-attachments/assets/bcfbaaf8-a50c-43ff-95bf-0bb9d494a591)
-![Image](https://github.com/user-attachments/assets/88791938-e2a2-4d4f-bb80-b2fc7ec6a4af)
-![Image](https://github.com/user-attachments/assets/46da9bb1-3b6e-4055-af5c-b8669f6020d8)
-![Image](https://github.com/user-attachments/assets/9a89ca13-6790-453d-b9eb-c3c6a4904455)
-![Image](https://github.com/user-attachments/assets/9f66fabf-e5ca-4850-979a-422171dd948c)
-![Image](https://github.com/user-attachments/assets/8acddfa5-c4dc-4e62-9219-d638ce847c44)
-![Image](https://github.com/user-attachments/assets/5cc7cb25-f84e-4b6f-a6bd-91fca87b1af0)
-![Image](https://github.com/user-attachments/assets/3b1f2a9a-41b0-4294-9996-32a6ca904159)
-![Image](https://github.com/user-attachments/assets/2bbd747e-4a56-41b7-8818-63fb9391c9b8)
-![Image](https://github.com/user-attachments/assets/aa976416-13e5-4e9c-9248-2a95ff2ed4bf)
-![Image](https://github.com/user-attachments/assets/360bcc3f-a62f-4631-9631-6214d0bcf8f6)
-![Image](https://github.com/user-attachments/assets/72986004-976e-4b95-b648-344bf6fe29b3)
+| | |
+|---|---|
+| ![PPT](https://github.com/user-attachments/assets/7cc107d6-f43b-4f93-97e7-c66087a246c2) | ![PPT](https://github.com/user-attachments/assets/ce6c1609-c5b4-4d6e-a887-ba57f88e9d4e) |
+| ![PPT](https://github.com/user-attachments/assets/1b0ba57f-fef6-4e36-b9d4-62102234433d) | ![PPT](https://github.com/user-attachments/assets/4e9756b9-cf2a-4c97-9d3f-3702f3af34eb) |
+| ![PPT](https://github.com/user-attachments/assets/b3917182-fd68-4395-94fc-7d7877fa5fdd) | ![PPT](https://github.com/user-attachments/assets/f90ba2fb-0404-4730-8eb1-9f4ad6782006) |
+| ![PPT](https://github.com/user-attachments/assets/5feb195d-2f0d-43d2-89fe-60679a27d8e3) | ![PPT](https://github.com/user-attachments/assets/82527254-c9fe-40c0-bd29-26f75fe4ef68) |
+| ![PPT](https://github.com/user-attachments/assets/7e3e37f2-f2f6-4259-bdd5-3b043966adb0) | ![PPT](https://github.com/user-attachments/assets/ff4ab465-5d92-49e2-afb8-a94205f8ae87) |
+| ![PPT](https://github.com/user-attachments/assets/8e92eeab-5ffa-4ec2-9bca-53a5547c89f0) | ![PPT](https://github.com/user-attachments/assets/43406297-da57-4214-b007-f64093e2a4a3) |
+| ![PPT](https://github.com/user-attachments/assets/23d86015-8d7b-47ca-ab29-624b5029e001) | ![PPT](https://github.com/user-attachments/assets/d6a704d4-43ec-4465-8ae6-a0bff675bb66) |
+| ![PPT](https://github.com/user-attachments/assets/e2ef4584-d592-4b09-b450-8cf1b16fef62) | ![PPT](https://github.com/user-attachments/assets/a44ef727-b4a3-4d2b-8561-fdd95410e9e1) |
+| ![PPT](https://github.com/user-attachments/assets/381e9f66-b395-485a-8bde-2a8af10577a4) | ![PPT](https://github.com/user-attachments/assets/9e90347a-d319-4778-a554-dae6fc24ea15) |
+| ![PPT](https://github.com/user-attachments/assets/8170ee17-1d31-46fe-8ea7-bc45f2a6a1cd) | ![PPT](https://github.com/user-attachments/assets/bcfbaaf8-a50c-43ff-95bf-0bb9d494a591) |
+| ![PPT](https://github.com/user-attachments/assets/88791938-e2a2-4d4f-bb80-b2fc7ec6a4af) | ![PPT](https://github.com/user-attachments/assets/46da9bb1-3b6e-4055-af5c-b8669f6020d8) |
+| ![PPT](https://github.com/user-attachments/assets/9a89ca13-6790-453d-b9eb-c3c6a4904455) | ![PPT](https://github.com/user-attachments/assets/9f66fabf-e5ca-4850-979a-422171dd948c) |
+| ![PPT](https://github.com/user-attachments/assets/8acddfa5-c4dc-4e62-9219-d638ce847c44) | ![PPT](https://github.com/user-attachments/assets/5cc7cb25-f84e-4b6f-a6bd-91fca87b1af0) |
+| ![PPT](https://github.com/user-attachments/assets/3b1f2a9a-41b0-4294-9996-32a6ca904159) | ![PPT](https://github.com/user-attachments/assets/2bbd747e-4a56-41b7-8818-63fb9391c9b8) |
+| ![PPT](https://github.com/user-attachments/assets/aa976416-13e5-4e9c-9248-2a95ff2ed4bf) | ![PPT](https://github.com/user-attachments/assets/360bcc3f-a62f-4631-9631-6214d0bcf8f6) |
+| ![PPT](https://github.com/user-attachments/assets/72986004-976e-4b95-b648-344bf6fe29b3) |  |
+---
