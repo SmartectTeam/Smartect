@@ -265,9 +265,9 @@ PDF와 Excel 형식으로 추출할 수 있습니다.
 -  [🎯 감지 설정 (보호 구역 지정)](https://github.com/user-attachments/assets/1bc1b249-706c-4062-bd3e-4f74be1b3175)
 -  [👁️ 대시보드 · 객체 탐지](https://github.com/user-attachments/assets/3dd35aa7-4c14-4f1a-893b-225e1c1529b7)
 -  [📋 이벤트 로그 관리](https://github.com/user-attachments/assets/44538572-08a5-4d68-bd82-cf472e626375)
-- 🔹 [🧠 행동 감지 모델 시연](https://github.com/user-attachments/assets/b1ee1e1d-34ff-44c0-966d-aea075d3fc5e)
-- 🔹 [📈 통계 화면](https://github.com/user-attachments/assets/56c11811-3a86-433b-8b56-3d83c42be64d)
-- 🔹 [✅ 마무리 · 게시판](https://github.com/user-attachments/assets/0834a7a2-3b75-4cdd-a1c1-565e7285ad47)
+-  [🧠 행동 감지 모델 시연](https://github.com/user-attachments/assets/b1ee1e1d-34ff-44c0-966d-aea075d3fc5e)
+-  [📈 통계 화면](https://github.com/user-attachments/assets/56c11811-3a86-433b-8b56-3d83c42be64d)
+-  [✅ 마무리 · 게시판](https://github.com/user-attachments/assets/0834a7a2-3b75-4cdd-a1c1-565e7285ad47)
 
 
 ---
