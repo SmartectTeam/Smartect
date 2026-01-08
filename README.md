@@ -108,7 +108,7 @@
 
 ### 6️⃣ Event Log
 - 이벤트 목록 조회
-- 필터링 (유형 / 기간 / 확인 상태)
+- 필터링 (유형 / 기간 / 확인 상태) 조회
 - 이벤트 상세 보기
 - 메모 작성 및 수정
 - 확인 여부(checkedAt) 기반 상태 관리
@@ -175,7 +175,7 @@
 # 🎬 시연
 
 ### 🏠 메인 화면 · 로그인
-![메인 및 로그인](https://github.com/user-attachments/assets/49d3956f-5f87-4651-bba4-84db7af000ce)
+![메인 및 로그인](https://github.com/user-attachments/assets/104439da-fbb4-4b0f-b289-1a36f871c17c)
 
 > SmarTect는 전시관,박물관과 같은 실내 공간에서 위험행동과 화재 상황을 감지하는 웹 기반 관제 시스템입니다.
 
@@ -186,7 +186,7 @@
 ---
 
 ### 📊 대시보드
-![대시보드](https://github.com/user-attachments/assets/62494bef-f601-4761-963d-30dfd4527438)
+![대시보드](https://github.com/user-attachments/assets/c363bfd0-c6dc-4b11-b33b-3652e62e479d)
 
 > 전체 CCTV 화면과 이벤트 발생 현황을 한눈에 확인할 수 있는 메인 대시보드입니다.
 
@@ -196,8 +196,8 @@
 
 ---
 
-### 🎯 감지 설정 (보호 구역 지정)
-![감지 설정](https://github.com/user-attachments/assets/175b98c0-efc5-4b2d-b3a5-18f7f97fdef0)
+### 🎯 감지 설정 (보호 구역 지정 등)
+![감지 설정](https://github.com/user-attachments/assets/070c15c5-0625-4b7d-bfce-a87936d4806d)
 
 > 설정 페이지에서 보호가 필요한 작품이나 구역을
 직접 지정할 수 있습니다.
@@ -209,7 +209,7 @@
 ---
 
 ### 👁️ 대시보드 · 객체 탐지
-![객체 탐지](https://github.com/user-attachments/assets/842dd348-517a-4cc1-84f8-eca3c553be1c)
+![객체 탐지](https://github.com/user-attachments/assets/6cdb7f36-f979-4383-a49b-a9d1039bc18b)
 
 > AI 객체 감지 결과가 실시간으로 대시보드에 반영되는 모습을 확인할 수 있습니다.
 
@@ -218,7 +218,7 @@
 ---
 
 ### 📋 이벤트 로그 관리
-![이벤트 로그](https://github.com/user-attachments/assets/af5de400-61f5-4149-969a-32ee2fead1fb)
+![이벤트 로그](https://github.com/user-attachments/assets/b9390abf-62cd-4704-bd55-eca578d8b8fd)
 
 > 이벤트 상세 화면에서는
 상황 스크린샷과 정보를 함께 확인할 수 있습니다.
@@ -229,7 +229,7 @@
 ---
 
 ### 🧠 행동 감지 모델 시연
-![행동 감지 모델](https://github.com/user-attachments/assets/2298b7be-5924-4679-a1a4-52f3f60cc602)
+![행동 감지 모델](https://github.com/user-attachments/assets/47e70002-cf62-43b1-b045-4b7e088d275b)
 
 > 기존 행동 인식 모델을 실시간 환경에 적용할 경우
 추론 성능 저하가 발생하는 이슈가 확인되었습니다.
@@ -239,7 +239,7 @@
 ---
 
 ### 📈 통계 화면
-![통계 화면](https://github.com/user-attachments/assets/c316306c-5a60-475e-958b-77cf0b471588)
+![통계 화면](https://github.com/user-attachments/assets/c3a3f254-7657-4622-ae8c-e8c871ddd790)
 
 > 이벤트 데이터를 기반으로 기간별 통계와 시각화 자료를 제공합니다.
 
@@ -249,7 +249,7 @@ PDF와 Excel 형식으로 추출할 수 있습니다.
 ---
 
 ### ✅ 마무리 · 게시판
-![마무리](https://github.com/user-attachments/assets/4974c710-7003-4899-990c-df96861745a4)
+![마무리](https://github.com/user-attachments/assets/fe7cfe8f-b4e4-4939-8f05-4d47e2407be4)
 
 > 로그아웃 시 메인 화면으로 이동하며, 게시판을 통해 피드백을 남길 수 있습니다.
 
@@ -260,11 +260,11 @@ PDF와 Excel 형식으로 추출할 수 있습니다.
 > GIF로는 표현하기 어려운 실제 동작 시연 영상입니다.  
 > 자세한 동작 확인이 필요하신 경우 참고해 주세요.
 
-- 🔹 [🏠 메인 화면 · 로그인](https://github.com/user-attachments/assets/9d456374-c6cd-4117-ad6c-a93a0ef2b647)
-- 🔹 [📊대시보드](https://github.com/user-attachments/assets/fef95eba-5efa-4824-9619-24058ff2e5b3)
-- 🔹 [🎯 감지 설정 (보호 구역 지정)](https://github.com/user-attachments/assets/1bc1b249-706c-4062-bd3e-4f74be1b3175)
-- 🔹 [👁️ 대시보드 · 객체 탐지](https://github.com/user-attachments/assets/3dd35aa7-4c14-4f1a-893b-225e1c1529b7)
-- 🔹 [📋 이벤트 로그 관리](https://github.com/user-attachments/assets/44538572-08a5-4d68-bd82-cf472e626375)
+-  [🏠 메인 화면 · 로그인](https://github.com/user-attachments/assets/9d456374-c6cd-4117-ad6c-a93a0ef2b647)
+-  [📊대시보드](https://github.com/user-attachments/assets/fef95eba-5efa-4824-9619-24058ff2e5b3)
+-  [🎯 감지 설정 (보호 구역 지정)](https://github.com/user-attachments/assets/1bc1b249-706c-4062-bd3e-4f74be1b3175)
+-  [👁️ 대시보드 · 객체 탐지](https://github.com/user-attachments/assets/3dd35aa7-4c14-4f1a-893b-225e1c1529b7)
+-  [📋 이벤트 로그 관리](https://github.com/user-attachments/assets/44538572-08a5-4d68-bd82-cf472e626375)
 - 🔹 [🧠 행동 감지 모델 시연](https://github.com/user-attachments/assets/b1ee1e1d-34ff-44c0-966d-aea075d3fc5e)
 - 🔹 [📈 통계 화면](https://github.com/user-attachments/assets/56c11811-3a86-433b-8b56-3d83c42be64d)
 - 🔹 [✅ 마무리 · 게시판](https://github.com/user-attachments/assets/0834a7a2-3b75-4cdd-a1c1-565e7285ad47)
